@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://sgc-backend-vbze.onrender.com";
+const API_URL = "https://sgc-backend-vbze.onrender.com";
 
 export interface LoginRequest {
     usuario: string
