@@ -1,0 +1,23 @@
+FROM node:18-alpine AS frontend-build
+WORKDIR /app
+
+COPY Frontend/package.json ./
+COPY Frontend/package-lock.json ./
+RUN npm ci
+
+COPY Frontend/ ./
+RUN npm run build
+
+FROM node:18-alpine
+WORKDIR /app
+
+ENV NODE_ENV production
+
+COPY --from=frontend-build /app/.next ./.next
+COPY --from=frontend-build /app/package.json ./package.json
+COPY --from=frontend-build /app/node_modules ./node_modules
+COPY Frontend/public ./public
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
