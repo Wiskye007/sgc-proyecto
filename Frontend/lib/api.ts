@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://sgc-backend-vbze.onrender.com";
 
 export interface LoginRequest {
     usuario: string
@@ -116,7 +116,7 @@ export interface MovimientoRequest {
 // ==================== AUTH ====================
 
 export async function login(data: LoginRequest): Promise<LoginResponse> {
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
@@ -129,7 +129,7 @@ export async function registrarUsuario(data: RegistroUsuarioRequest): Promise<{
     error: string;
     message: string
 }> {
-    const response = await fetch(`${API_URL}/auth/registro`, {
+    const response = await fetch(`${API_URL}/api/auth/registro`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
@@ -140,17 +140,18 @@ export async function registrarUsuario(data: RegistroUsuarioRequest): Promise<{
 // ==================== CONVICTOS ====================
 
 export async function obtenerConvictos(): Promise<Convicto[]> {
-    const response = await fetch(`${API_URL}/convictos`)
+    const response = await fetch(`${API_URL}/api/convictos`)
+    if (!response.ok) throw new Error("Error al obtener convictos")
     return response.json()
 }
 
 export async function obtenerConvictoPorId(id: number): Promise<Convicto> {
-    const response = await fetch(`${API_URL}/convictos/${id}`)
+    const response = await fetch(`${API_URL}/api/convictos/${id}`)
     return response.json()
 }
 
 export async function crearConvicto(data: ConvictoRequest): Promise<{ success: boolean; message: string }> {
-    const response = await fetch(`${API_URL}/convictos`, {
+    const response = await fetch(`${API_URL}/api/convictos`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
@@ -162,7 +163,7 @@ export async function actualizarConvicto(
     id: number,
     data: ConvictoRequest,
 ): Promise<{ success: boolean; message: string }> {
-    const response = await fetch(`${API_URL}/convictos/${id}`, {
+    const response = await fetch(`${API_URL}/api/convictos/${id}`, {
         method: "PUT",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
@@ -173,12 +174,12 @@ export async function actualizarConvicto(
 // ==================== SEGURIDAD ====================
 
 export async function obtenerIncidentes(): Promise<Incidente[]> {
-    const response = await fetch(`${API_URL}/seguridad/incidentes`)
+    const response = await fetch(`${API_URL}/api/seguridad/incidentes`)
     return response.json()
 }
 
 export async function crearIncidente(data: IncidenteRequest): Promise<{ success: boolean; message: string }> {
-    const response = await fetch(`${API_URL}/seguridad/incidentes`, {
+    const response = await fetch(`${API_URL}/api/seguridad/incidentes`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
@@ -187,12 +188,12 @@ export async function crearIncidente(data: IncidenteRequest): Promise<{ success:
 }
 
 export async function obtenerMovimientos(): Promise<Movimiento[]> {
-    const response = await fetch(`${API_URL}/seguridad/movimientos`)
+    const response = await fetch(`${API_URL}/api/seguridad/movimientos`)
     return response.json()
 }
 
 export async function crearMovimiento(data: MovimientoRequest): Promise<{ success: boolean; message: string }> {
-    const response = await fetch(`${API_URL}/seguridad/movimientos`, {
+    const response = await fetch(`${API_URL}/api/seguridad/movimientos`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
@@ -203,12 +204,12 @@ export async function crearMovimiento(data: MovimientoRequest): Promise<{ succes
 // ==================== MÉDICO ====================
 
 export async function obtenerRevisionesMedicas(): Promise<RevisionMedica[]> {
-    const response = await fetch(`${API_URL}/medico/revisiones`)
+    const response = await fetch(`${API_URL}/api/medico/revisiones`)
     return response.json()
 }
 
 export async function crearRevisionMedica(data: RevisionMedicaRequest): Promise<{ success: boolean; message: string }> {
-    const response = await fetch(`${API_URL}/medico/revisiones`, {
+    const response = await fetch(`${API_URL}/api/medico/revisiones`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),

@@ -25,8 +25,10 @@ app.config['JSON_SORT_KEYS'] = False
 app.config['ENV'] = os.getenv('FLASK_ENV', 'development')
 
 # CONFIGURACIÓN DE CORS
-CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://192.168.18.37:3000"]}},
-     supports_credentials=True)
+# Permitir Vercel y localhost para desarrollo
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "https://sgc-proyecto-noc383la5-76252803-3965s-projects.vercel.app/"]}}, 
+    supports_credentials=True)
+
 
 # Registrar blueprints
 app.register_blueprint(auth_routes.bp)

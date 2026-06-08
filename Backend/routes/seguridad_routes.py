@@ -12,14 +12,14 @@ def get_incidentes():
     try:
         query = """
                 SELECT i.id,
-                       i.convicto_id,
-                       i.fecha,
-                       i.tipo_incidente,
-                       i.descripcion,
-                       co.nombre,
-                       co.apellido
+                    i.convicto_id,
+                    i.fecha,
+                    i.tipo_incidente,
+                    i.descripcion,
+                    co.nombre,
+                    co.apellido
                 FROM Incidentes i
-                         JOIN Convictos co ON i.convicto_id = co.id
+                        JOIN Convictos co ON i.convicto_id = co.id
                 ORDER BY i.fecha DESC \
                 """
         result = db.execute_query(query)
