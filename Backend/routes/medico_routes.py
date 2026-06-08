@@ -22,18 +22,18 @@ def obtener_revisiones():
     try:
         query = """
                 SELECT r.IDRevision,
-                       r.Fecha,
-                       r.Hora,
-                       r.Prioridad,
-                       r.IDConv,
-                       r.Diagnostico,
-                       r.Tratamiento,
-                       r.MedicoResponsable,
-                       r.ProximaRevision,
-                       c.NombreCompleto AS NombreCompleto,
-                       c.DNI            AS DNI
+                    r.Fecha,
+                    r.Hora,
+                    r.Prioridad,
+                    r.IDConv,
+                    r.Diagnostico,
+                    r.Tratamiento,
+                    r.MedicoResponsable,
+                    r.ProximaRevision,
+                    c.NombreCompleto AS NombreCompleto,
+                    c.DNI            AS DNI
                 FROM tblRevisionesMedicas r
-                         LEFT JOIN tblConvictos c ON r.IDConv = c.IDConv
+                        LEFT JOIN tblConvictos c ON r.IDConv = c.IDConv
                 ORDER BY r.Fecha DESC \
                 """
         resultados = db.execute_query(query)
@@ -144,16 +144,16 @@ def obtener_tratamientos():
     try:
         query = """
                 SELECT t.IDTratamiento,
-                       t.IDConv,
-                       t.Medicamento,
-                       t.Dosis,
-                       t.Frecuencia,
-                       t.Duracion,
-                       t.Medico,
-                       t.FechaInicio,
-                       c.NombreCompleto AS NombreCompleto
+                    t.IDConv,
+                    t.Medicamento,
+                    t.Dosis,
+                    t.Frecuencia,
+                    t.Duracion,
+                    t.Medico,
+                    t.FechaInicio,
+                    c.NombreCompleto AS NombreCompleto
                 FROM tblTratamientos t
-                         LEFT JOIN tblConvictos c ON t.IDConv = c.IDConv
+                        LEFT JOIN tblConvictos c ON t.IDConv = c.IDConv
                 ORDER BY t.IDTratamiento DESC \
                 """
         resultados = db.execute_query(query)
@@ -258,16 +258,16 @@ def obtener_derivaciones():
     try:
         query = """
                 SELECT d.IDDerivacion,
-                       d.Estado,
-                       d.IDConv,
-                       d.Especialidad,
-                       d.Motivo,
-                       d.Urgencia,
-                       d.Institucion,
-                       d.Fecha,
-                       c.NombreCompleto AS NombreCompleto
+                    d.Estado,
+                    d.IDConv,
+                    d.Especialidad,
+                    d.Motivo,
+                    d.Urgencia,
+                    d.Institucion,
+                    d.Fecha,
+                    c.NombreCompleto AS NombreCompleto
                 FROM tblDerivaciones d
-                         LEFT JOIN tblConvictos c ON d.IDConv = c.IDConv
+                        LEFT JOIN tblConvictos c ON d.IDConv = c.IDConv
                 ORDER BY d.IDDerivacion DESC \
                 """
         resultados = db.execute_query(query)
@@ -372,15 +372,15 @@ def obtener_historial():
     try:
         query = """
                 SELECT h.IDHistorial,
-                       h.Fecha,
-                       h.IDConv,
-                       h.Tipo,
-                       h.Diagnostico,
-                       h.Medico,
-                       h.Observaciones,
-                       c.NombreCompleto AS NombreCompleto
+                    h.Fecha,
+                    h.IDConv,
+                    h.Tipo,
+                    h.Diagnostico,
+                    h.Medico,
+                    h.Observaciones,
+                    c.NombreCompleto AS NombreCompleto
                 FROM tblHistorial h
-                         LEFT JOIN tblConvictos c ON h.IDConv = c.IDConv
+                        LEFT JOIN tblConvictos c ON h.IDConv = c.IDConv
                 ORDER BY h.Fecha DESC \
                 """
 
