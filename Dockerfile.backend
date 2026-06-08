@@ -1,47 +1,23 @@
-# Build stage
-FROM python:3.11-slim as backend-build
-WORKDIR /app
+# 1. Usamos una imagen de Python base
+FROM python:3.11-slim
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    gcc g++ \
-    libodbcinst2 \
-    unixodbc-common \
-    unixodbc \
-    unixodbc-dev \
-    freetds-dev \
-    curl \
-    libssl-dev \
-    libsasl2-dev \
+# 2. Instalamos dependencias del sistema necesarias para SQL Server/ODBC
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ unixodbc unixodbc-dev freetds-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# 3. Definimos el directorio de trabajo
+WORKDIR /app
+
+# 4. Copiamos solo los requirements primero
 COPY Backend/requirements.txt .
-RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Runtime stage
-FROM node:18-alpine as frontend-build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+# 5. Copiamos el resto del código del backend
+COPY Backend/ .
 
-FROM python:3.11-slim
-WORKDIR /app
+# 6. Exponemos el puerto
+EXPOSE 5000
 
-RUN apt-get update && apt-get install -y \
-    odbcinst1debian2 \
-    unixodbc \
-    unixodbc-dev \
-    freetds-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=backend-build /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=backend-build /usr/local/bin /usr/local/bin
-
-COPY Backend/ ./backend/
-
-EXPOSE 5000 3000
-
-CMD ["python", "-m", "backend.app"]
+# 7. Comando para iniciar con gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
