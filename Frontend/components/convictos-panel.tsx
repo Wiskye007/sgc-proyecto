@@ -80,7 +80,9 @@ interface Visita {
     observaciones?: string
 }
 
-const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost" ? `http://${window.location.hostname}:5000/api/convictos` : "http://localhost:5000/api/convictos";
+const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost"
+    ? "https://sgc-backend-vbze.onrender.com/api/convictos"
+    : "http://localhost:5000/api/convictos";
 
 const getFormattedDate = (dateString?: string): string => {
     if (!dateString) return "";

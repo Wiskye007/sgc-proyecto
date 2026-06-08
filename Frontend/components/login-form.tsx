@@ -19,7 +19,7 @@ import {Shield} from "lucide-react"
 import {useToast} from "@/hooks/use-toast"
 
 const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost"
-    ? `http://${window.location.hostname}:5000/api`
+    ? "https://sgc-backend-vbze.onrender.com/api"
     : "http://localhost:5000/api";
 
 export default function LoginForm() {

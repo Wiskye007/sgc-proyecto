@@ -46,8 +46,8 @@ const getFormattedDate = (dateString?: string): string => {
     return new Date().toISOString().split("T")[0];
 }
 
-const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost" ? `http://${window.location.hostname}:5000/api/medico` : "http://localhost:5000/api/medico";
-const CONVICTOS_URL = typeof window !== "undefined" && window.location.hostname !== "localhost" ? `http://${window.location.hostname}:5000/api/convictos` : "http://localhost:5000/api/convictos";
+const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost" ? `https://sgc-backend-vbze.onrender.com/api/medico` : "https://sgc-backend-vbze.onrender.com/api/medico";
+const CONVICTOS_URL = typeof window !== "undefined" && window.location.hostname !== "localhost" ? `https://sgc-backend-vbze.onrender.com/api/convictos` : "https://sgc-backend-vbze.onrender.com/api/convictos";
 
 export default function MedicoPanel() {
     const router = useRouter()
