@@ -13,6 +13,9 @@ eggs/
 .eggs/
 lib/
 lib64/
+# El frontend tiene una carpeta lib/ con código fuente (no es build de Python)
+!Frontend/lib/
+!Frontend/lib/**
 parts/
 sdist/
 var/

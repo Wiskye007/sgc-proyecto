@@ -30,7 +30,8 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {ArrowLeft, AlertCircle, Calendar, Pill, Plus, Edit2, Printer, FileText, Trash2, Download, Stethoscope} from 'lucide-react'
-import {useToast} from "@/hooks/use-toast"  
+import {useToast} from "@/hooks/use-toast"
+import { authFetch } from "@/lib/auth"  
 
     const getFormattedDate = (dateString?: string): string => {
         if (!dateString) return new Date().toISOString().split("T")[0];
@@ -111,11 +112,11 @@ export default function MedicoPanel() {
         setLoading(true)
         try {
             const [rRev, rTra, rDer, rHis, rCon] = await Promise.all([
-                fetch(`${API_URL}/revisiones`),
-                fetch(`${API_URL}/tratamientos`),
-                fetch(`${API_URL}/derivaciones`),
-                fetch(`${API_URL}/historial`),
-                fetch(CONVICTOS_URL)
+                authFetch(`${API_URL}/revisiones`),
+                authFetch(`${API_URL}/tratamientos`),
+                authFetch(`${API_URL}/derivaciones`),
+                authFetch(`${API_URL}/historial`),
+                authFetch(CONVICTOS_URL)
             ])
             if (rRev.ok) setRevisionesData(await rRev.json())
             if (rTra.ok) setTratamientosData(await rTra.json())
@@ -188,7 +189,7 @@ export default function MedicoPanel() {
                 medico: revision.medico || "Usuario actual",
                 proximaRevision: revision.proximaRevision || null
             }
-            const res = await fetch(`${API_URL}/revisiones`, {
+            const res = await authFetch(`${API_URL}/revisiones`, {
                 method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
             })
             if (res.ok) {
@@ -218,7 +219,7 @@ export default function MedicoPanel() {
                 medico: editingData.data.medico,
                 proximaRevision: editingData.data.proximaRevision ? getFormattedDate(editingData.data.proximaRevision) : null
             }
-            const res = await fetch(`${API_URL}/revisiones/${id}`, {
+            const res = await authFetch(`${API_URL}/revisiones/${id}`, {
                 method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
             })
             if (res.ok) {
@@ -242,7 +243,7 @@ export default function MedicoPanel() {
                 Medico: tratamiento.medico || "Usuario actual",
                 FechaInicio: tratamiento.fechaInicio || new Date().toISOString().split("T")[0]
             }
-            const res = await fetch(`${API_URL}/tratamientos`, {
+            const res = await authFetch(`${API_URL}/tratamientos`, {
                 method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
             })
             if (res.ok) {
@@ -265,7 +266,7 @@ export default function MedicoPanel() {
                 Medico: editingData.data.medico,
                 FechaInicio: getFormattedDate(editingData.data.fechaInicio)
             }
-            const res = await fetch(`${API_URL}/tratamientos/${id}`, {
+            const res = await authFetch(`${API_URL}/tratamientos/${id}`, {
                 method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
             })
             if (res.ok) { toast({title: "Tratamiento actualizado"}); await fetchAll() } 
@@ -286,7 +287,7 @@ export default function MedicoPanel() {
                 Institucion: derivacion.institucion,
                 Fecha: derivacion.fecha || new Date().toISOString().split("T")[0]
             }
-            const res = await fetch(`${API_URL}/derivaciones`, {
+            const res = await authFetch(`${API_URL}/derivaciones`, {
                 method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
             })
             if (res.ok) {
@@ -309,7 +310,7 @@ export default function MedicoPanel() {
                 Institucion: editingData.data.institucion,
                 Fecha: getFormattedDate(editingData.data.fecha)
             }
-            const res = await fetch(`${API_URL}/derivaciones/${id}`, {
+            const res = await authFetch(`${API_URL}/derivaciones/${id}`, {
                 method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
             })
             if (res.ok) { toast({title: "Actualizada"}); await fetchAll() } 
@@ -324,7 +325,7 @@ export default function MedicoPanel() {
             if (type === "tratamiento") path = `/tratamientos/${id}`
             if (type === "derivacion") path = `/derivaciones/${id}`
             if (!path) return
-            const res = await fetch(`${API_URL}${path}`, {method: "DELETE"})
+            const res = await authFetch(`${API_URL}${path}`, {method: "DELETE"})
             if (res.ok) {
                 toast({title: "Eliminado"}); setDeleteConfirm(null); await fetchAll()
             } else { toast({title: "Error", variant: "destructive"}) }
