@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 import smtplib
 from email.mime.text import MIMEText
+import re
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 logger = logging.getLogger(__name__)
@@ -88,6 +89,14 @@ def registro():
         dni_frontend = data.get('dni')
         correo_frontend = data.get('correo')
 
+        # Validación de DNI (8 caracteres)
+        dni_limpio = str(dni_frontend or '').strip().upper()
+        if not re.match(r"^[A-Z0-9]{8}$", dni_limpio):
+            return jsonify({
+                'error': 'El DNI debe tener exactamente 8 caracteres'
+            }), 400
+        dni_frontend = dni_limpio
+
         # Verificar nombre de usuario
         result_check = db.execute_query(
             "SELECT 1 FROM Usuarios WHERE NombreUsuario = ?",
@@ -120,7 +129,7 @@ def registro():
                 """
         params = (
             data.get('nombreCompleto'),
-            data.get('dni'),
+            dni_frontend,
             data.get('cargo'),
             data.get('nivelAcceso'),
             nombre_usuario_frontend,
@@ -197,7 +206,7 @@ def reset_password():
                 SELECT Id
                 FROM Usuarios
                 WHERE TokenRecuperacion = ?
-                  AND TokenExpira > GETDATE() \
+                AND TokenExpira > GETDATE() \
                 """
         result = db.execute_query(query, (token,))
 

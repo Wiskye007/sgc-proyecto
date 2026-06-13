@@ -73,9 +73,18 @@ def crear_convicto():
             existe = db.execute_query(check_query, (dni,))
             if existe:
                 return jsonify({'error': f'El DNI "{dni}" ya se encuentra registrado en el sistema.'}), 409
-
-        from datetime import datetime
-        fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        fecha_input = data.get('fechaingreso')
+        
+        if fecha_input:
+            from datetime import datetime
+            try:
+                fecha_limpia = fecha_input.replace('T', ' ').split('.')[0]
+                fecha_actual = fecha_limpia
+            except:
+                fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            from datetime import datetime
+            fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         query = """
                 INSERT INTO tblConvictos (NombreCompleto, Alias, DNI, Edad, Delito, Pabellon, Celda, Estado, Nivel,
@@ -102,8 +111,7 @@ def actualizar_convicto(id):
         data = request.get_json()
         dni = data.get('dni')
 
-        # --- VALIDACIÓN DE DNI EN ACTUALIZACIÓN ---
-        # Verificamos si el DNI existe EN OTRO registro distinto al que estamos editando
+        # --- VALIDACIÓN DE DNI ---
         if dni:
             check_query = "SELECT 1 FROM tblConvictos WHERE DNI = ? AND IDConv != ?"
             existe = db.execute_query(check_query, (dni, id))
@@ -180,7 +188,6 @@ def obtener_movimientos():
         movimientos = []
         if resultados:
             for r in resultados:
-
                 # --- FECHA ---
                 from datetime import date
                 fecha = r["fecha"]
@@ -224,11 +231,14 @@ def crear_movimiento():
             return jsonify({'error': 'Faltan datos obligatorios'}), 400
 
         from datetime import datetime
-        try:
-            fecha_dt = datetime.strptime(fecha_input, "%Y-%m-%d")
-            fecha_final = fecha_dt.strftime("%d/%m/%Y")
-        except:
-            return jsonify({"error": "Formato de fecha inválido."}), 400
+        fecha_input = data.get('fecha')
+        
+        if fecha_input:
+            fecha_final = fecha_input.split('T')[0]
+        else:
+            fecha_final = datetime.now().strftime("%Y-%m-%d")
+            
+        hora_final = data.get('hora') or datetime.now().strftime("%H:%M:%S")
 
         query = """
                 INSERT INTO tblMovimientos (Fecha, Hora, IDConv, Origen, Destino, Motivo, AutorizadoPor)
@@ -236,8 +246,8 @@ def crear_movimiento():
                 """
 
         params = (
-            data.get('fecha'),
-            data.get('hora'),
+            fecha_final,
+            hora_final,
             data.get('convicto'),
             data.get('origen'),
             data.get('destino'),
@@ -257,6 +267,9 @@ def crear_movimiento():
 def actualizar_movimiento(id):
     try:
         data = request.get_json()
+        
+        fecha_input = data.get('fecha')
+        fecha_final = fecha_input.split('T')[0] if fecha_input else None
 
         query = """
                 UPDATE tblMovimientos
@@ -270,7 +283,7 @@ def actualizar_movimiento(id):
                 WHERE IDMov = ? \
                 """
         params = (
-            data.get('fecha'),
+            fecha_final,
             data.get('hora'),
             data.get('convictoId'),
             data.get('origen'),
@@ -348,8 +361,6 @@ def crear_conducta():
         data = request.get_json()
 
         # -------- VALIDACIONES --------
-
-        # Campos obligatorios
         if not data.get('convictoId') or not data.get('tipo') or not data.get('descripcion'):
             return jsonify({'error': 'Faltan datos obligatorios.'}), 400
 
@@ -357,26 +368,26 @@ def crear_conducta():
         if len(descripcion.strip()) < 10:
             return jsonify({'error': 'La descripción debe tener al menos 10 caracteres.'}), 400
 
-        # Validar fecha no futura
-        if data.get('fecha'):
-            from datetime import date
-            fecha_reg = date.fromisoformat(data.get('fecha'))
-            if fecha_reg > date.today():
-                return jsonify({'error': 'La fecha no puede ser futura.'}), 400
+        # 🔥 CORRECCIÓN: Evitamos date.fromisoformat que explota con la 'T' de React
+        fecha_input = data.get('fecha')
+        if fecha_input:
+            fecha_final = fecha_input.split('T')[0]
+        else:
+            from datetime import datetime
+            fecha_final = datetime.now().strftime("%Y-%m-%d")
 
         # -------- INSERTAR --------
-
         query = """
                 INSERT INTO tblConducta (IDConv, Fecha, Tipo, Descripcion, Sancion, RegistradoPor)
                 VALUES (?, ?, ?, ?, ?, ?) \
                 """
         params = (
             data.get('convictoId'),
-            data.get('fecha'),
+            fecha_final,
             data.get('tipo'),
             descripcion.strip(),
             data.get('sancion'),
-            data.get('registrado')
+            data.get('registrado') or 'Sistema'
         )
 
         db.execute_update(query, params)
@@ -397,14 +408,9 @@ def actualizar_conducta(id):
             return jsonify({'error': 'Faltan datos obligatorios.'}), 400
 
         descripcion = data.get('descripcion')
-        if len(descripcion.strip()) < 10:
-            return jsonify({'error': 'La descripción debe tener al menos 10 caracteres.'}), 400
-
-        if data.get('fecha'):
-            from datetime import date
-            fecha_reg = date.fromisoformat(data.get('fecha'))
-            if fecha_reg > date.today():
-                return jsonify({'error': 'La fecha no puede ser futura.'}), 400
+        
+        fecha_input = data.get('fecha')
+        fecha_final = fecha_input.split('T')[0] if fecha_input else None
 
         # -------- UPDATE --------
         query = """
@@ -420,7 +426,7 @@ def actualizar_conducta(id):
 
         params = (
             data.get('convictoId'),
-            data.get('fecha'),
+            fecha_final,
             data.get('tipo'),
             descripcion.strip(),
             data.get('sancion'),
@@ -487,6 +493,7 @@ def obtener_visitas():
                     hora_str = hora.strftime("%H:%M")
                 else:
                     hora_str = "00:00" if hora in (None, "", "None") else str(hora)
+                    
                 visitas.append({
                     'id': r['IDVisita'],
                     'fecha': fecha_str,
@@ -509,15 +516,28 @@ def obtener_visitas():
 def crear_visita():
     try:
         data = request.get_json()
+        fecha_raw = data.get('fecha')
+        
+        if fecha_raw and 'T' in fecha_raw:
+            fecha_final = fecha_raw.split('T')[0]
+            hora_final = fecha_raw.split('T')[1][:5]  # Agarra solo HH:MM
+        else:
+            fecha_final = fecha_raw
+            hora_final = data.get('hora') or "00:00"
+
         query = """
                 INSERT INTO tblVisitas (Fecha, Hora, IDConv, Visitante, DNIVisitante, Parentesco, Estado, Observaciones)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?) \
                 """
         params = (
-            data.get('fecha'), data.get('hora'),
-            data.get('convictoId'),  # ID
-            data.get('visitante'), data.get('dniVisitante'),
-            data.get('parentesco'), data.get('estado'), data.get('observaciones')
+            fecha_final, 
+            hora_final,
+            data.get('recluso') or data.get('convictoId'),  # ID
+            data.get('visitante'), 
+            data.get('dniVisitante'),
+            data.get('parentesco'), 
+            data.get('estado') or 'Programada', 
+            data.get('observaciones')
         )
         db.execute_update(query, params)
         return jsonify({'success': True}), 201
@@ -531,28 +551,21 @@ def actualizar_visita(id):
         data = request.get_json()
 
         # -------- VALIDACIONES --------
-
-        campos_obligatorios = ['convictoId', 'visitante', 'dniVisitante', 'estado']
+        campos_obligatorios = ['visitante', 'dniVisitante']
         for campo in campos_obligatorios:
             if not data.get(campo):
                 return jsonify({'error': f"El campo '{campo}' es obligatorio."}), 400
 
-        # Validar fecha (no pasada si el estado es 'Programada')
-        if data.get('fecha'):
-            from datetime import date
-            fecha_visita = date.fromisoformat(data.get('fecha'))
-            if data.get('estado').lower() == "programada":
-                if fecha_visita < date.today():
-                    return jsonify({'error': 'No se puede programar una visita con fecha pasada.'}), 400
-
-        # Validación de hora
-        hora = data.get('hora')
-        import re
-        if hora and not re.match(r'^([01]\d|2[0-3]):([0-5]\d)$', hora):
-            return jsonify({'error': 'Formato de hora inválido. Use HH:MM.'}), 400
+        # 🔥 CORRECCIÓN: Separar fecha y hora limpiamente sin date.fromisoformat
+        fecha_raw = data.get('fecha')
+        if fecha_raw and 'T' in fecha_raw:
+            fecha_final = fecha_raw.split('T')[0]
+            hora_final = fecha_raw.split('T')[1][:5]
+        else:
+            fecha_final = fecha_raw
+            hora_final = data.get('hora')
 
         # -------- ACTUALIZACIÓN --------
-
         query = """
                 UPDATE tblVisitas
                 SET Fecha=?,
@@ -567,9 +580,9 @@ def actualizar_visita(id):
                 """
 
         params = (
-            data.get('fecha'),
-            data.get('hora'),
-            data.get('convictoId'),
+            fecha_final,
+            hora_final,
+            data.get('recluso') or data.get('convictoId'),
             data.get('visitante'),
             data.get('dniVisitante'),
             data.get('parentesco'),

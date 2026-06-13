@@ -1,6 +1,4 @@
-"use client"
-
-import type React from "react"
+"use client"    
 import {useState, useEffect} from "react"
 import {useRouter} from 'next/navigation'
 import {Button} from "@/components/ui/button"
@@ -14,12 +12,12 @@ import {
     DialogContent,
     DialogDescription,
     DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import {ArrowLeft, FileText, Download, BarChart, Save, Trash2, FileDown, Printer, Plus, Eye} from 'lucide-react'
-import {useToast} from "@/hooks/use-toast"
+    DialogTitle,} 
+    from "@/components/ui/dialog"
 import {Separator} from "@/components/ui/separator"
+import {Badge} from "@/components/ui/badge" // <--- Agregado aquí
+import {ArrowLeft, FileText, Download, BarChart, Save, Trash2, FileDown, Printer, Plus, Eye, Users, Activity, AlertCircle, Pill} from 'lucide-react' // <--- Actualizado aquí
+import {useToast} from "@/hooks/use-toast"
 import {
     PieChart,
     Pie,
@@ -49,40 +47,36 @@ const tiposReporte = [
     {id: "capacidad", nombre: "Reporte de Capacidad", descripcion: "Análisis de ocupación por pabellón"},
 ]
 
+// --- DATOS SIMULADOS ---
 const datoPoblacionPabellones = [
     {nombre: "Pab. A", internos: 42, capacidad: 50},
     {nombre: "Pab. B", internos: 38, capacidad: 45},
     {nombre: "Pab. C", internos: 35, capacidad: 40},
     {nombre: "Pab. D", internos: 33, capacidad: 45},
-]
-
+    ]
 const datoPoblacionTendencia = [
     {mes: "Ago", internos: 145},
     {mes: "Sep", internos: 152},
     {mes: "Oct", internos: 158},
     {mes: "Nov", internos: 148},
-]
-
+    ]
 const datoIncidentes = [
     {tipo: "Peleas", cantidad: 12, fill: "#ef4444"},
     {tipo: "Agresiones", cantidad: 8, fill: "#f97316"},
     {tipo: "Contrabando", cantidad: 6, fill: "#eab308"},
     {tipo: "Otros", cantidad: 4, fill: "#6366f1"},
-]
-
+    ]
 const datoSalud = [
     {categoria: "Sanos", valor: 115, fill: "#22c55e"},
     {categoria: "En tratamiento", valor: 42, fill: "#3b82f6"},
     {categoria: "Derivados", valor: 11, fill: "#f59e0b"},
-]
-
+    ]
 const datoMovimientos = [
     {semana: "Sem 1", traslados: 15},
     {semana: "Sem 2", traslados: 18},
     {semana: "Sem 3", traslados: 12},
     {semana: "Sem 4", traslados: 21},
-]
-
+    ]
 const datoReincidencia = [
     {rango: "1-5 años", reincidentes: 18},
     {rango: "6-10 años", reincidentes: 25},
@@ -100,8 +94,7 @@ interface ReportForm {
     cargoPersonal: string
     observaciones: string
     formato: string
-
-    [key: string]: string | undefined
+        [key: string]: string | undefined
 }
 
 interface SavedReport {
@@ -156,18 +149,12 @@ export default function ReportesPanel() {
 
     const handleSelectReportType = (typeId: string) => {
         setSelectedReportType(typeId)
-        setFormData({
-            ...formData,
-            tipoReporte: typeId,
-        })
+        setFormData({ ...formData, tipoReporte: typeId })
         setOpenNewDialog(true)
     }
 
     const updateFormField = (field: string, value: string) => {
-        setFormData({
-            ...formData,
-            [field]: value,
-        })
+        setFormData({ ...formData, [field]: value })
     }
 
     const handleGuardarReporte = async () => {
@@ -193,8 +180,7 @@ export default function ReportesPanel() {
             })
 
             if (response.ok) {
-                const data = await response.json()
-                toast({title: "Éxito", description: "Reporte guardado correctamente"})
+            toast({title: "Éxito", description: "Reporte guardado correctamente"})
                 loadSavedReports()
                 setOpenNewDialog(false)
                 setFormData({
@@ -210,8 +196,7 @@ export default function ReportesPanel() {
             } else {
                 throw new Error("Error al guardar")
             }
-        } catch (error) {
-            console.error("[v0] Error guardando reporte:", error)
+            } catch (error) {
             toast({title: "Error", description: "No se pudo guardar el reporte", variant: "destructive"})
         } finally {
             setLoading(false)
@@ -219,22 +204,17 @@ export default function ReportesPanel() {
     }
 
     const handleEliminarReporte = async () => {
-        if (!selectedReport?.id) return
-
+            if (!selectedReport?.id) return
         try {
             setLoading(true)
-            const response = await fetch(`${API_URL}/api/reportes/${selectedReport.id}`, {
-                method: "DELETE",
-            })
-
+            const response = await fetch(`${API_URL}/api/reportes/${selectedReport.id}`, { method: "DELETE" })
             if (response.ok) {
-                toast({title: "Éxito", description: "Reporte eliminado correctamente", variant: "destructive"})
+                toast({title: "Eliminado", description: "Reporte eliminado correctamente"})
                 loadSavedReports()
                 setOpenViewDialog(false)
                 setSelectedReport(null)
             }
-        } catch (error) {
-            console.error("[v0] Error eliminando reporte:", error)
+            } catch (error) {
             toast({title: "Error", description: "No se pudo eliminar el reporte", variant: "destructive"})
         } finally {
             setLoading(false)
@@ -243,8 +223,7 @@ export default function ReportesPanel() {
 
     const handleExportarReporte = async (formato: string) => {
         if (!selectedReport?.id) return
-
-        try {
+            try {
             const response = await fetch(`${API_URL}/api/reportes/${selectedReport.id}/exportar/${formato}`)
             if (response.ok) {
                 const blob = await response.blob()
@@ -259,8 +238,7 @@ export default function ReportesPanel() {
                 toast({title: "Éxito", description: `Reporte exportado en ${formato.toUpperCase()}`})
             }
         } catch (error) {
-            console.error("[v0] Error exportando:", error)
-            toast({title: "Error", description: "No se pudo exportar el reporte", variant: "destructive"})
+        toast({title: "Error", description: "No se pudo exportar el reporte", variant: "destructive"})
         }
     }
 
@@ -276,53 +254,140 @@ export default function ReportesPanel() {
     }
 
     return (
-        <div className="min-h-screen bg-background p-6">
-            <div className="container mx-auto max-w-7xl">
-                {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <Button variant="outline" size="icon" onClick={() => router.push("/dashboard")}>
-                        <ArrowLeft className="h-4 w-4"/>
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold">Panel de Reportes</h1>
-                        <p className="text-muted-foreground">Estadísticas y gráficos de la institución</p>
+        <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-slate-200">
+            <div className="container mx-auto max-w-7xl relative z-10 space-y-8">
+                
+                {/* --- HEADER DEL PANEL DE REPORTES --- */}
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0a0f1a]/80 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl">
+                    <div className="flex items-center gap-5">
+                        <Button 
+                            aria-label="Volver al menú principal" 
+                            className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" 
+                            onClick={() => router.push("/dashboard")}
+                        >
+                            <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
+                        </Button>
+                        <div>
+                            <h1 className="text-3xl font-black tracking-wide text-white flex items-center gap-3">
+                                <BarChart className="h-7 w-7 text-blue-400" /> Panel de Reportes
+                            </h1>
+                            <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Estadísticas y Analíticas del Sistema</p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Sección Generar Nuevo Reporte */}
-                <Card className="mb-8 border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
-                    <CardHeader>
-                        <CardTitle className="text-xl flex items-center gap-2">
-                            <Plus className="h-5 w-5"/>
+                {/* --- SECCIÓN: ESTADÍSTICAS GENERALES (GRÁFICOS) --- */}
+                <Card className="sgc-card border-0 shadow-2xl">
+                    <CardHeader className="border-b border-slate-800/60 pb-4">
+                        <CardTitle className="text-xl text-white">Visualización de datos en tiempo real</CardTitle>
+                        <CardDescription className="text-slate-400">Resumen consolidado de la población y estado de la carceleta</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            
+                            {/* Gráfico 1 - Población por Pabellón */}
+                            <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                    <Users className="h-4 w-4 text-blue-400"/> Ocupación por Pabellón
+                                </h3>
+                                <ResponsiveContainer width="100%" height={280}>
+                                    <RechartsBarChart data={datoPoblacionPabellones}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false}/>
+                                        <XAxis dataKey="nombre" stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
+                                        <YAxis stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
+                                        <Tooltip cursor={{fill: '#1e293b', opacity: 0.4}} contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }}/>
+                                        <Legend wrapperStyle={{paddingTop: "20px"}}/>
+                                        <Bar dataKey="internos" fill="#3b82f6" name="Internos" radius={[4, 4, 0, 0]}/>
+                                        <Bar dataKey="capacidad" fill="#10b981" name="Capacidad" radius={[4, 4, 0, 0]}/>
+                                    </RechartsBarChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            {/* Gráfico 2 - Tendencia de Población */}
+                            <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                    <Activity className="h-4 w-4 text-purple-400"/> Tendencia de Población
+                                </h3>
+                                <ResponsiveContainer width="100%" height={280}>
+                                    <LineChart data={datoPoblacionTendencia}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false}/>
+                                        <XAxis dataKey="mes" stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
+                                        <YAxis stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
+                                        <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }}/>
+                                        <Legend wrapperStyle={{paddingTop: "20px"}}/>
+                                        <Line type="monotone" dataKey="internos" stroke="#a855f7" name="Total Internos" strokeWidth={3} dot={{fill: "#a855f7", r: 4, strokeWidth: 2}} activeDot={{r: 6}}/>
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            {/* Gráfico 3 - Incidentes */}
+                            <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                    <AlertCircle className="h-4 w-4 text-red-400"/> Distribución de Incidentes
+                                </h3>
+                                <ResponsiveContainer width="100%" height={280}>
+                                    <PieChart>
+                                        <Pie data={datoIncidentes} cx="50%" cy="50%" labelLine={false} label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`} outerRadius={90} fill="#8884d8" dataKey="cantidad" stroke="#060a12" strokeWidth={2}>
+                                            {datoIncidentes.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill}/> ))}
+                                        </Pie>
+                                        <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }}/>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            {/* Gráfico 4 - Salud */}
+                            <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                    <Pill className="h-4 w-4 text-green-400"/> Estado de Salud Global
+                                </h3>
+                                <ResponsiveContainer width="100%" height={280}>
+                                    <PieChart>
+                                        <Pie data={datoSalud} cx="50%" cy="50%" innerRadius={65} outerRadius={90} paddingAngle={4} dataKey="valor" stroke="none">
+                                            {datoSalud.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill}/> ))}
+                                        </Pie>
+                                        <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }}/>
+                                        <Legend wrapperStyle={{paddingTop: "20px"}}/>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            </div>
+                    </CardContent>
+                </Card>
+
+                {/* --- SECCIÓN: GENERAR NUEVO REPORTE --- */}
+                <Card className="sgc-card border-0 shadow-2xl">
+                    <CardHeader className="border-b border-slate-800/60 pb-4">
+                        <CardTitle className="text-xl flex items-center gap-2 text-white">
+                            <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
+                                <Plus className="h-5 w-5 text-blue-400"/>
+                            </div>
                             Generar Nuevo Reporte
                         </CardTitle>
-                        <CardDescription>Selecciona el tipo de reporte que deseas crear</CardDescription>
+                        <CardDescription className="text-slate-400">Selecciona el módulo de datos que deseas procesar</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {tiposReporte.map((tipo) => (
                                 <Card
                                     key={tipo.id}
-                                    className="cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all"
+                                    className="bg-[#060a12]/60 border border-slate-800/80 hover:border-blue-500/50 hover:bg-slate-800/40 cursor-pointer transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]"
                                     onClick={() => handleSelectReportType(tipo.id)}
                                 >
                                     <CardHeader className="pb-3">
-                                        <div className="flex items-start gap-3">
-                                            <div className="rounded-lg bg-primary/10 p-2">
-                                                <FileText className="h-5 w-5 text-primary"/>
+                                        <div className="flex items-start gap-4">
+                                            <div className="rounded-xl bg-[#0a0f1a] p-3 border border-slate-800 group-hover:bg-blue-500/20 group-hover:border-blue-500/30 transition-colors shadow-inner">
+                                                <FileText className="h-6 w-6 text-blue-400"/>
                                             </div>
                                             <div>
-                                                <CardTitle className="text-base">{tipo.nombre}</CardTitle>
-                                                <CardDescription
-                                                    className="text-xs">{tipo.descripcion}</CardDescription>
+                                                <CardTitle className="text-base text-slate-200 group-hover:text-white transition-colors">{tipo.nombre}</CardTitle>
+                                                <CardDescription className="text-xs text-slate-500 mt-1">{tipo.descripcion}</CardDescription>
                                             </div>
                                         </div>
                                     </CardHeader>
                                     <CardContent>
-                                        <Button size="sm" className="w-full gap-2">
-                                            <Plus className="h-4 w-4"/>
-                                            Crear
-                                        </Button>
+                                        <div className="w-full h-9 rounded-lg flex items-center justify-center gap-2 bg-slate-800/50 text-slate-400 font-semibold border border-slate-700/50 group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent transition-all duration-300 text-sm">
+                                            <Plus className="h-4 w-4"/> Configurar Reporte
+                                        </div>
                                     </CardContent>
                                 </Card>
                             ))}
@@ -330,342 +395,43 @@ export default function ReportesPanel() {
                     </CardContent>
                 </Card>
 
-                {/* Dialog para crear/editar reporte */}
-                <Dialog open={openNewDialog} onOpenChange={setOpenNewDialog}>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>
-                                {selectedReportType
-                                    ? tiposReporte.find((t) => t.id === selectedReportType)?.nombre
-                                    : "Nuevo Reporte"}
-                            </DialogTitle>
-                            <DialogDescription>Complete todos los campos del reporte</DialogDescription>
-                        </DialogHeader>
-
-                        <div className="space-y-6">
-                            <div className="space-y-4">
-                                <h3 className="font-semibold text-sm">Información General</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Fecha del reporte</Label>
-                                        <Input
-                                            type="date"
-                                            value={formData.fecha}
-                                            onChange={(e) => updateFormField("fecha", e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Período</Label>
-                                        <Select value={formData.periodo}
-                                                onValueChange={(v) => updateFormField("periodo", v)}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleccionar"/>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="actual">Actual</SelectItem>
-                                                <SelectItem value="mes">Este mes</SelectItem>
-                                                <SelectItem value="trimestre">Este trimestre</SelectItem>
-                                                <SelectItem value="anio">Este año</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Asunto del informe *</Label>
-                                    <Input
-                                        placeholder="Ej: Informe mensual de población carcelaria"
-                                        value={formData.asunto}
-                                        onChange={(e) => updateFormField("asunto", e.target.value)}
-                                    />
-                                </div>
+                {/* --- SECCIÓN: REPORTES GUARDADOS --- */}
+                <Card className="sgc-card border-0 shadow-2xl">
+                    <CardHeader className="border-b border-slate-800/60 pb-4">
+                        <CardTitle className="text-xl flex items-center gap-2 text-white">
+                            <div className="bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
+                                <Save className="h-5 w-5 text-slate-300"/>
                             </div>
-
-                            <Separator/>
-
-                            <div className="space-y-4">
-                                <h3 className="font-semibold text-sm">Personal a Cargo</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Nombre completo</Label>
-                                        <Input
-                                            placeholder="Nombre del responsable"
-                                            value={formData.personalCargo}
-                                            onChange={(e) => updateFormField("personalCargo", e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Cargo</Label>
-                                        <Input
-                                            placeholder="Ej: Director, Subdirector"
-                                            value={formData.cargoPersonal}
-                                            onChange={(e) => updateFormField("cargoPersonal", e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <Separator/>
-
-                            <div className="space-y-4">
-                                <h3 className="font-semibold text-sm">Observaciones</h3>
-                                <Textarea
-                                    placeholder="Ingrese observaciones relevantes..."
-                                    rows={4}
-                                    value={formData.observaciones}
-                                    onChange={(e) => updateFormField("observaciones", e.target.value)}
-                                />
-                            </div>
-
-                            <Separator/>
-
-                            <div className="space-y-2">
-                                <Label>Formato de exportación</Label>
-                                <Select value={formData.formato} onValueChange={(v) => updateFormField("formato", v)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Seleccionar formato"/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="pdf">PDF</SelectItem>
-                                        <SelectItem value="excel">Excel</SelectItem>
-                                        <SelectItem value="csv">CSV</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2 pt-4">
-                                <Button onClick={handleGuardarReporte} disabled={loading} className="gap-2">
-                                    <Save className="h-4 w-4"/>
-                                    Guardar
-                                </Button>
-                                <Button variant="outline" onClick={() => setOpenNewDialog(false)} className="gap-2">
-                                    Cancelar
-                                </Button>
-                            </div>
-                        </div>
-                    </DialogContent>
-                </Dialog>
-
-                {/* Sección de Estadísticas */}
-                <Card className="mb-6">
-                    <CardHeader>
-                        <CardTitle>Estadísticas Generales</CardTitle>
-                        <CardDescription>Resumen de la población carcelaria</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Gráfico de Barras - Población por Pabellón */}
-                            <div className="bg-card rounded-lg p-4 border border-border">
-                                <h3 className="text-sm font-semibold mb-4 text-foreground">Población por Pabellón</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <RechartsBarChart data={datoPoblacionPabellones}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151"/>
-                                        <XAxis dataKey="nombre" stroke="#9ca3af"/>
-                                        <YAxis stroke="#9ca3af"/>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: "#1f2937",
-                                                border: "1px solid #374151",
-                                                borderRadius: "8px",
-                                                color: "#f3f4f6",
-                                            }}
-                                        />
-                                        <Legend/>
-                                        <Bar dataKey="internos" fill="#3b82f6" name="Internos" radius={[8, 8, 0, 0]}/>
-                                        <Bar dataKey="capacidad" fill="#10b981" name="Capacidad" radius={[8, 8, 0, 0]}/>
-                                    </RechartsBarChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            {/* Gráfico de Línea - Tendencia de Población */}
-                            <div className="bg-card rounded-lg p-4 border border-border">
-                                <h3 className="text-sm font-semibold mb-4 text-foreground">Tendencia de Población</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <LineChart data={datoPoblacionTendencia}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151"/>
-                                        <XAxis dataKey="mes" stroke="#9ca3af"/>
-                                        <YAxis stroke="#9ca3af"/>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: "#1f2937",
-                                                border: "1px solid #374151",
-                                                borderRadius: "8px",
-                                                color: "#f3f4f6",
-                                            }}
-                                        />
-                                        <Legend/>
-                                        <Line
-                                            type="monotone"
-                                            dataKey="internos"
-                                            stroke="#a855f7"
-                                            name="Internos"
-                                            strokeWidth={2}
-                                            dot={{fill: "#a855f7", r: 5}}
-                                        />
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            {/* Gráfico Circular - Incidentes */}
-                            <div className="bg-card rounded-lg p-4 border border-border">
-                                <h3 className="text-sm font-semibold mb-4 text-foreground">Incidentes por Tipo</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
-                                        <Pie
-                                            data={datoIncidentes}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ name, value }) => `${name}: ${value}`}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            dataKey="cantidad"
-                                        >
-                                            {datoIncidentes.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.fill}/>
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: "#1f2937",
-                                                border: "1px solid #374151",
-                                                borderRadius: "8px",
-                                                color: "#f3f4f6",
-                                            }}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            {/* Gráfico de Anillo - Estado de Salud */}
-                            <div className="bg-card rounded-lg p-4 border border-border">
-                                <h3 className="text-sm font-semibold mb-4 text-foreground">Estado de Salud de
-                                    Internos</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
-                                        <Pie
-                                            data={datoSalud}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={60}
-                                            outerRadius={100}
-                                            paddingAngle={2}
-                                            dataKey="valor"
-                                        >
-                                            {datoSalud.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.fill}/>
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: "#1f2937",
-                                                border: "1px solid #374151",
-                                                borderRadius: "8px",
-                                                color: "#f3f4f6",
-                                            }}
-                                        />
-                                        <Legend/>
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            {/* Gráfico de Barras - Movimientos por Semana */}
-                            <div className="bg-card rounded-lg p-4 border border-border">
-                                <h3 className="text-sm font-semibold mb-4 text-foreground">Traslados por Semana</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <RechartsBarChart data={datoMovimientos}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151"/>
-                                        <XAxis dataKey="semana" stroke="#9ca3af"/>
-                                        <YAxis stroke="#9ca3af"/>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: "#1f2937",
-                                                border: "1px solid #374151",
-                                                borderRadius: "8px",
-                                                color: "#f3f4f6",
-                                            }}
-                                        />
-                                        <Bar dataKey="traslados" fill="#f97316" radius={[8, 8, 0, 0]}/>
-                                    </RechartsBarChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            {/* Gráfico de Línea - Reincidencia */}
-                            <div className="bg-card rounded-lg p-4 border border-border">
-                                <h3 className="text-sm font-semibold mb-4 text-foreground">Análisis de Reincidencia</h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <LineChart data={datoReincidencia}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151"/>
-                                        <XAxis dataKey="rango" stroke="#9ca3af"/>
-                                        <YAxis stroke="#9ca3af"/>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: "#1f2937",
-                                                border: "1px solid #374151",
-                                                borderRadius: "8px",
-                                                color: "#f3f4f6",
-                                            }}
-                                        />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="reincidentes"
-                                            stroke="#ec4899"
-                                            strokeWidth={3}
-                                            dot={{fill: "#ec4899", r: 5}}
-                                            activeDot={{r: 7}}
-                                        />
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Sección de Reportes Guardados */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Eye className="h-5 w-5"/>
-                            Reportes Guardados
+                            Registro de Reportes Emitidos
                         </CardTitle>
-                        <CardDescription>Historial de reportes generados anteriormente</CardDescription>
+                        <CardDescription className="text-slate-400">Documentos generados y almacenados en la base de datos</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-6">
                         {loading ? (
-                            <div className="text-center py-8">Cargando reportes...</div>
+                            <div className="text-center py-12 text-slate-400 animate-pulse">Consultando base de datos...</div>
                         ) : savedReports.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">
-                                No hay reportes guardados. Crea uno nuevo para comenzar.
+                            <div className="text-center py-12 bg-[#060a12]/40 rounded-xl border border-dashed border-slate-800 text-slate-500">
+                                No se encontraron documentos. Genere un nuevo reporte para visualizarlo aquí.
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                 {savedReports.map((report) => (
-                                    <Card key={report.id} className="hover:shadow-lg transition-shadow">
+                                    <Card key={report.id} className="bg-[#0a0f1a] border border-slate-800 shadow-lg hover:border-slate-600 transition-all">
                                         <CardHeader className="pb-3">
-                                            <CardTitle className="text-base line-clamp-2">{report.asunto}</CardTitle>
-                                            <CardDescription className="text-xs">
-                                                {report.fecha} • {report.tipoReporte}
+                                            <CardTitle className="text-base text-slate-200 line-clamp-2 leading-snug">{report.asunto}</CardTitle>
+                                            <CardDescription className="text-xs text-blue-400/80 font-medium mt-1">
+                                                {report.fecha} <span className="text-slate-600 mx-1">|</span> {report.tipoReporte.toUpperCase()}
                                             </CardDescription>
                                         </CardHeader>
                                         <CardContent>
                                             <div className="flex gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    className="flex-1 gap-1"
-                                                    onClick={() => {
-                                                        setSelectedReport(report)
-                                                        setOpenViewDialog(true)
-                                                    }}
-                                                >
-                                                    <Eye className="h-3 w-3"/>
-                                                    Ver
+                                                <Button size="sm" className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border-0 h-9"
+                                                    onClick={() => { setSelectedReport(report); setOpenViewDialog(true); }}>
+                                                    <Eye className="h-3.5 w-3.5 mr-1.5 text-blue-400"/> Ver
                                                 </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="gap-1"
-                                                    onClick={() => handleExportarReporte(report.formato)}
-                                                >
-                                                    <Download className="h-3 w-3"/>
+                                                <Button size="sm" className="flex-1 sgc-btn-secondary h-9 border-slate-700"
+                                                    onClick={() => handleExportarReporte(report.formato)}>
+                                                    <Download className="h-3.5 w-3.5 mr-1.5"/> Bajar
                                                 </Button>
                                             </div>
                                         </CardContent>
@@ -676,68 +442,128 @@ export default function ReportesPanel() {
                     </CardContent>
                 </Card>
 
-                {/* Dialog para ver reporte guardado */}
+                {/* ========================================================================= */}
+                {/* DIALOG: GENERAR NUEVO REPORTE (FORMULARIO) */}
+                {/* ========================================================================= */}
+                <Dialog open={openNewDialog} onOpenChange={setOpenNewDialog}>
+                    <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader className="border-b border-slate-800/80 pb-4">
+                            <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
+                                <FileText className="h-5 w-5 text-blue-400"/>
+                                {selectedReportType ? tiposReporte.find((t) => t.id === selectedReportType)?.nombre : "Nuevo Reporte"}
+                            </DialogTitle>
+                            <DialogDescription className="text-slate-400 text-xs mt-1">Complete los parámetros requeridos para la extracción de datos.</DialogDescription>
+                        </DialogHeader>
+
+                        <div className="space-y-6 pt-2">
+                            <div className="space-y-4">
+                                <h3 className="font-bold tracking-widest text-slate-500 uppercase text-xs">I. Parámetros del Documento</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="sgc-label">Fecha de Emisión</Label>
+                                        <Input type="date" className="sgc-input h-11" value={formData.fecha} onChange={(e) => updateFormField("fecha", e.target.value)} />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="sgc-label">Período de Análisis</Label>
+                                        <Select value={formData.periodo} onValueChange={(v) => updateFormField("periodo", v)}>
+                                            <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
+                                            <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
+                                                <SelectItem value="actual" className="focus:bg-blue-600 focus:text-white">Estado Actual</SelectItem>
+                                                <SelectItem value="mes" className="focus:bg-blue-600 focus:text-white">Este mes</SelectItem>
+                                                <SelectItem value="trimestre" className="focus:bg-blue-600 focus:text-white">Este trimestre</SelectItem>
+                                                <SelectItem value="anio" className="focus:bg-blue-600 focus:text-white">Este año</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="sgc-label">Asunto / Título del Informe *</Label>
+                                    <Input className="sgc-input h-11" placeholder="Ej: Informe de incidencias Pabellón A" value={formData.asunto} onChange={(e) => updateFormField("asunto", e.target.value)} />
+                                </div>
+                            </div>
+
+                            <Separator className="bg-slate-800/80"/>
+
+                            <div className="space-y-4">
+                                <h3 className="font-bold tracking-widest text-slate-500 uppercase text-xs">II. Firmas y Responsables</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="sgc-label">Nombre del Responsable</Label>
+                                        <Input className="sgc-input h-11" placeholder="Ej: Cmdt. Juan Pérez" value={formData.personalCargo} onChange={(e) => updateFormField("personalCargo", e.target.value)} />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="sgc-label">Cargo Administrativo</Label>
+                                        <Input className="sgc-input h-11" placeholder="Ej: Jefe de Seguridad" value={formData.cargoPersonal} onChange={(e) => updateFormField("cargoPersonal", e.target.value)} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Separator className="bg-slate-800/80"/>
+
+                            <div className="space-y-4">
+                                <h3 className="font-bold tracking-widest text-slate-500 uppercase text-xs">III. Notas Adicionales</h3>
+                                <Textarea className="sgc-input" placeholder="Anotaciones que se incluirán al pie del reporte..." rows={3} value={formData.observaciones} onChange={(e) => updateFormField("observaciones", e.target.value)} />
+                            </div>
+
+                            <Separator className="bg-slate-800/80"/>
+
+                            <div className="space-y-1.5">
+                                <Label className="sgc-label">Formato de Exportación Predeterminado</Label>
+                                <Select value={formData.formato} onValueChange={(v) => updateFormField("formato", v)}>
+                                    <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Formato"/></SelectTrigger>
+                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
+                                        <SelectItem value="pdf" className="focus:bg-blue-600 focus:text-white">Documento PDF (.pdf)</SelectItem>
+                                        <SelectItem value="excel" className="focus:bg-blue-600 focus:text-white">Hoja de Cálculo (.xlsx)</SelectItem>
+                                        <SelectItem value="csv" className="focus:bg-blue-600 focus:text-white">Valores por Comas (.csv)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="flex gap-3 pt-4 border-t border-slate-800/80">
+                                <Button variant="outline" onClick={() => setOpenNewDialog(false)} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
+                                <Button onClick={handleGuardarReporte} disabled={loading} className="sgc-btn-primary flex-1 h-11">
+                                    <Save className="h-4 w-4 mr-2"/> Generar y Guardar
+                                </Button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                {/* ========================================================================= */}
+                {/* DIALOG: VISTA PREVIA DEL REPORTE */}
+                {/* ========================================================================= */}
                 <Dialog open={openViewDialog} onOpenChange={setOpenViewDialog}>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>{selectedReport?.asunto}</DialogTitle>
-                            <DialogDescription>Fecha: {selectedReport?.fecha}</DialogDescription>
+                    <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader className="border-b border-slate-800/80 pb-4">
+                            <DialogTitle className="text-xl font-bold text-white pr-6 leading-tight">{selectedReport?.asunto}</DialogTitle>
+                            <DialogDescription className="text-blue-400 font-mono text-xs mt-1">EMITIDO: {selectedReport?.fecha}</DialogDescription>
                         </DialogHeader>
 
                         {selectedReport && (
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-6 pt-2">
+                                <div className="grid grid-cols-2 gap-4 bg-[#060a12]/50 p-4 rounded-xl border border-slate-800">
                                     <div>
-                                        <Label className="text-xs text-muted-foreground">Tipo de Reporte</Label>
-                                        <p className="font-medium">{selectedReport.tipoReporte}</p>
+                                        <Label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1 block">Tipo de Reporte</Label>
+                                        <p className="text-sm font-medium text-slate-200">{selectedReport.tipoReporte.toUpperCase()}</p>
                                     </div>
                                     <div>
-                                        <Label className="text-xs text-muted-foreground">Formato</Label>
-                                        <p className="font-medium">{selectedReport.formato.toUpperCase()}</p>
+                                        <Label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1 block">Formato Base</Label>
+                                        <Badge variant="outline" className="bg-slate-800 text-slate-300 border-slate-700">{selectedReport.formato.toUpperCase()}</Badge>
                                     </div>
-                                </div>
-
-                                <Separator/>
-
+                                    </div>
                                 <div>
-                                    <Label className="text-xs text-muted-foreground">Observaciones</Label>
-                                    <p className="text-sm mt-2">{selectedReport.datos.observaciones || "Sin observaciones"}</p>
+                                    <Label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2 block">Observaciones Adjuntas</Label>
+                                    <div className="bg-[#0a0f1a] p-4 rounded-lg border border-slate-800/80 text-sm text-slate-300 min-w-20">
+                                        {selectedReport.datos.observaciones || <span className="text-slate-600 italic">No se registraron observaciones.</span>}
+                                    </div>
                                 </div>
 
-                                <Separator/>
-
-                                <div className="flex flex-wrap gap-2">
-                                    <Button
-                                        onClick={() => handleExportarReporte("pdf")}
-                                        className="gap-2"
-                                        variant="default"
-                                    >
-                                        <FileDown className="h-4 w-4"/>
-                                        Exportar PDF
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleExportarReporte("excel")}
-                                        className="gap-2"
-                                        variant="outline"
-                                    >
-                                        <Download className="h-4 w-4"/>
-                                        Exportar Excel
-                                    </Button>
-                                    <Button
-                                        onClick={handleImprimirReporte}
-                                        className="gap-2"
-                                        variant="outline"
-                                    >
-                                        <Printer className="h-4 w-4"/>
-                                        Imprimir
-                                    </Button>
-                                    <Button
-                                        onClick={handleEliminarReporte}
-                                        className="gap-2"
-                                        variant="destructive"
-                                    >
-                                        <Trash2 className="h-4 w-4"/>
-                                        Eliminar
+                                <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-800/80">
+                                    <Button onClick={() => handleExportarReporte("pdf")} className="sgc-btn-primary flex-1 h-11"><FileDown className="h-4 w-4 mr-2"/> PDF</Button>
+                                    <Button onClick={() => handleExportarReporte("excel")} className="sgc-btn-secondary flex-1 h-11 border-slate-700"><Download className="h-4 w-4 mr-2"/> Excel</Button>
+                                    <Button onClick={handleImprimirReporte} className="sgc-btn-secondary flex-1 h-11 border-slate-700"><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                    <Button onClick={handleEliminarReporte} className="bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 transition-colors h-11 px-4 rounded-md">
+                                    <Trash2 className="h-4 w-4"/>
                                     </Button>
                                 </div>
                             </div>
@@ -746,5 +572,5 @@ export default function ReportesPanel() {
                 </Dialog>
             </div>
         </div>
-    )
-}
+        )
+    }
