@@ -24,7 +24,8 @@ import {
     AlertDialogTitle
 } from "@/components/ui/alert-dialog"
 import {ArrowLeft, Search, Plus, Edit2, Printer, Trash2, Download} from 'lucide-react'
-import {useToast} from "@/hooks/use-toast"  
+import {useToast} from "@/hooks/use-toast"
+import { authFetch } from "@/lib/auth"  
 
 // --------------------- TIPOS ---------------------
 interface Convicto {
@@ -180,10 +181,10 @@ const ConvictosPanel: React.FC = () => {
     const fetchDatos = async () => {
         try {
             const [rConv, rMov, rCond, rVis] = await Promise.all([
-                fetch(`${API_URL}`),
-                fetch(`${API_URL}/movimientos`),
-                fetch(`${API_URL}/conducta`),
-                fetch(`${API_URL}/visitas`)
+                authFetch(`${API_URL}`),
+                authFetch(`${API_URL}/movimientos`),
+                authFetch(`${API_URL}/conducta`),
+                authFetch(`${API_URL}/visitas`)
             ])
             if (rConv.ok) setConvictosData(await rConv.json())
             if (rMov.ok) setMovimientosData(await rMov.json())
@@ -243,7 +244,7 @@ const ConvictosPanel: React.FC = () => {
                 observaciones: clean(convictoForm.observaciones),
                 fechaingreso: new Date().toISOString() 
             }
-            const res = await fetch(`${API_URL}`, {
+            const res = await authFetch(`${API_URL}`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(payload)
@@ -298,7 +299,7 @@ const ConvictosPanel: React.FC = () => {
                     pabellon: clean(d.pabellon), celda: clean(d.celda), estado: clean(d.estado),
                     nivelPeligrosidad: clean(d.nivel), contacto: clean(d.contacto), observaciones: clean(d.observaciones)
                 }
-                const res = await fetch(`${API_URL}/${id}`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
+                const res = await authFetch(`${API_URL}/${id}`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
                 if (res.ok) { toast({title: "Actualizado", description: "Registro actualizado"}); setEditingData(null); await fetchDatos() } 
                 else { const err = await res.json().catch(() => null); toast({title: "Error", description: err?.error || "No se pudo actualizar", variant: "destructive"}) }
             } 
@@ -314,7 +315,7 @@ const ConvictosPanel: React.FC = () => {
                     fecha: d.fecha, hora: d.hora, convictoId: Number(d.convictoId),
                     origen: clean(d.origen), destino: clean(d.destino), motivo: clean(d.motivo), autorizadoPor: clean(d.autorizadoPor)
                 }
-                const res = await fetch(`${API_URL}/movimientos/${id}`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
+                const res = await authFetch(`${API_URL}/movimientos/${id}`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
                 if (res.ok) { toast({title: "Actualizado", description: "Traslado actualizado"}); setEditingData(null); await fetchDatos() } 
                 else { const err = await res.json().catch(() => null); toast({title: "Error", description: err?.error || "Error al actualizar", variant: "destructive"}) }
             } 
@@ -329,7 +330,7 @@ const ConvictosPanel: React.FC = () => {
                     convictoId: Number(d.convictoId), fecha: d.fecha, tipo: d.tipo,
                     descripcion: clean(d.descripcion), sancion: clean(d.sancion), registrado: clean(d.registrado)
                 }
-                const res = await fetch(`${API_URL}/conducta/${id}`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
+                const res = await authFetch(`${API_URL}/conducta/${id}`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
                 if (res.ok) { toast({title: "Actualizado", description: "Conducta actualizada"}); setEditingData(null); await fetchDatos() } 
                 else { const err = await res.json().catch(() => null); toast({title: "Error", description: err?.error || "Error al actualizar", variant: "destructive"}) }
             } 
@@ -347,7 +348,7 @@ const ConvictosPanel: React.FC = () => {
                     visitante: clean(d.visitante), dniVisitante: clean(d.dniVisitante),
                     parentesco: clean(d.parentesco), estado: d.estado, observaciones: ""
                 }
-                const res = await fetch(`${API_URL}/visitas/${id}`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
+                const res = await authFetch(`${API_URL}/visitas/${id}`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
                 if (res.ok) { toast({title: "Actualizado", description: "Visita actualizada"}); setEditingData(null); await fetchDatos() } 
                 else { const err = await res.json().catch(() => null); toast({title: "Error", description: err?.error || "Error al actualizar", variant: "destructive"}) }
             }
@@ -375,7 +376,7 @@ const ConvictosPanel: React.FC = () => {
                 origen: clean(movimientoForm.origen), destino: clean(movimientoForm.destino),
                 motivo: clean(movimientoForm.motivo), autorizadoPor: clean(movimientoForm.autorizadoPor) || "Sistema"
             }
-            const res = await fetch(`${API_URL}/movimientos`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
+            const res = await authFetch(`${API_URL}/movimientos`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
             if (res.ok) {
                 toast({title: "Éxito", description: "Traslado registrado"})
                 setOpenNuevoMovimiento(false)
@@ -408,7 +409,7 @@ const ConvictosPanel: React.FC = () => {
                 descripcion: clean(conductaForm.descripcion), sancion: clean(conductaForm.sancion) || "Ninguna",
                 registrado: "Usuario Actual"
             }
-            const res = await fetch(`${API_URL}/conducta`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
+            const res = await authFetch(`${API_URL}/conducta`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
             if (res.ok) {
                 toast({title: "Éxito", description: "Conducta registrada"})
                 setOpenNuevaConducta(false)
@@ -442,7 +443,7 @@ const ConvictosPanel: React.FC = () => {
                 visitante: clean(visitaForm.visitante), dniVisitante: clean(visitaForm.dniVisitante),
                 parentesco: clean(visitaForm.parentesco), estado: visitaForm.estado, observaciones: ""
             }
-            const res = await fetch(`${API_URL}/visitas`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
+            const res = await authFetch(`${API_URL}/visitas`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
             if (res.ok) {
                 toast({title: "Éxito", description: "Visita programada"})
                 setOpenNuevaVisita(false)
@@ -471,7 +472,7 @@ const ConvictosPanel: React.FC = () => {
             }
 
         try {
-            const res = await fetch(`${API_URL}${endpoint}`, {method: "DELETE"})
+            const res = await authFetch(`${API_URL}${endpoint}`, {method: "DELETE"})
             if (res.ok) {
                 toast({title: "Eliminado", description: "Registro eliminado"})
                 await fetchDatos()

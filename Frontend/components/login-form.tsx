@@ -50,6 +50,8 @@ export default function LoginForm() {
         })
         const data = await response.json()
         if (response.ok) {
+            if (data.token) localStorage.setItem("authToken", data.token)
+            localStorage.setItem("currentUser", JSON.stringify(data.usuario))
             toast({ title: "Inicio de sesión exitoso", description: `Bienvenido, ${data.usuario.nombre}` })
             router.push("/dashboard")
         } else {

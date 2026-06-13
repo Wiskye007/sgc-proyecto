@@ -2,8 +2,10 @@ from flask import Blueprint, request, jsonify
 from db_connection import db
 import logging
 from werkzeug.security import generate_password_hash, check_password_hash
+from auth_utils import generar_token
 import secrets
 import smtplib
+import os
 from email.mime.text import MIMEText
 import re
 
@@ -48,15 +50,17 @@ def login():
             return jsonify({'error': 'Usuario o contraseña incorrectos'}), 401
 
         # Login exitoso
+        usuario_payload = {
+            'id': user.get('Id'),
+            'usuario': user.get('NombreUsuario'),
+            'nombre': user.get('NombreCompleto'),
+            'cargo': user.get('Cargo'),
+            'nivelAcceso': user.get('NivelAcceso'),
+        }
         return jsonify({
             'success': True,
-            'usuario': {
-                'id': user.get('Id'),
-                'usuario': user.get('NombreUsuario'),
-                'nombre': user.get('NombreCompleto'),
-                'cargo': user.get('Cargo'),
-                'nivelAcceso': user.get('NivelAcceso'),
-            }
+            'token': generar_token(usuario_payload),
+            'usuario': usuario_payload,
         }), 200
 
     except Exception as e:
@@ -152,9 +156,6 @@ def recuperar():
         data = request.get_json()
         correo = data.get("correo")
 
-        # DEBUG: Log para ver qué está llegando
-        logger.info(f"Datos recibidos en recuperar: {data}")
-
         if not correo:
             return jsonify({"error": "Correo requerido"}), 400
 
@@ -171,20 +172,30 @@ def recuperar():
         # Generar token seguro
         token = secrets.token_urlsafe(32)
 
-        # Guardarlo en la BD
+        # Guardarlo en la BD (PostgreSQL: NOW() + INTERVAL)
         db.execute_update(
-            "UPDATE Usuarios SET TokenRecuperacion = ?, TokenExpira = DATEADD(hour, 1, GETDATE()) WHERE Id = ?",
+            "UPDATE Usuarios SET TokenRecuperacion = ?, TokenExpira = NOW() + INTERVAL '1 hour' WHERE Id = ?",
             (token, usuario_id)
         )
 
-        # DEBUG: Log del token generado
-        logger.info(f"Token generado para {correo}: {token}")
+        # Enviar el enlace de recuperación por correo. El token NUNCA se
+        # devuelve en la respuesta ni se escribe en logs.
+        enlace = f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/reset-password?token={token}"
+        try:
+            enviar_correo(
+                correo,
+                "Recuperación de contraseña - SGC",
+                f"Hola {nombre_usuario}, usa este enlace para restablecer tu "
+                f"contraseña (válido 1 hora): {enlace}"
+            )
+        except Exception:
+            # No revelamos si el envío falló para no filtrar información.
+            logger.exception("No se pudo enviar el correo de recuperación")
 
-        # Para desarrollo, puedes retornar el token en la respuesta
+        # Respuesta genérica: no confirma existencia de la cuenta ni expone el token.
         return jsonify({
             "success": True,
-            "message": "Correo de recuperación enviado",
-            "token": token  # Solo para desarrollo, quitar en producción
+            "message": "Si el correo existe, se ha enviado un enlace de recuperación"
         }), 200
 
     except Exception as e:
@@ -206,7 +217,7 @@ def reset_password():
                 SELECT Id
                 FROM Usuarios
                 WHERE TokenRecuperacion = ?
-                AND TokenExpira > GETDATE() \
+                AND TokenExpira > NOW() \
                 """
         result = db.execute_query(query, (token,))
 
@@ -234,10 +245,18 @@ def reset_password():
 # FUNCIÓN PARA ENVIAR CORREO
 # -------------------------------------------------------
 def enviar_correo(to, subject, mensaje):
+    remitente = os.getenv("SMTP_USER")
+    clave = os.getenv("SMTP_PASSWORD")
+    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    puerto = int(os.getenv("SMTP_PORT", "465"))
+
+    if not remitente or not clave:
+        raise RuntimeError("SMTP no configurado (SMTP_USER / SMTP_PASSWORD)")
+
     msg = MIMEText(mensaje)
     msg["Subject"] = subject
-    msg["From"] = "tu_correo@gmail.com"
+    msg["From"] = remitente
     msg["To"] = to
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login("tu_correo@gmail.com", "tu_clave_de_app")
+    with smtplib.SMTP_SSL(host, puerto) as server:
+        server.login(remitente, clave)
         server.send_message(msg)

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Users, Shield, Activity, BarChart3, LogOut } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { authFetch } from "@/lib/auth"
 
 const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost"
     ? "https://sgc-backend-vbze.onrender.com/api"
@@ -55,7 +56,7 @@ export default function DashboardModules() {
 
     const handleLogout = async () => {
         try {
-            const response = await fetch(`${API_URL}/auth/logout`, {
+            const response = await authFetch(`${API_URL}/auth/logout`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             });

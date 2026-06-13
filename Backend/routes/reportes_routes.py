@@ -14,7 +14,7 @@ def get_poblacion():
         query = """
                 SELECT pabellon, COUNT(*) as cantidad
                 FROM Convictos
-                WHERE activo = 1
+                WHERE activo = TRUE
                 GROUP BY pabellon
                 ORDER BY pabellon \
                 """
@@ -47,10 +47,11 @@ def get_salud_estadisticas():
     """Estadísticas de salud"""
     try:
         query = """
-                SELECT TOP 10 diagnostico, COUNT(*) as cantidad
+                SELECT diagnostico, COUNT(*) as cantidad
                 FROM ConsultasMedicas
                 GROUP BY diagnostico
-                ORDER BY cantidad DESC \
+                ORDER BY cantidad DESC
+                LIMIT 10 \
                 """
         result = db.execute_query(query)
         return jsonify({'success': True, 'data': result}), 200
