@@ -1,7 +1,7 @@
 import { authFetch } from "./auth"
 
-//const API_URL = "https://sgc-backend-vbze.onrender.com";
-const API_URL = "http://localhost:5000";
+const API_URL = "https://sgc-backend-vbze.onrender.com";
+//const API_URL = "http://localhost:5000";
 
 export interface LoginRequest {
     usuario: string

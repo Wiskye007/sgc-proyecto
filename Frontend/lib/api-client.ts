@@ -1,7 +1,6 @@
-// Cliente API para conectar Next.js con la API ASP.NET
 
-//const API_URL = "https://sgc-backend-vbze.onrender.com";
-const API_URL = "http://localhost:5000";
+const API_URL = "https://sgc-backend-vbze.onrender.com";
+//const API_URL = "http://localhost:5000";
 
 // Función auxiliar para hacer peticiones
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
