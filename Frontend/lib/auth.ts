@@ -21,6 +21,7 @@ export function authHeaders(extra: Record<string, string> = {}): Record<string, 
 // presente), la limpia y redirige al login.
 export async function authFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
     const token = getAuthToken()
+    console.log("LLAVE ENCONTRADA POR EL FRONTEND:", token)
     const headers = new Headers(init.headers || {})
     if (init.body && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json")
