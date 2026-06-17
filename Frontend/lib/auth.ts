@@ -20,8 +20,7 @@ export function authHeaders(extra: Record<string, string> = {}): Record<string, 
 // Wrapper de fetch que adjunta el token y, si la sesión expiró (401 con token
 // presente), la limpia y redirige al login.
 export async function authFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
-    const token = getAuthToken()
-    console.log("LLAVE ENCONTRADA POR EL FRONTEND:", token)
+    const token = getAuthToken()    
     const headers = new Headers(init.headers || {})
     if (init.body && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json")
@@ -35,4 +34,4 @@ export async function authFetch(input: RequestInfo | URL, init: RequestInit = {}
         if (typeof window !== "undefined") window.location.href = "/"
     }
     return response
-}
+}   

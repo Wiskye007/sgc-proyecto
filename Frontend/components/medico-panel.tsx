@@ -6,7 +6,7 @@ import {useRouter} from 'next/navigation'
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Badge} from "@/components/ui/badge"
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {Textarea} from "@/components/ui/textarea"   
@@ -29,7 +29,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {ArrowLeft, AlertCircle, Calendar, Pill, Plus, Edit2, Printer, FileText, Trash2, Download, Stethoscope} from 'lucide-react'
+import {ArrowLeft, AlertCircle, Calendar, Pill, Plus, Edit2, Printer, Trash2, Download, Stethoscope} from 'lucide-react'
 import {useToast} from "@/hooks/use-toast"
 import { authFetch } from "@/lib/auth"  
 

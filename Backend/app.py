@@ -27,7 +27,7 @@ app.config['ENV'] = os.getenv('FLASK_ENV', 'development')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-cambiar')
 
 # CONFIGURACIÓN DE CORS
-# Orígenes permitidos configurables por entorno (coma-separados).
+# Orígenes permitidos configurables por entorno.
 ALLOWED_ORIGINS = [
     o.strip() for o in os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000').split(',') if o.strip()
 ]

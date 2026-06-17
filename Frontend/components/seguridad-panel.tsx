@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import {ArrowLeft, AlertTriangle, CheckCircle, Clock, Shield, MoveRight, AlertOctagon, KeyRound, Users} from "lucide-react"
 import {useToast} from "@/hooks/use-toast"
-import * as api from "@/lib/api"
+import { authFetch } from "@/lib/auth"
 
 const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost"
     ? "https://sgc-backend-vbze.onrender.com/api"
@@ -111,73 +111,127 @@ export default function SeguridadPanel() {
         }
     }
 
-    const handleRegistrarMovimiento = (e: React.FormEvent) => {
+    const handleRegistrarMovimiento = async (e: React.FormEvent) => {
         e.preventDefault()
-        toast({
-            title: "Movimiento registrado",
-            description: `Traslado de ${movimiento.recluso} registrado correctamente`,
-        })
-        setMovimientoDialog(false)
-        setMovimiento({recluso: "", origen: "", destino: "", motivo: "", escolta: ""})
+        try {
+            setLoading(true)
+            const response = await authFetch(`${API_URL}/convictos/movimientos`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    convicto:      movimiento.recluso,
+                    origen:        movimiento.origen,
+                    destino:       movimiento.destino,
+                    motivo:        movimiento.motivo,
+                    autorizadoPor: movimiento.escolta,
+                    fecha:         new Date().toISOString().split("T")[0],
+                    hora:          new Date().toTimeString().slice(0, 5),
+                }),
+            })
+            const data = await response.json()
+            if (response.ok && data.success) {
+                toast({title: "Movimiento registrado", description: `Traslado de ${movimiento.recluso} guardado en el sistema`})
+                setMovimientoDialog(false)
+                setMovimiento({recluso: "", origen: "", destino: "", motivo: "", escolta: ""})
+            } else {
+                toast({title: "Error", description: data.error || "No se pudo registrar el movimiento", variant: "destructive"})
+            }
+        } catch {
+            toast({title: "Error", description: "Error al conectar con el servidor", variant: "destructive"})
+        } finally {
+            setLoading(false)
+        }
     }
 
     const handleReportarIncidente = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
             setLoading(true)
-            const incidenteRequest: api.IncidenteRequest = {
-                tipo: incidente.tipo,
-                descripcion: incidente.descripcion,
-                ubicacion: incidente.ubicacion,
-                gravedad: incidente.gravedad,
-                reportadoPor: "Usuario actual",
-            }
-
-            const result = await api.crearIncidente(incidenteRequest)
-
-            if (result.success) {
-                toast({
-                    title: "Incidente reportado",
-                    description: "El incidente ha sido registrado en el sistema y guardado en la base de datos",
-                })
+            const response = await authFetch(`${API_URL}/seguridad/incidentes`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    tipoIncidente: incidente.tipo,
+                    descripcion:   `[${incidente.gravedad.toUpperCase()}] ${incidente.ubicacion} — ${incidente.descripcion}${incidente.involucrados ? ` | Involucrados: ${incidente.involucrados}` : ""}`,
+                    fecha:         new Date().toISOString().split("T")[0],
+                }),
+            })
+            const data = await response.json()
+            if (response.ok && data.success) {
+                toast({title: "Incidente reportado", description: "El incidente ha sido registrado y guardado en la base de datos"})
                 setIncidenteDialog(false)
                 setIncidente({tipo: "", ubicacion: "", descripcion: "", gravedad: "", involucrados: ""})
             } else {
-                toast({
-                    title: "Error",
-                    description: result.message || "No se pudo guardar el incidente",
-                    variant: "destructive",
-                })
+                toast({title: "Error", description: data.error || "No se pudo guardar el incidente", variant: "destructive"})
             }
-            } catch (error) {
-            toast({
-                title: "Error",
-                description: "Ocurrió un error al guardar el incidente",
-                variant: "destructive",
-            })
+        } catch {
+            toast({title: "Error", description: "Ocurrió un error al guardar el incidente", variant: "destructive"})
         } finally {
             setLoading(false)
         }
     }
 
-    const handleRegistrarAcceso = (e: React.FormEvent) => {
+    const handleRegistrarAcceso = async (e: React.FormEvent) => {
         e.preventDefault()
-        toast({
-            title: "Acceso registrado",
-            description: `Acceso de ${acceso.persona} registrado`,
-        })
-        setAccesoDialog(false)
-        setAcceso({persona: "", dni: "", tipo: "", area: "", motivo: ""})
+        try {
+            setLoading(true)
+            // Los accesos se registran como visitas con estado "Acceso"
+            const response = await authFetch(`${API_URL}/convictos/visitas`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    visitante:    acceso.persona,
+                    dniVisitante: acceso.dni,
+                    parentesco:   acceso.tipo,
+                    observaciones: `Área: ${acceso.area} — Motivo: ${acceso.motivo}`,
+                    estado:       "Acceso",
+                    fecha:        new Date().toISOString(),
+                }),
+            })
+            const data = await response.json()
+            if (response.ok && data.success) {
+                toast({title: "Acceso registrado", description: `Acceso de ${acceso.persona} guardado en el sistema`})
+                setAccesoDialog(false)
+                setAcceso({persona: "", dni: "", tipo: "", area: "", motivo: ""})
+            } else {
+                toast({title: "Error", description: data.error || "No se pudo registrar el acceso", variant: "destructive"})
+            }
+        } catch {
+            toast({title: "Error", description: "Error al conectar con el servidor", variant: "destructive"})
+        } finally {
+            setLoading(false)
+        }
     }
 
-    const handleRegistrarVisita = (e: React.FormEvent) => {
+    const handleRegistrarVisita = async (e: React.FormEvent) => {
         e.preventDefault()
-        toast({
-            title: "Visita registrada",
-            description: `Visita de ${visita.visitante} registrada correctamente`,
-        })
-        setVisitaDialog(false)
-        setVisita({visitante: "", dniVisitante: "", recluso: "", parentesco: "", fecha: ""})
+        try {
+            setLoading(true)
+            const response = await authFetch(`${API_URL}/convictos/visitas`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    visitante:    visita.visitante,
+                    dniVisitante: visita.dniVisitante,
+                    recluso:      visita.recluso,
+                    parentesco:   visita.parentesco,
+                    fecha:        visita.fecha,
+                    estado:       "Programada",
+                }),
+            })
+            const data = await response.json()
+            if (response.ok && data.success) {
+                toast({title: "Visita registrada", description: `Visita de ${visita.visitante} guardada en el sistema`})
+                setVisitaDialog(false)
+                setVisita({visitante: "", dniVisitante: "", recluso: "", parentesco: "", fecha: ""})
+            } else {
+                toast({title: "Error", description: data.error || "No se pudo registrar la visita", variant: "destructive"})
+            }
+        } catch {
+            toast({title: "Error", description: "Error al conectar con el servidor", variant: "destructive"})
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -496,4 +550,4 @@ export default function SeguridadPanel() {
             </div>
         </div>
     )
-}   
+}

@@ -90,14 +90,14 @@ def guardar_reporte():
 
         query = """
                 INSERT INTO Reportes (tipo_reporte, asunto, fecha, personal_cargo, cargo_personal, observaciones, datos,
-                                      formato)
+                                    formato)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?) \
                 """
 
         import json
         datos_json = json.dumps(data.get('datos', {}))
 
-        db.execute_query(query, (
+        db.execute_update(query, (
             data.get('tipoReporte'),
             data.get('asunto'),
             data.get('fecha'),
@@ -125,12 +125,12 @@ def get_historial():
         for row in result:
             import json
             reportes.append({
-                'id': row[0],
-                'tipoReporte': row[1],
-                'asunto': row[2],
-                'fecha': str(row[3]),
-                'formato': row[4],
-                'datos': json.loads(row[5]) if isinstance(row[5], str) else row[5]
+                'id': row['id'],
+                'tipoReporte': row['tipo_reporte'],
+                'asunto': row['asunto'],
+                'fecha': str(row['fecha']),
+                'formato': row['formato'],
+                'datos': json.loads(row['datos']) if isinstance(row['datos'], str) else row['datos']
             })
 
         return jsonify({'success': True, 'data': reportes}), 200
@@ -144,7 +144,7 @@ def eliminar_reporte(report_id):
     """Eliminar un reporte"""
     try:
         query = "DELETE FROM Reportes WHERE id = ?"
-        db.execute_query(query, (report_id,))
+        db.execute_update(query, (report_id,))
         return jsonify({'success': True, 'message': 'Reporte eliminado'}), 200
     except Exception as e:
         logger.error(f"Error eliminando reporte: {e}")
@@ -162,7 +162,9 @@ def exportar_reporte(report_id, formato):
             return jsonify({'error': 'Reporte no encontrado'}), 404
 
         import json
-        asunto, datos = result[0]
+        row = result[0]
+        asunto = row['asunto']
+        datos = row['datos']
         datos_dict = json.loads(datos) if isinstance(datos, str) else datos
 
         if formato == 'pdf':
@@ -208,7 +210,7 @@ def exportar_reporte(report_id, formato):
 
             from flask import send_file
             return send_file(buffer, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                             as_attachment=True, download_name=f'{asunto}.xlsx')
+                            as_attachment=True, download_name=f'{asunto}.xlsx')
 
         elif formato == 'csv':
             import csv
@@ -229,4 +231,4 @@ def exportar_reporte(report_id, formato):
         return jsonify({'error': 'Formato no soportado'}), 400
     except Exception as e:
         logger.error(f"Error exportando reporte: {e}")
-        return jsonify({'error': 'Error al exportar reporte'}), 500
+        return jsonify({'error': 'Error al exportar reporte'}), 500 

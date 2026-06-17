@@ -118,12 +118,12 @@ class DatabaseConnection:
 
                     resultados_normalizados.append(row_normalizada)
                 return resultados_normalizados
-
-        except Exception as e:
-                print(f"Error en la normalización o query: {e}")
-
+    
         except psycopg2.Error as e:
             logger.error(f"Error ejecutando consulta a la BD: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error en la normalización o query: {e}")
             raise
 
     def execute_update(self, query, params=None):

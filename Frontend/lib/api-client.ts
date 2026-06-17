@@ -1,18 +1,31 @@
+//const API_URL = "https://sgc-backend-vbze.onrender.com";    
+const API_URL = "http://localhost:5000";
 
-const API_URL = "https://sgc-backend-vbze.onrender.com";
-//const API_URL = "http://localhost:5000";
+function getToken(): string | null {
+    if (typeof window === "undefined") return null
+    return localStorage.getItem("authToken")
+}
 
 // Función auxiliar para hacer peticiones
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     const url = `${API_URL}${endpoint}`
+    const token = getToken()
 
     const response = await fetch(url, {
         ...options,
         headers: {
             "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...options.headers,
         },
     })
+
+    if (response.status === 401 && token) {
+        localStorage.removeItem("authToken")
+        localStorage.removeItem("currentUser")
+        if (typeof window !== "undefined") window.location.href = "/"
+        throw new Error("Sesión expirada")
+    }
 
     if (!response.ok) {
         const error = await response.text()
@@ -197,4 +210,4 @@ export async function eliminarReporte(id: number) {
     return fetchAPI(`/api/reportes/${id}`, {
         method: "DELETE",
     })
-}
+}   

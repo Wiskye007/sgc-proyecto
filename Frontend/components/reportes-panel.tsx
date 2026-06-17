@@ -136,7 +136,7 @@ export default function ReportesPanel() {
     const loadSavedReports = async () => {
         try {
             setLoading(true)
-            const response = await authFetch(`/api/reportes/historial`)
+            const response = await authFetch(`${API_URL}/historial`)
             if (response.ok) {
                 const data = await response.json()
                 setSavedReports(data.data || [])
@@ -166,7 +166,7 @@ export default function ReportesPanel() {
             }
 
             setLoading(true)
-            const response = await authFetch(`${API_URL}/api/reportes/guardar`, {
+            const response = await authFetch(`${API_URL}/guardar`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
@@ -208,7 +208,7 @@ export default function ReportesPanel() {
             if (!selectedReport?.id) return
         try {
             setLoading(true)
-            const response = await authFetch(`${API_URL}/api/reportes/${selectedReport.id}`, { method: "DELETE" })
+            const response = await authFetch(`${API_URL}/${selectedReport.id}`, { method: "DELETE" })
             if (response.ok) {
                 toast({title: "Eliminado", description: "Reporte eliminado correctamente"})
                 loadSavedReports()
@@ -225,7 +225,7 @@ export default function ReportesPanel() {
     const handleExportarReporte = async (formato: string) => {
         if (!selectedReport?.id) return
             try {
-            const response = await authFetch(`${API_URL}/api/reportes/${selectedReport.id}/exportar/${formato}`)
+            const response = await authFetch(`${API_URL}/${selectedReport.id}/exportar/${formato}`)
             if (response.ok) {
                 const blob = await response.blob()
                 const url = window.URL.createObjectURL(blob)
