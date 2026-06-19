@@ -24,7 +24,7 @@ const modules = [
     {
         id: "seguridad",
         title: "Panel de Seguridad",
-        description: "Control de pabellones, accesos y movimientos",
+        description: "Gestión de pabellones, alertas, incidentes y accesos",
         icon: Shield,
         href: "/dashboard/seguridad",
         color: "text-red-400",
@@ -89,7 +89,6 @@ export default function DashboardModules() {
     };
 
     return (
-        /* Envolvemos todo en sgc-bg para heredar las partículas y el fondo oscuro radial */
         <div className="sgc-bg min-h-screen w-full py-10 px-4 md:px-8 font-sans text-slate-200">
             <div className="container mx-auto max-w-6xl space-y-8 relative z-10">
                 
@@ -105,7 +104,6 @@ export default function DashboardModules() {
                         </div>
                     </div>
                     
-                    {/* Botón Destructivo Estilizado (Logout) */}
                     <Button 
                         aria-label="Cerrar sesión" 
                         onClick={handleLogout}
@@ -123,13 +121,11 @@ export default function DashboardModules() {
                         return (
                             <Card
                                 key={module.id}
-                                /* sgc-card aplica el acristalado, bordes y sombras del globals.css */
                                 className={`sgc-card group cursor-pointer border-0 hover:-translate-y-1 transition-all duration-300 ${module.glow}`}
                                 onClick={() => router.push(module.href)}
                             >
                                 <CardHeader className="pb-4">
                                     <div className="flex items-start gap-5">
-                                        {/* Contenedor del ícono que brilla al pasar el mouse */}
                                         <div className="rounded-xl bg-[#060a12] p-4 border border-slate-800 shadow-inner group-hover:bg-slate-800/40 transition-colors">
                                             <Icon className={`h-8 w-8 ${module.color}`} />
                                         </div>
@@ -140,7 +136,6 @@ export default function DashboardModules() {
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    {/* Falso botón que se anima con la tarjeta completa */}
                                     <div className="w-full h-11 rounded-lg flex items-center justify-center gap-2 bg-blue-500/5 text-blue-400 font-semibold border border-blue-500/10 group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent transition-all duration-300">
                                         Acceder al módulo
                                     </div>

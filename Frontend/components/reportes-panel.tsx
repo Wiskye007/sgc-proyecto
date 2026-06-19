@@ -15,8 +15,8 @@ import {
     DialogTitle,} 
     from "@/components/ui/dialog"
 import {Separator} from "@/components/ui/separator"
-import {Badge} from "@/components/ui/badge" // <--- Agregado aquí
-import {ArrowLeft, FileText, Download, BarChart, Save, Trash2, FileDown, Printer, Plus, Eye, Users, Activity, AlertCircle, Pill} from 'lucide-react' // <--- Actualizado aquí
+import {Badge} from "@/components/ui/badge"
+import {ArrowLeft, FileText, Download, BarChart, Save, Trash2, FileDown, Printer, Plus, Eye, Users, Activity, AlertCircle, Pill} from 'lucide-react'
 import {useToast} from "@/hooks/use-toast"
 import { authFetch } from "@/lib/auth"
 import {
@@ -28,16 +28,14 @@ import {
     CartesianGrid,
     Tooltip,
     Legend,
-    ResponsiveContainer,
-    LineChart,
-    Line,
+    ResponsiveContainer,    
     BarChart as RechartsBarChart,
     Bar,
 } from "recharts"
 
 const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost"
-    ? "https://sgc-backend-vbze.onrender.com/api/reportes"
-    : "http://localhost:5000/api/reportes";
+    ? "https://sgc-backend-vbze.onrender.com/api"
+    : "http://localhost:5000/api";
 
 const tiposReporte = [
     {id: "poblacion", nombre: "Reporte de Población", descripcion: "Estadísticas de internos por pabellón"},
@@ -46,44 +44,7 @@ const tiposReporte = [
     {id: "movimientos", nombre: "Reporte de Movimientos", descripcion: "Traslados y movimientos registrados"},
     {id: "incidentes", nombre: "Reporte de Incidentes", descripcion: "Incidentes de seguridad registrados"},
     {id: "capacidad", nombre: "Reporte de Capacidad", descripcion: "Análisis de ocupación por pabellón"},
-]
-
-// --- DATOS SIMULADOS ---
-const datoPoblacionPabellones = [
-    {nombre: "Pab. A", internos: 42, capacidad: 50},
-    {nombre: "Pab. B", internos: 38, capacidad: 45},
-    {nombre: "Pab. C", internos: 35, capacidad: 40},
-    {nombre: "Pab. D", internos: 33, capacidad: 45},
-    ]
-const datoPoblacionTendencia = [
-    {mes: "Ago", internos: 145},
-    {mes: "Sep", internos: 152},
-    {mes: "Oct", internos: 158},
-    {mes: "Nov", internos: 148},
-    ]
-const datoIncidentes = [
-    {tipo: "Peleas", cantidad: 12, fill: "#ef4444"},
-    {tipo: "Agresiones", cantidad: 8, fill: "#f97316"},
-    {tipo: "Contrabando", cantidad: 6, fill: "#eab308"},
-    {tipo: "Otros", cantidad: 4, fill: "#6366f1"},
-    ]
-const datoSalud = [
-    {categoria: "Sanos", valor: 115, fill: "#22c55e"},
-    {categoria: "En tratamiento", valor: 42, fill: "#3b82f6"},
-    {categoria: "Derivados", valor: 11, fill: "#f59e0b"},
-    ]
-const datoMovimientos = [
-    {semana: "Sem 1", traslados: 15},
-    {semana: "Sem 2", traslados: 18},
-    {semana: "Sem 3", traslados: 12},
-    {semana: "Sem 4", traslados: 21},
-    ]
-const datoReincidencia = [
-    {rango: "1-5 años", reincidentes: 18},
-    {rango: "6-10 años", reincidentes: 25},
-    {rango: "11-15 años", reincidentes: 14},
-    {rango: "16+ años", reincidentes: 9},
-]
+]   
 
 interface ReportForm {
     id?: string
@@ -118,6 +79,12 @@ export default function ReportesPanel() {
     const [savedReports, setSavedReports] = useState<SavedReport[]>([])
     const [loading, setLoading] = useState(false)
 
+    // --- ESTADO PARA GRÁFICOS CON DATOS REALES ---
+    const [datoPoblacionPabellones, setDatoPoblacionPabellones] = useState<any[]>([])
+    const [datoIncidentes, setDatoIncidentes] = useState<any[]>([])
+    const [datoPrioridades, setDatoPrioridades] = useState<any[]>([])
+    const [chartsLoading, setChartsLoading] = useState(false)
+
     const [formData, setFormData] = useState<ReportForm>({
         tipoReporte: "",
         fecha: new Date().toISOString().split("T")[0],
@@ -131,18 +98,115 @@ export default function ReportesPanel() {
 
     useEffect(() => {
         loadSavedReports()
+        loadChartsData()
     }, [])
+
+    const loadChartsData = async () => {
+        try {
+            setChartsLoading(true)
+            
+            // --- CARGAR POBLACIÓN POR PABELLÓN ---
+            try {
+                const poblacionRes = await authFetch(`${API_URL}/reportes/poblacion`)
+                if (poblacionRes.ok) {
+                    const data = await poblacionRes.json()
+                    if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                        const capacidades: {[key: string]: number} = {
+                            A: 50, B: 45, C: 40, D: 45
+                        }
+                        const poblacionFormato = data.data.map((item: any) => {
+                            const pab = item.pabellon || item.Pabellon || item.nombre || "Desconocido"
+                            return {
+                                nombre: `Pab. ${pab}`,
+                                internos: parseInt(item.cantidad) || item.count || 0,
+                                capacidad: capacidades[pab] || 50
+                            }
+                        })
+                        setDatoPoblacionPabellones(poblacionFormato)
+                    }
+                }
+            } catch (e) {
+                console.error("Error cargando población:", e)
+            }
+
+            // --- CARGAR INCIDENTES POR TIPO ---
+            try {
+                const incidentesRes = await authFetch(`${API_URL}/reportes/incidentes-estadisticas`)
+                if (incidentesRes.ok) {
+                    const data = await incidentesRes.json()
+                    if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                    // 1. Definimos los colores exactos para cada tipo de falta
+                    const mapaColores: { [key: string]: string } = {
+                        "Falta grave": "#ef4444", // Rojo
+                        "Falta leve": "#eab308",  // Amarillo
+                        "Positiva": "#10b981",     // Verde
+                    }
+
+                    // 2. Colores secundarios por si la API devuelve otros tipos de incidentes
+                    const coloresComodines = ["#6366f1", "#ec4899", "#8b5cf6", "#f97316"]
+
+                    const incidentesFormato = data.data.map((item: any, idx: number) => {
+                    const tipo = item.tipo_incidente || item.TipoIncidente || item.nombre || "Otro"
+    
+                    // 3. Buscamos si el tipo tiene un color asignado, si no, usa un comodín
+                    const fill = mapaColores[tipo] || coloresComodines[idx % coloresComodines.length]
+                        return {
+                            tipo: tipo,
+                            cantidad: parseInt(item.cantidad) || item.count || 0,
+                            fill: fill
+                        }
+                        })
+                        setDatoIncidentes(incidentesFormato)
+                        }
+                    }
+                } catch (e) {
+                console.error("Error cargando incidentes:", e)
+            }
+            
+            // --- CARGAR PRIORIDADES DE REVISIONES MÉDICAS ---
+            try {
+                const prioridadesRes = await authFetch(`${API_URL}/medico/prioridades-estadisticas`)
+                if (prioridadesRes.ok) {
+                    const data = await prioridadesRes.json()
+                    if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                        const coloresPrioridad: {[key: string]: string} = {
+                            "Urgente": "#ef4444",
+                            "Alta": "#f97316",
+                            "Media": "#eab308",
+                            "Baja": "#22c55e"
+                        }
+                        
+                        const prioridadesFormato = data.data.map((item: any) => {
+                            const prioridad = item.prioridad || item.Prioridad || "Desconocida"
+                            return {
+                                prioridad: prioridad,
+                                valor: parseInt(item.cantidad) || item.count || 0,
+                                fill: coloresPrioridad[prioridad] || "#64748b"
+                            }
+                        })
+                        
+                        setDatoPrioridades(prioridadesFormato)
+                    }
+                }
+            } catch (e) {
+                console.error("Error cargando prioridades:", e)
+            }
+        } catch (error) {
+            console.error("Error general cargando gráficos:", error)
+        } finally {
+            setChartsLoading(false)
+        }
+    }
 
     const loadSavedReports = async () => {
         try {
             setLoading(true)
-            const response = await authFetch(`${API_URL}/historial`)
-            if (response.ok) {
-                const data = await response.json()
-                setSavedReports(data.data || [])
-            }
+            // Los reportes guardados se cargan desde una API de historial
+            // Por ahora, inicializamos un array vacío
+            // En el futuro, conectar con: GET /api/reportes/historial
+            setSavedReports([])
         } catch (error) {
-            console.error("[v0] Error cargando reportes:", error)
+            console.error("Error cargando reportes guardados:", error)
         } finally {
             setLoading(false)
         }
@@ -284,74 +348,151 @@ export default function ReportesPanel() {
                         <CardDescription className="text-slate-400">Resumen consolidado de la población y estado de la carceleta</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            
-                            {/* Gráfico 1 - Población por Pabellón */}
-                            <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
-                                <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
-                                    <Users className="h-4 w-4 text-blue-400"/> Ocupación por Pabellón
-                                </h3>
-                                <ResponsiveContainer width="100%" height={280}>
-                                    <RechartsBarChart data={datoPoblacionPabellones}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false}/>
-                                        <XAxis dataKey="nombre" stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
-                                        <YAxis stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
-                                        <Tooltip cursor={{fill: '#1e293b', opacity: 0.4}} contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }}/>
-                                        <Legend wrapperStyle={{paddingTop: "20px"}}/>
-                                        <Bar dataKey="internos" fill="#3b82f6" name="Internos" radius={[4, 4, 0, 0]}/>
-                                        <Bar dataKey="capacidad" fill="#10b981" name="Capacidad" radius={[4, 4, 0, 0]}/>
-                                    </RechartsBarChart>
-                                </ResponsiveContainer>
+                        {chartsLoading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <div className="text-center space-y-3">
+                                    <div className="inline-block">
+                                        <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"/>
+                                    </div>
+                                    <p className="text-slate-400">Cargando gráficos...</p>
+                                </div>
                             </div>
+                        ) : (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                
+                                {/* Gráfico 1 - Población por Pabellón */}
+                                <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                    <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                        <Users className="h-4 w-4 text-blue-400"/> Ocupación por Pabellón
+                                    </h3>
+                                    {datoPoblacionPabellones.length > 0 ? (
+                                        <ResponsiveContainer width="100%" height={280}>
+                                            <RechartsBarChart data={datoPoblacionPabellones}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false}/>
+                                                <XAxis dataKey="nombre" stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
+                                                <YAxis stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
+                                                <Tooltip cursor={{fill: '#1e293b', opacity: 0.4}} contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }}/>
+                                                <Legend wrapperStyle={{paddingTop: "20px"}}/>
+                                                <Bar dataKey="internos" fill="#3b82f6" name="Internos" radius={[4, 4, 0, 0]}/>
+                                                <Bar dataKey="capacidad" fill="#10b981" name="Capacidad" radius={[4, 4, 0, 0]}/>
+                                            </RechartsBarChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        <div className="h-[280px] flex items-center justify-center text-slate-500">
+                                            <p className="text-sm">Sin datos disponibles</p>
+                                        </div>
+                                    )}
+                                </div>
 
-                            {/* Gráfico 2 - Tendencia de Población */}
-                            <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
-                                <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
-                                    <Activity className="h-4 w-4 text-purple-400"/> Tendencia de Población
-                                </h3>
-                                <ResponsiveContainer width="100%" height={280}>
-                                    <LineChart data={datoPoblacionTendencia}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false}/>
-                                        <XAxis dataKey="mes" stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
-                                        <YAxis stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false}/>
-                                        <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }}/>
-                                        <Legend wrapperStyle={{paddingTop: "20px"}}/>
-                                        <Line type="monotone" dataKey="internos" stroke="#a855f7" name="Total Internos" strokeWidth={3} dot={{fill: "#a855f7", r: 4, strokeWidth: 2}} activeDot={{r: 6}}/>
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </div>
+                                {/* Gráfico 2 - Tendencia de Población */}
+                                <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                    <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                        <Activity className="h-4 w-4 text-purple-400"/> Indicador de Capacidad
+                                    </h3>
+                                    {datoPoblacionPabellones.length > 0 ? (
+                                        <div className="space-y-6 px-2 h-[280px] flex flex-col justify-center">
+                                            {datoPoblacionPabellones.map((pab, idx) => {
+                                                const porcentaje = Math.round((pab.internos / pab.capacidad) * 100)
+                                                const colorBar = porcentaje >= 90 ? "bg-red-500" : porcentaje >= 75 ? "bg-yellow-500" : "bg-green-500"
+                                                return (
+                                                    <div key={idx}>
+                                                        <div className="flex justify-between text-sm text-slate-400 mb-1">
+                                                            <span className="text-sm font-medium text-slate-300">{pab.nombre}</span>
+                                                            <span className="font-bold text-white">{porcentaje}%</span>
+                                                        </div>
+                                                        <div className="w-full bg-slate-800/50 rounded-full h-3 overflow-hidden">
+                                                            <div className={`h-full rounded-full transition-all ${colorBar}`} style={{width: `${porcentaje}%`}}/>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="h-[280px] flex items-center justify-center text-slate-500">
+                                            <p className="text-sm">Sin datos disponibles</p>
+                                        </div>
+                                    )}
+                                </div>
 
-                            {/* Gráfico 3 - Incidentes */}
-                            <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
-                                <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
-                                    <AlertCircle className="h-4 w-4 text-red-400"/> Distribución de Incidentes
-                                </h3>
-                                <ResponsiveContainer width="100%" height={280}>
-                                    <PieChart>
-                                        <Pie data={datoIncidentes} cx="50%" cy="50%" labelLine={false} label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`} outerRadius={90} fill="#8884d8" dataKey="cantidad" stroke="#060a12" strokeWidth={2}>
-                                            {datoIncidentes.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill}/> ))}
-                                        </Pie>
-                                        <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }}/>
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
+                                {/* Gráfico 3 - Incidentes */}
+                                <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                    <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                        <AlertCircle className="h-4 w-4 text-red-400"/> Distribución de Incidentes
+                                    </h3>
+                                    {datoIncidentes.length > 0 ? (
+                                        <ResponsiveContainer width="100%" height={280}>
+                                            <PieChart>
+                                                <Pie 
+                                                    data={datoIncidentes} 
+                                                    cx="50%" 
+                                                    cy="50%" 
+                                                    labelLine={false} 
+                                                    nameKey="tipo" 
+                                                    dataKey="cantidad"
+                                                    label={({ name }: { name?: string }) => `${name || 'Desconocido'}`} 
+                                                    outerRadius={90} 
+                                                    fill="#8884d8" 
+                                                    stroke="#060a12" 
+                                                    strokeWidth={2}
+                                                >
+                                                    {datoIncidentes.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill}/> ))}
+                                                </Pie>
+                                                <Tooltip 
+                                                    contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }} 
+                                                    formatter={(value) => [`${value} casos`, 'Cantidad']}
+                                                />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        <div className="h-[280px] flex items-center justify-center text-slate-500">
+                                            <p className="text-sm">Sin datos disponibles</p>
+                                        </div>
+                                    )}
+                                </div>
 
-                            {/* Gráfico 4 - Salud */}
-                            <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
-                                <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
-                                    <Pill className="h-4 w-4 text-green-400"/> Estado de Salud Global
-                                </h3>
-                                <ResponsiveContainer width="100%" height={280}>
-                                    <PieChart>
-                                        <Pie data={datoSalud} cx="50%" cy="50%" innerRadius={65} outerRadius={90} paddingAngle={4} dataKey="valor" stroke="none">
-                                            {datoSalud.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill}/> ))}
-                                        </Pie>
-                                        <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }}/>
-                                        <Legend wrapperStyle={{paddingTop: "20px"}}/>
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-                            </div>
+                                {/* Gráfico 4 - Prioridades de Revisiones Médicas */}
+                                <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                    <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                        <Pill className="h-4 w-4 text-purple-400"/> Prioridades de Revisiones Médicas
+                                    </h3>
+                                    {datoPrioridades.length > 0 ? (
+                                        <div className="flex flex-col items-center">
+                                            <ResponsiveContainer width="100%" height={220}>
+                                                <PieChart>
+                                                    <Pie 
+                                                        data={datoPrioridades} 
+                                                        cx="50%" 
+                                                        cy="50%" 
+                                                        innerRadius={50} 
+                                                        outerRadius={80} 
+                                                        dataKey="valor" 
+                                                        nameKey="prioridad"
+                                                        stroke="#060a12" 
+                                                        strokeWidth={2}
+                                                        label={({ percent }: { percent?: number }) => {
+                                                            return `${((percent || 0) * 100).toFixed(1)}%`;}}
+                                                        labelLine={false}>{datoPrioridades.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill}/> ))}
+                                                    </Pie>
+                                                    <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px", color: "#f8fafc" }} formatter={(value) => [`${value} revisiones`, 'Total']}/>
+                                                </PieChart>
+                                            </ResponsiveContainer>
+                                            <div className="mt-4 flex flex-wrap gap-4 justify-center">
+                                                {datoPrioridades.map((item, idx) => (
+                                                    <div key={idx} className="flex items-center gap-2">
+                                                        <div className="w-3 h-3 rounded-full" style={{backgroundColor: item.fill}}/>
+                                                        <span className="text-sm text-slate-400">{item.prioridad}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="h-[280px] flex items-center justify-center text-slate-500">
+                                            <p className="text-sm">Sin datos disponibles</p>
+                                        </div>
+                                    )}
+                                </div>
+                                </div>
+                        )}
                     </CardContent>
                 </Card>
 

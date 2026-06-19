@@ -99,7 +99,10 @@ const getFormattedDate = (dateString?: string): string => {
 const ConvictosPanel: React.FC = () => {
     const {toast} = useToast()
 
-    // --------------------- FILTROS ---------------------
+    // --------------------- FILTROS ---------------------   
+    const [tipoConductaFilter, setTipoConductaFilter] = useState<string>("todos")
+    const [estadoVisitaFilter, setEstadoVisitaFilter] = useState<string>("todos")
+
     const [searchTerm, setSearchTerm] = useState<string>("")
     const [estadoFilter, setEstadoFilter] = useState<string>("todos")
     const [nivelFilter, setNivelFilter] = useState<string>("todos")
@@ -504,17 +507,27 @@ const ConvictosPanel: React.FC = () => {
         return (c.nombre.toLowerCase().includes(term) || clean(c.dni).includes(term) || (c.fechaingreso ?? "").includes(term) || String(c.id).includes(term)) &&
             (estadoFilter === "todos" || c.estado === estadoFilter) && (nivelFilter === "todos" || c.nivelPeligrosidad === nivelFilter)
     })
+
         const filteredMovimientos = movimientosData.filter(m => {
         const term = searchMovimientos.toLowerCase()
         return String(m.convictoId).includes(term) || (m.origen ?? "").toLowerCase().includes(term) || (m.fecha ?? "").includes(term) || (m.destino ?? "").toLowerCase().includes(term)
     })
-        const filteredConducta = conductaData.filter(c => {
+
+    const filteredConducta = conductaData.filter(c => {
         const term = searchConducta.toLowerCase()
-        return (String(c.convictoId).includes(term) || (c.fecha ?? "").includes(term) || (c.tipo ?? "").toLowerCase().includes(term))
+        const matchesSearch = String(c.convictoId).includes(term) || (c.fecha ?? "").includes(term) || (c.tipo ?? "").toLowerCase().includes(term) || (c.nombre ?? "").toLowerCase().includes(term)
+        //Verifica si el filtro es "todos" o si coincide con el tipo
+        const matchesTipo = tipoConductaFilter === "todos" || c.tipo === tipoConductaFilter
+        return matchesSearch && matchesTipo
     })
-        const filteredVisitas = visitasData.filter(v => {
+
+    const filteredVisitas = visitasData.filter(v => {
         const term = searchVisitas.toLowerCase()
-        return (String(v.convictoId).includes(term) || (v.fecha ?? "").includes(term) || (v.estado ?? "").toLowerCase().includes(term))
+        const matchesSearch = String(v.convictoId).includes(term) || (v.fecha ?? "").includes(term) || (v.estado ?? "").toLowerCase().includes(term) || (v.nombre ?? "").toLowerCase().includes(term)
+        const raizFiltro = estadoVisitaFilter === "todos" ? "" : estadoVisitaFilter.toLowerCase().slice(0, -1)
+        //Verifica si el filtro es "todos" o si coincide ignorando mayúsculas/minúsculas
+        const matchesEstado = estadoVisitaFilter === "todos" || (v.estado && v.estado.toLowerCase().includes(raizFiltro))
+        return matchesSearch && matchesEstado
     })
 
     // --------------------- AYUDAS VISUALES ---------------------
@@ -529,6 +542,7 @@ const ConvictosPanel: React.FC = () => {
     const getTipoConductaColor = (tipo?: string) => {
         if (tipo === "Positiva") return "bg-green-500/10 text-green-400 border-green-500/20"
         if (tipo === "Falta grave") return "bg-red-500/10 text-red-400 border-red-500/20"
+        if (tipo === "Falta leve") return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
         return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
     }
     const getEstadoVisitaColor = (estado?: string) => {
@@ -573,19 +587,19 @@ const ConvictosPanel: React.FC = () => {
                         <Card className="sgc-card border-0 mb-4">
                             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
                                 <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de Internos</CardTitle>
-                                <Badge variant="secondary" className={`text-sm px-3 py-1 mt-2 md:mt-0 ${convictosData.length > 800 ? "border-red-500 text-red-400 bg-red-500/10" : convictosData.length > 400 ? "border-yellow-500 text-yellow-400 bg-yellow-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
+                                <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${convictosData.length > 800 ? "border-red-500 text-red-400 bg-red-500/10" : convictosData.length > 400 ? "border-yellow-500 text-yellow-400 bg-yellow-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
                                     Registros totales: {convictosData.length}
                                 </Badge>
                             </CardHeader>
-                            <CardContent className="pt-6">
+                            <CardContent className="pt-0">
                                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                     <div className="relative md:w-1/3">
                                         <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"/>
-                                        <Input aria-label="Búsqueda de registros" placeholder="Buscar por ID, Nombre o DNI..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10"/>
+                                        <Input aria-label="Búsqueda de registros" placeholder="Buscar por ID, Nombre o DNI..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10!"/>
                                     </div>
                                     <div className="flex gap-4 md:w-auto">
                                         <Select value={estadoFilter} onValueChange={setEstadoFilter}>
-                                            <SelectTrigger className="sgc-input w-[180px]"><SelectValue placeholder="Estado"/></SelectTrigger>
+                                            <SelectTrigger className="sgc-input h-10! w-[180px]"><SelectValue placeholder="Estado"/></SelectTrigger>
                                             <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                                                 <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los estados</SelectItem>
                                                 <SelectItem value="Procesado" className="focus:bg-blue-600 focus:text-white">Procesado</SelectItem>
@@ -593,9 +607,9 @@ const ConvictosPanel: React.FC = () => {
                                             </SelectContent>
                                         </Select>
                                         <Select value={nivelFilter} onValueChange={setNivelFilter}>
-                                            <SelectTrigger className="sgc-input w-[180px]"><SelectValue placeholder="Peligrosidad"/></SelectTrigger>
+                                            <SelectTrigger className="sgc-input h-10! w-[250px]"><SelectValue placeholder="Peligrosidad"/></SelectTrigger>
                                             <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                                <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todas las alertas</SelectItem>
+                                                <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los niveles (Peligrosidad)</SelectItem>
                                                 <SelectItem value="Baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
                                                 <SelectItem value="Media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>
                                                 <SelectItem value="Alta" className="focus:bg-blue-600 focus:text-white">Alta</SelectItem>
@@ -746,11 +760,25 @@ const ConvictosPanel: React.FC = () => {
                     {/* ========== CONDUCTA ========== */}
                     <TabsContent value="conducta" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
-                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4">
+                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 gap-4">
                                 <CardTitle className="text-xl text-white font-bold tracking-wide">Registro Disciplinario</CardTitle>
-                                <div className="relative w-full md:w-72 mt-2 md:mt-0">
-                                    <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
-                                    <Input placeholder="Buscar incidentes..." value={searchConducta} onChange={(e) => setSearchConducta(e.target.value)} className="sgc-input pl-10 h-10"/>
+                                <div className="flex flex-col md:flex-row w-full md:w-auto gap-4">
+                                    <div className="relative w-full md:w-72">
+                                        <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
+                                        <Input placeholder="Buscar incidentes..." value={searchConducta} onChange={(e) => setSearchConducta(e.target.value)} className="sgc-input pl-10 h-10!"/>
+                                    </div>
+                                    {/*SELECT DE TIPO DE CONDUCTA */}
+                                    <Select value={tipoConductaFilter} onValueChange={setTipoConductaFilter}>
+                                        <SelectTrigger className="sgc-input h-10! w-full md:w-[180px]">
+                                            <SelectValue placeholder="Tipo de falta"/>
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
+                                            <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los tipos</SelectItem>
+                                            <SelectItem value="Positiva" className="focus:bg-blue-600 focus:text-white">Positiva</SelectItem>
+                                            <SelectItem value="Falta leve" className="focus:bg-blue-600 focus:text-white">Falta leve</SelectItem>
+                                            <SelectItem value="Falta grave" className="focus:bg-blue-600 focus:text-white">Falta grave</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </CardHeader>
                         </Card>
@@ -813,11 +841,25 @@ const ConvictosPanel: React.FC = () => {
                     {/* ========== VISITAS ========== */}
                     <TabsContent value="visitas" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
-                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4">
+                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 gap-4">
                                 <CardTitle className="text-xl text-white font-bold tracking-wide">Control de Visitas</CardTitle>
-                                <div className="relative w-full md:w-72 mt-2 md:mt-0">
-                                    <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
-                                    <Input placeholder="Buscar visita..." value={searchVisitas} onChange={(e) => setSearchVisitas(e.target.value)} className="sgc-input pl-10 h-10"/>
+                                <div className="flex flex-col md:flex-row w-full md:w-auto gap-4">
+                                    <div className="relative w-full md:w-72">
+                                        <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
+                                        <Input placeholder="Buscar visita..." value={searchVisitas} onChange={(e) => setSearchVisitas(e.target.value)} className="sgc-input pl-10 h-10!"/>
+                                    </div>
+                                    {/*SELECT DE ESTADO DE VISITA */}
+                                    <Select value={estadoVisitaFilter} onValueChange={setEstadoVisitaFilter}>
+                                        <SelectTrigger className="sgc-input h-10! w-full md:w-[180px]">
+                                            <SelectValue placeholder="Estado"/>
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
+                                            <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los estados</SelectItem>
+                                            <SelectItem value="programada" className="focus:bg-blue-600 focus:text-white">Programado</SelectItem>
+                                            <SelectItem value="realizada" className="focus:bg-blue-600 focus:text-white">Realizado</SelectItem>
+                                            <SelectItem value="cancelada" className="focus:bg-blue-600 focus:text-white">Cancelado</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </CardHeader>
                         </Card>
@@ -924,7 +966,7 @@ const ConvictosPanel: React.FC = () => {
                                 <div className="space-y-1.5">
                                     <Label className="sgc-label">Nivel de peligrosidad *</Label>
                                     <Select value={convictoForm.nivel} onValueChange={v => setConvictoForm({...convictoForm, nivel: v})}>
-                                        <SelectTrigger className="sgc-input"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
+                                        <SelectTrigger className="sgc-input w-[180px] flex items-center justify-between px-3 text-sm text-slate-200"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
                                         <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                                             <SelectItem value="Baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
                                             <SelectItem value="Media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>
@@ -982,7 +1024,7 @@ const ConvictosPanel: React.FC = () => {
                                     </Select>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="sgc-label">Nivel</Label>
+                                    <Label className="sgc-label">Nivel de peligrosidad</Label>
                                     <Select value={editingData?.data.nivel ?? editingData?.data.nivelPeligrosidad ?? ""} onValueChange={v => setEditingData({...editingData!, data: {...editingData!.data, nivel: v, nivelPeligrosidad: v}})}>
                                         <SelectTrigger className="sgc-input"><SelectValue/></SelectTrigger>
                                         <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">

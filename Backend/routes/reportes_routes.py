@@ -12,34 +12,68 @@ def get_poblacion():
     """Reporte de población por pabellón"""
     try:
         query = """
-                SELECT pabellon, COUNT(*) as cantidad
-                FROM Convictos
-                WHERE activo = TRUE
-                GROUP BY pabellon
-                ORDER BY pabellon \
+                SELECT Pabellon, COUNT(*) as cantidad
+                FROM tblConvictos
+                GROUP BY Pabellon
+                ORDER BY Pabellon
                 """
         result = db.execute_query(query)
-        return jsonify({'success': True, 'data': result}), 200
+        
+        # Normalizar resultado
+        poblacion_normalizada = []
+        if result:
+            for row in result:
+                try:
+                    pabellon = row.get('Pabellon') or row.get('pabellon') or 'Desconocido'
+                    cantidad = int(row.get('cantidad') or 0)
+                    poblacion_normalizada.append({
+                        'pabellon': pabellon,
+                        'cantidad': cantidad
+                    })
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error procesando fila de población: {row}, error: {e}")
+                    continue
+        
+        return jsonify({'success': True, 'data': poblacion_normalizada}), 200
     except Exception as e:
-        logger.error(f"Error en reporte de población: {e}")
-        return jsonify({'error': 'Error interno del servidor'}), 500
+        logger.error(f"Error en reporte de población: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e), 'data': []}), 500
 
 
 @bp.route('/incidentes-estadisticas', methods=['GET'])
 def get_incidentes_estadisticas():
-    """Estadísticas de incidentes"""
+    """Estadísticas de incidentes (desde tblconducta)"""
     try:
+        # Se actualiza el nombre de la tabla a tblconducta y la columna a 'tipo'
         query = """
-                SELECT tipo_incidente, COUNT(*) as cantidad
-                FROM Incidentes
-                GROUP BY tipo_incidente
-                ORDER BY cantidad DESC \
+                SELECT tipo, COUNT(*) as cantidad
+                FROM tblconducta
+                GROUP BY tipo
+                ORDER BY cantidad DESC
                 """
         result = db.execute_query(query)
-        return jsonify({'success': True, 'data': result}), 200
+        
+        # Normalizar resultado para el frontend
+        incidentes_normalizados = []
+        if result:
+            for row in result:
+                try:
+                    # db_connection a veces capitaliza las llaves (Tipo, Cantidad)
+                    tipo = row.get('tipo') or row.get('Tipo') or 'Otro'
+                    cantidad = int(row.get('cantidad') or row.get('Cantidad') or 0)
+                    
+                    incidentes_normalizados.append({
+                        'tipo_incidente': tipo, # El frontend espera esta llave
+                        'cantidad': cantidad
+                    })
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error procesando fila de incidentes: {row}, error: {e}")
+                    continue
+        
+        return jsonify({'success': True, 'data': incidentes_normalizados}), 200
     except Exception as e:
-        logger.error(f"Error en estadísticas de incidentes: {e}")
-        return jsonify({'error': 'Error interno del servidor'}), 500
+        logger.error(f"Error en estadísticas de incidentes: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e), 'data': []}), 500
 
 
 @bp.route('/salud-estadisticas', methods=['GET'])
@@ -47,17 +81,60 @@ def get_salud_estadisticas():
     """Estadísticas de salud"""
     try:
         query = """
-                SELECT diagnostico, COUNT(*) as cantidad
-                FROM ConsultasMedicas
-                GROUP BY diagnostico
+                SELECT Diagnostico, COUNT(*) as cantidad
+                FROM tblRevisionesMedicas
+                GROUP BY Diagnostico
                 ORDER BY cantidad DESC
-                LIMIT 10 \
+                LIMIT 10
                 """
         result = db.execute_query(query)
-        return jsonify({'success': True, 'data': result}), 200
+        
+        # Normalizar resultado
+        salud_normalizada = []
+        if result:
+            for row in result:
+                try:
+                    diagnostico = row.get('Diagnostico') or row.get('diagnostico') or 'Desconocido'
+                    cantidad = int(row.get('cantidad') or 0)
+                    salud_normalizada.append({
+                        'diagnostico': diagnostico,
+                        'cantidad': cantidad
+                    })
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error procesando fila de salud: {row}, error: {e}")
+                    continue
+        
+        return jsonify({'success': True, 'data': salud_normalizada}), 200
     except Exception as e:
-        logger.error(f"Error en estadísticas de salud: {e}")
-        return jsonify({'error': 'Error interno del servidor'}), 500
+        logger.error(f"Error en estadísticas de salud: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e), 'data': []}), 500
+
+
+@bp.route('/debug-columns', methods=['GET'])
+def debug_columns():
+    """Debug: Retorna información de las columnas disponibles"""
+    try:
+        tables_to_check = ['tblConvictos', 'incidentes', 'tblRevisionesMedicas']
+        debug_info = {}
+        
+        for table in tables_to_check:
+            try:
+                query = f"SELECT * FROM {table} LIMIT 1"
+                result = db.execute_query(query)
+                if result and len(result) > 0:
+                    debug_info[table] = {
+                        'columns': list(result[0].keys()),
+                        'sample': result[0]
+                    }
+                else:
+                    debug_info[table] = {'columns': [], 'note': 'No data found'}
+            except Exception as e:
+                debug_info[table] = {'error': str(e)}
+        
+        return jsonify({'success': True, 'debug': debug_info}), 200
+    except Exception as e:
+        logger.error(f"Error en debug: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @bp.route('/tendencia-poblacion', methods=['GET'])
@@ -69,17 +146,17 @@ def get_tendencia_poblacion():
 
         query = """
                 SELECT CAST(fecha_ingreso AS DATE) as fecha, COUNT(*) as cantidad
-                FROM Convictos
+                FROM tblConvictos
                 WHERE fecha_ingreso BETWEEN ? AND ?
                 GROUP BY CAST(fecha_ingreso AS DATE)
-                ORDER BY fecha \
+                ORDER BY fecha
                 """
 
         result = db.execute_query(query, (fecha_inicio, fecha_fin))
-        return jsonify({'success': True, 'data': result}), 200
+        return jsonify({'success': True, 'data': result or []}), 200
     except Exception as e:
-        logger.error(f"Error en tendencia de población: {e}")
-        return jsonify({'error': 'Error interno del servidor'}), 500
+        logger.error(f"Error en tendencia de población: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e), 'data': []}), 500
 
 
 @bp.route('/guardar', methods=['POST'])

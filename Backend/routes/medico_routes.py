@@ -474,3 +474,43 @@ def eliminar_historial(id):
         return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@bp.route('/prioridades-estadisticas', methods=['GET'])
+def get_prioridades_estadisticas():
+    """Estadísticas de prioridades de revisiones médicas"""
+    try:
+        query = """
+                SELECT Prioridad, COUNT(*) as cantidad
+                FROM tblRevisionesMedicas
+                GROUP BY Prioridad
+                ORDER BY 
+                    CASE Prioridad
+                        WHEN 'Urgente' THEN 1
+                        WHEN 'Alta' THEN 2
+                        WHEN 'Media' THEN 3
+                        WHEN 'Baja' THEN 4
+                        ELSE 5
+                    END
+                """
+        result = db.execute_query(query)
+        
+        # Normalizar resultado
+        prioridades_normalizadas = []
+        if result:
+            for row in result:
+                try:
+                    prioridad = row.get('Prioridad') or row.get('prioridad') or 'Desconocida'
+                    cantidad = int(row.get('cantidad') or 0)
+                    prioridades_normalizadas.append({
+                        'prioridad': prioridad,
+                        'cantidad': cantidad
+                    })
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error procesando fila de prioridades: {row}, error: {e}")
+                    continue
+        
+        return jsonify({'success': True, 'data': prioridades_normalizadas}), 200
+    except Exception as e:
+        logger.error(f"Error en estadísticas de prioridades: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e), 'data': []}), 500

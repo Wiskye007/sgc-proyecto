@@ -1,7 +1,7 @@
 "use client"    
 
 import type React from "react"  
-import {useState} from "react"
+import {useState, useEffect} from "react"
 import {useRouter} from "next/navigation"
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
@@ -25,26 +25,7 @@ import { authFetch } from "@/lib/auth"
 const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost"
     ? "https://sgc-backend-vbze.onrender.com/api"
     : "http://localhost:5000/api";
-
-const pabellones = [
-    {id: "A", nombre: "Pabellón A", capacidad: 50, ocupacion: 48, nivel: "Máxima"},
-    {id: "B", nombre: "Pabellón B", capacidad: 60, ocupacion: 52, nivel: "Alta"},
-    {id: "C", nombre: "Pabellón C", capacidad: 40, ocupacion: 38, nivel: "Máxima"},
-    {id: "D", nombre: "Pabellón D", capacidad: 45, ocupacion: 30, nivel: "Media"},
-]
-
-const incidentes = [
-    {id: 1, tipo: "Alerta", descripcion: "Capacidad crítica en Pabellón A", hora: "14:30", prioridad: "alta"},
-    {
-        id: 2,
-        tipo: "Movimiento",
-        descripcion: "Traslado de 3 internos al Pabellón B",
-        hora: "13:15",
-        prioridad: "normal",
-    },
-    {id: 3, tipo: "Incidente", descripcion: "Altercado menor en comedor", hora: "12:45", prioridad: "media"},
-]
-
+    
 export default function SeguridadPanel() {
     const router = useRouter()
     const {toast} = useToast()
@@ -53,6 +34,13 @@ export default function SeguridadPanel() {
     const [incidenteDialog, setIncidenteDialog] = useState(false)
     const [accesoDialog, setAccesoDialog] = useState(false)
     const [visitaDialog, setVisitaDialog] = useState(false)
+
+    // --- ESTADO PARA DATOS---
+    const [pabellones, setPabellones] = useState<any[]>([])
+    const [incidentes, setIncidentes] = useState<any[]>([])
+    const [dataLoading, setDataLoading] = useState(false)
+    const [filtroIncidentes, setFiltroIncidentes] = useState("24h")
+    const [incidentesLoading, setIncidentesLoading] = useState(false)
 
     const [movimiento, setMovimiento] = useState({
         recluso: "",
@@ -86,6 +74,87 @@ export default function SeguridadPanel() {
         fecha: "",
     })
 
+// --- EFECTO 1: Cargar Pabellones (Solo se ejecuta 1 vez al iniciar) ---
+    useEffect(() => {
+        loadSecurityData()
+    }, [])
+
+    const loadSecurityData = async () => {
+        try {
+            setDataLoading(true)
+            const poblacionRes = await authFetch(`${API_URL}/reportes/poblacion`)
+            if (poblacionRes.ok) {
+                const data = await poblacionRes.json()
+                if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                    const capacidades: {[key: string]: number} = {
+                        A: 50, B: 60, C: 40, D: 45
+                    }
+                    const pabellonesDatos = data.data.map((item: any) => {
+                        const letra = item.pabellon || item.Pabellon || item.nombre || "Desconocido"
+                        const ocupacion = parseInt(item.cantidad) || item.count || 0
+                        const capacidad = capacidades[letra] || 50
+                        const porcentaje = (ocupacion / capacidad) * 100
+                        
+                        let nivel = "Media"
+                        if (porcentaje >= 90) nivel = "Máxima"
+                        else if (porcentaje >= 75) nivel = "Alta"
+                        
+                        return {
+                            id: letra,
+                            nombre: `Pabellón ${letra}`,
+                            capacidad,
+                            ocupacion,
+                            nivel
+                        }
+                    })
+                    setPabellones(pabellonesDatos)
+                }
+            }
+        } catch (e) {
+            console.error("Error cargando población:", e)
+        } finally {
+            setDataLoading(false)
+        }
+    }
+
+    // --- EFECTO 2: Cargar Incidentes dinámicamente (Se ejecuta cuando cambias el filtro) ---
+    useEffect(() => {
+        const fetchIncidentes = async () => {
+            try {
+                setIncidentesLoading(true)
+                const response = await authFetch(`${API_URL}/seguridad/incidentes?filtro=${filtroIncidentes}`)
+                
+                if (response.ok) {
+                    const data = await response.json()
+                    if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                        const incidentesFormato = data.data.map((item: any) => ({
+                            id: item.id,
+                            tipo: item.tipo || "Registro de conducta",
+                            descripcion: item.descripcion || "",
+                            fecha: item.fecha || "",
+                            prioridad: item.prioridad || "baja",
+                            interno_nombre: item.interno_nombre || "Desconocido"
+                        }))
+                        setIncidentes(incidentesFormato)
+                    } else {
+                        // Si el backend envía un array vacío
+                        setIncidentes([]) 
+                    }
+                } else {
+                    // Si el backend falla (Error 500, etc), vaciamos la lista para notarlo
+                    setIncidentes([])
+                }
+            } catch (error) {
+                console.error("Error cargando incidentes filtrados:", error)
+                setIncidentes([])
+            } finally {
+                setIncidentesLoading(false)
+            }
+        }
+        
+        fetchIncidentes()
+    }, [filtroIncidentes])
+
     const getOcupacionColor = (ocupacion: number, capacidad: number) => {
         const porcentaje = (ocupacion / capacidad) * 100
         if (porcentaje >= 90) return "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
@@ -99,17 +168,32 @@ export default function SeguridadPanel() {
         if (porcentaje >= 75) return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
         return "bg-green-500/20 text-green-400 border-green-500/30"
     }
+    
+    const getPrioridadIcon = (prioridad: string, tipo: string = "") => {
+        // Convertimos a minúsculas para evitar errores si viene como "Alta" o "ALTA"
+        const p = (prioridad || "").toLowerCase().trim();
+        const t = (tipo || "").toLowerCase().trim();
 
-    const getPrioridadIcon = (prioridad: string) => {
-        switch (prioridad) {
-            case "alta":
-                return <AlertTriangle className="h-5 w-5 text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.6)]"/>
-            case "media":
-                return <Clock className="h-5 w-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]"/>
-            default:
-                return <CheckCircle className="h-5 w-5 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]"/>
+        // 1. Verificación por prioridad explícita
+        if (p === "alta" || p === "alto" || p === "grave") {
+            return <AlertTriangle className="h-5 w-5 text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.6)]"/>;
         }
-    }
+        if (p === "media" || p === "medio" || p === "leve") {
+            return <Clock className="h-5 w-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]"/>;
+        }
+
+        // 2. SALVAVIDAS: Si el backend no envía prioridad, la deducimos por palabras clave en el tipo
+        if (t.includes("grave") || t.includes("pelea") || t.includes("agresión") || t.includes("agresion")) {
+            return <AlertTriangle className="h-5 w-5 text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.6)]"/>;
+        }
+        if (t.includes("leve")) {
+            return <Clock className="h-5 w-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]"/>;
+        }
+
+        // Por defecto (Baja / Positiva)
+        return <CheckCircle className="h-5 w-5 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]"/>;
+    };
+
 
     const handleRegistrarMovimiento = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -235,7 +319,7 @@ export default function SeguridadPanel() {
     }
 
     return (
-        <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-slate-200">
+        <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-slate-200 ">
             <div className="container mx-auto max-w-7xl relative z-10 space-y-8">
                 
                 {/* --- HEADER DEL PANEL DE SEGURIDAD --- */}
@@ -259,7 +343,16 @@ export default function SeguridadPanel() {
 
                 {/* --- GRID DE PABELLONES --- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                    {pabellones.map((pabellon) => {
+                    {dataLoading ? (
+                        <div className="col-span-full flex items-center justify-center py-8">
+                            <div className="text-center space-y-2">
+                                <div className="inline-block">
+                                    <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"/>
+                                </div>
+                                <p className="text-slate-400 text-sm">Cargando datos de pabellones...</p>
+                            </div>
+                        </div>
+                    ) : pabellones.length > 0 ? pabellones.map((pabellon) => {
                         const porcentaje = Math.round((pabellon.ocupacion / pabellon.capacidad) * 100)
                         return (
                             <Card key={pabellon.id} className="sgc-card border-0 hover:-translate-y-1 transition-transform">
@@ -270,19 +363,19 @@ export default function SeguridadPanel() {
                                 <CardContent className="pt-4">
                                     <div className="space-y-4">
                                         <div className="flex justify-between text-sm items-center">
-                                            <span className="text-slate-400 uppercase text-[10px] font-bold tracking-widest">Ocupación</span>
-                                            <span className="font-bold text-white text-lg">
-                                                {pabellon.ocupacion} <span className="text-slate-500 text-sm">/ {pabellon.capacidad}</span>
+                                            <span className="text-slate-400 uppercase text-[13px] font-bold tracking-widest">Ocupación</span>
+                                            <span className="font-bold text-white text-[20px]">
+                                                {pabellon.ocupacion} <span className="text-slate-500 text-[20px]">/ {pabellon.capacidad}</span>
                                             </span>
                                         </div>
                                         <div className="w-full bg-[#060a12] rounded-full h-2.5 border border-slate-800/80 overflow-hidden">
                                             <div
-                                                className={`h-full rounded-full transition-all duration-1000 ${getOcupacionColor(pabellon.ocupacion, pabellon.capacidad)}`}
+                                                className={`h-full rounded-full transition-all duration-1000${getOcupacionColor(pabellon.ocupacion, pabellon.capacidad)}`}
                                                 style={{width: `${porcentaje}%`}}
                                             />
                                         </div>
-                                        <div className="text-right">
-                                            <Badge variant="outline" className={getBadgeStyle(pabellon.ocupacion, pabellon.capacidad)}>
+                                        <div className="text-[20px] text-right">
+                                            <Badge variant="outline" className={`${getBadgeStyle(pabellon.ocupacion, pabellon.capacidad)} text-[15px] px-3 py-1`}>
                                                 {porcentaje}% ocupado
                                             </Badge>
                                         </div>
@@ -290,49 +383,94 @@ export default function SeguridadPanel() {
                                 </CardContent>
                             </Card>
                         )
-                    })}
+                    }) : (
+                        <div className="col-span-full flex items-center justify-center py-8">
+                            <p className="text-slate-400 text-sm">No hay datos de pabellones disponibles</p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    
-                    {/* --- ALERTAS E INCIDENTES --- */}
-                    <Card className="sgc-card border-0 shadow-2xl">
-                        <CardHeader className="border-b border-slate-800/60 pb-4">
-                            <CardTitle className="text-xl text-white flex items-center gap-2">
-                                <AlertTriangle className="h-5 w-5 text-red-400"/> Alertas e Incidentes Recientes
-                            </CardTitle>
-                            <CardDescription className="text-slate-400">Registro de las últimas 24 horas</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <div className="space-y-3">
-                                {incidentes.map((incidente) => (
-                                    <div
-                                        key={incidente.id}
-                                        className="flex items-start gap-4 p-4 rounded-xl bg-[#060a12]/60 border border-slate-800/80 shadow-inner hover:border-slate-700 transition-colors"
-                                    >
-                                        <div className="mt-1 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
-                                            {getPrioridadIcon(incidente.prioridad)}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <span className="font-bold text-sm text-slate-200 uppercase tracking-wide">{incidente.tipo}</span>
-                                                <span className="text-xs font-mono text-blue-400/80 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">{incidente.hora}</span>
-                                            </div>
-                                            <p className="text-sm text-slate-400 leading-snug">{incidente.descripcion}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                
+                {/* --- ALERTAS E INCIDENTES --- */}
+                    <Card className="sgc-card border-0 shadow-2xl flex flex-col">
+                        <CardHeader className="border-b border-slate-800/60 pb-4 flex flex-row items-start justify-between gap-4">
+                            <div>
+                                <CardTitle className="text-xl text-white flex items-center gap-2">
+                                    <AlertTriangle className="h-6 w-6 text-red-400"/> Alertas e Incidentes
+                                </CardTitle>
+                                <CardDescription className="text-slate-400 text-[15px] mt-1">
+                                    {filtroIncidentes === '24h' ? "Registro de las últimas 24 horas" :
+                                    filtroIncidentes === 'mes' ? "Registro del último mes" :
+                                    filtroIncidentes === 'anio' ? "Registro del último año" :
+                                    "Todos los registros históricos"}
+                                </CardDescription>
                             </div>
+                            
+                            {/* Select del filtro */}
+                            <Select value={filtroIncidentes} onValueChange={setFiltroIncidentes}>
+                                <SelectTrigger className="w-[180px] h-9 sgc-input text-sm border-slate-700 bg-slate-900/50">
+                                    <SelectValue placeholder="Filtrar" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 text-xs">
+                                    <SelectItem value="24h" className="focus:bg-blue-600 focus:text-white">Últimas 24h</SelectItem>
+                                    <SelectItem value="mes" className="focus:bg-blue-600 focus:text-white">Último mes</SelectItem>
+                                    <SelectItem value="anio" className="focus:bg-blue-600 focus:text-white">Último año</SelectItem>
+                                    <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los registros</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </CardHeader>
+
+                        <CardContent className="pt-4 flex-1 flex flex-col min-h-[330px]">
+                            {incidentesLoading ? (
+                                <div className="flex-1 flex flex-col items-center justify-center py-4">
+                                    <div className="text-center space-y-2">
+                                        <div className="inline-block">
+                                            <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"/>
+                                        </div>
+                                        <p className="text-slate-400 text-sm">Actualizando registros...</p>
+                                    </div>
+                                </div>
+                            ) : incidentes.length > 0 ? (
+                                <div className="space-y-3 max-h-[330px] overflow-y-auto pr-2 pb-2">
+                                    {incidentes.map((incidente) => (
+                                        <div
+                                            key={incidente.id}
+                                            className="flex items-start gap-4 p-4 rounded-xl bg-[#060a12]/60 border border-slate-800/80 shadow-inner hover:border-slate-700 transition-colors"
+                                        >
+                                            <div className="mt-1 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
+                                                {getPrioridadIcon(incidente.prioridad, incidente.tipo)}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <span className="font-bold text-sm text-slate-200 uppercase tracking-wide">{incidente.tipo}</span>
+                                                    <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700">
+                                                        {incidente.fecha}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-blue-400 font-semibold mb-1">
+                                                    Interno: <span className="text-slate-300 font-normal">{incidente.interno_nombre}</span>
+                                                </p>
+                                                <p className="text-sm text-slate-400 leading-snug">{incidente.descripcion}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-center py-8">
+                                    <p className="text-slate-400 text-sm">No hay incidentes para este período</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
-                    {/* --- ACCIONES RÁPIDAS --- */}
+                {/* --- ACCIONES RÁPIDAS --- */}
                     <Card className="sgc-card border-0 shadow-2xl flex flex-col">
                         <CardHeader className="border-b border-slate-800/60 pb-4">
                             <CardTitle className="text-xl text-white">Terminal de Acciones Rápidas</CardTitle>
-                            <CardDescription className="text-slate-400">Gestión táctica de seguridad</CardDescription>
+                            <CardDescription className="text-slate-400 text-[15px]">Gestión táctica de seguridad</CardDescription>
                         </CardHeader>
-                        <CardContent className="pt-6 flex-1 flex flex-col justify-center gap-4">
+                        <CardContent className="pt-2 flex-1 flex flex-col justify-center gap-5 py-8">
                             
                             {/* Dialog: Movimiento */}
                             <Dialog open={movimientoDialog} onOpenChange={setMovimientoDialog}>
@@ -344,7 +482,7 @@ export default function SeguridadPanel() {
                                 <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-xl">
                                     <DialogHeader className="border-b border-slate-800/80 pb-4">
                                         <DialogTitle className="text-xl font-bold text-white flex items-center gap-2"><MoveRight className="text-blue-400 h-5 w-5"/> Registrar Movimiento</DialogTitle>
-                                        <DialogDescription className="text-slate-400 text-xs">Complete los datos del traslado del interno.</DialogDescription>
+                                        <DialogDescription className="text-slate-400 text-[15px]">Complete los datos del traslado del interno.</DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleRegistrarMovimiento} className="space-y-4 pt-2">
                                         <div className="space-y-1.5">
@@ -387,7 +525,7 @@ export default function SeguridadPanel() {
                                 <DialogContent className="sgc-card border-red-900/50 text-slate-100 sm:max-w-xl">
                                     <DialogHeader className="border-b border-slate-800/80 pb-4">
                                         <DialogTitle className="text-xl font-bold text-white flex items-center gap-2"><AlertOctagon className="text-red-400 h-5 w-5"/> Reportar Incidente de Seguridad</DialogTitle>
-                                        <DialogDescription className="text-slate-400 text-xs">Registre los detalles para notificar a la guardia.</DialogDescription>
+                                        <DialogDescription className="text-slate-400 text-[15px]">Registre los detalles para notificar al personal.</DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleReportarIncidente} className="space-y-4 pt-2">
                                         <div className="grid grid-cols-2 gap-4">
@@ -431,7 +569,7 @@ export default function SeguridadPanel() {
                                         </div>
                                         <div className="flex gap-3 pt-4 border-t border-slate-800/80">
                                             <Button type="button" onClick={() => setIncidenteDialog(false)} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
-                                            <Button type="submit" className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold h-11 shadow-lg shadow-red-900/40 border-0">Emitir Alerta</Button>
+                                            <Button type="submit" className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold h-11 shadow-lg shadow-red-900/40 border-0">Emitir alerta</Button>
                                         </div>
                                     </form>
                                 </DialogContent>
@@ -447,7 +585,7 @@ export default function SeguridadPanel() {
                                 <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-xl">
                                     <DialogHeader className="border-b border-slate-800/80 pb-4">
                                         <DialogTitle className="text-xl font-bold text-white flex items-center gap-2"><KeyRound className="text-blue-400 h-5 w-5"/> Registrar Acceso a Instalaciones</DialogTitle>
-                                        <DialogDescription className="text-slate-400 text-xs">Registre el ingreso de personal autorizado o externos.</DialogDescription>
+                                        <DialogDescription className="text-slate-400 text-[15px]">Registre el ingreso de personal autorizado o externos.</DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleRegistrarAcceso} className="space-y-4 pt-2">
                                         <div className="grid grid-cols-2 gap-4">
@@ -501,7 +639,7 @@ export default function SeguridadPanel() {
                                 <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-xl">
                                     <DialogHeader className="border-b border-slate-800/80 pb-4">
                                         <DialogTitle className="text-xl font-bold text-white flex items-center gap-2"><Users className="text-blue-400 h-5 w-5"/> Programar Visita a Interno</DialogTitle>
-                                        <DialogDescription className="text-slate-400 text-xs">Verifique la relación y registre la fecha de encuentro.</DialogDescription>
+                                        <DialogDescription className="text-slate-400 text-[15px]">Verifique la relación y registre la fecha de encuentro.</DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleRegistrarVisita} className="space-y-4 pt-2">
                                         <div className="grid grid-cols-2 gap-4">
