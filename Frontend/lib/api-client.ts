@@ -1,5 +1,8 @@
-//const API_URL = "https://sgc-backend-vbze.onrender.com";    
-const API_URL = "http://localhost:5000";
+const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
+
+const API_URL = isLocalhost 
+? "http://localhost:5000" 
+: "https://sgc-backend-vbze.onrender.com";
 
 function getToken(): string | null {
     if (typeof window === "undefined") return null

@@ -328,7 +328,7 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
                 <Input
                     id="nombreCompleto"
                     type="text"
-                    placeholder="Nombre completo"
+                    placeholder="Ingrese sus datos"
                     value={nuevoUsuario.nombreCompleto}
                     onChange={(e) =>
                     setNuevoUsuario({
@@ -367,7 +367,7 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
                 <Input
                     id="correo"
                     type="email"
-                    placeholder="Correo"
+                    placeholder="ejemplo@dominio.com"
                     value={nuevoUsuario.correo}
                     onChange={(e) =>setNuevoUsuario({...nuevoUsuario, correo: e.target.value,})}
                     onKeyDown={(e) => e.stopPropagation()}
@@ -382,7 +382,7 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
                 <Input
                     id="cargo"
                     type="text"
-                    placeholder="Cargo de la directora"
+                    placeholder="Ingrese su cargo"
                     value={nuevoUsuario.cargo}
                     onChange={(e) =>
                     setNuevoUsuario({
@@ -408,15 +408,14 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
                     disabled={isLoading}>
                     <SelectTrigger
                     id="nivelAcceso"
-                    className="sgc-input h-10 w-full">
-                    <SelectValue placeholder="Nivel de acceso" />
+                    className="sgc-input h-10! w-full">
+                    <SelectValue placeholder="Seleccione" />
                     </SelectTrigger>
                     <SelectContent>
                     <SelectItem value="administrador">Administrador</SelectItem>
                     <SelectItem value="supervisor">Supervisor</SelectItem>
                     <SelectItem value="guardia">Guardia de seguridad</SelectItem>
                     <SelectItem value="medico">Personal médico</SelectItem>
-                    <SelectItem value="administrativo">Administrativo</SelectItem>
                     </SelectContent>
                 </Select>
                 </div>
@@ -426,7 +425,7 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
                 <Input
                     id="nuevoUsuarioNombre"
                     type="text"
-                    placeholder="Usuario"
+                    placeholder="Usuario de acceso"
                     value={nuevoUsuario.usuario}
                     onChange={(e) =>
                     setNuevoUsuario({
@@ -446,7 +445,7 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
                     <Input
                     id="nuevaContrasena"
                     type={showRegPass ? "text" : "password"}
-                    placeholder="Contraseña"
+                    placeholder="•••••••••"
                     value={nuevoUsuario.contrasena}
                     onChange={(e) =>
                         setNuevoUsuario({
@@ -475,7 +474,7 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
                     <Input
                     id="confirmarContrasena"
                     type={showRegPass2 ? "text" : "password"}
-                    placeholder="Confirmar contraseña"
+                    placeholder="•••••••••"
                     value={nuevoUsuario.confirmarContrasena}
                     onChange={(e) =>
                         setNuevoUsuario({
