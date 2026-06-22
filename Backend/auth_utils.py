@@ -68,18 +68,3 @@ def requiere_auth(f):
         return f(*args, **kwargs)
 
     return wrapper
-
-# En tu auth_utils.py
-def requiere_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        # ... (código que decodifica el JWT) ...
-        usuario_id = payload.get('id')
-        
-        # Verificar estado real en BD en cada petición importante
-        user_db = db.execute_query("SELECT estado FROM usuarios WHERE id = %s", (usuario_id,))
-        if not user_db or user_db[0].get('estado') != 'activo':
-            return jsonify({'error': 'Cuenta desactivada'}), 401
-            
-        return f(*args, **kwargs)
-    return decorated

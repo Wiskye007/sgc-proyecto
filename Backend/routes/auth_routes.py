@@ -33,19 +33,25 @@ def login():
                 FROM Usuarios
                 WHERE NombreUsuario = ? \
                 """
+        # 1. Ejecutar query y verificar existencia
         result = db.execute_query(query, (usuario,))
-
         if not result:
             return jsonify({'error': 'Usuario o contraseña incorrectos'}), 401
 
         user = result[0]
+
+        # 2. Validación robusta del estado (independiente de mayúsculas/minúsculas)
+        # Buscamos en ambas llaves posibles por si tu DB devuelve distinto formato
+        estado_raw = user.get('estado') or user.get('Estado') or 'activo'
         
-        # A prueba de fallos: buscar tanto mayúsculas como minúsculas
+        if str(estado_raw).lower() != 'activo':
+            return jsonify({'error': 'Cuenta desactivada. Contacte a un administrador.'}), 403
+
+        # 3. Obtención segura del hash
         hash_guardado = user.get('ContrasenaHash') or user.get('contrasenahash')
         
-        estado = user.get('Estado') or user.get('estado') or 'activo'
-        if estado.lower() != 'activo':
-            return jsonify({'error': 'Cuenta desactivada. Contacte a un administrador.'}), 403
+        if not hash_guardado:
+            return jsonify({'error': 'Error en la configuración del usuario'}), 500
 
         if not hash_guardado:
             logger.error("ERROR: La columna ContrasenaHash no existe o es None")
