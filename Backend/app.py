@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 # Importar blueprints de rutas
-from routes import auth_routes, convictos_routes, medico_routes, seguridad_routes, reportes_routes
+from routes import auth_routes, convictos_routes, medico_routes, seguridad_routes, reportes_routes, usuarios_routes
 from auth_utils import verificar_token
 
 load_dotenv()
@@ -58,6 +58,7 @@ app.register_blueprint(convictos_routes.bp)
 app.register_blueprint(medico_routes.bp)
 app.register_blueprint(seguridad_routes.bp)
 app.register_blueprint(reportes_routes.bp)
+app.register_blueprint(usuarios_routes.bp)
 
 
 # Rutas de salud

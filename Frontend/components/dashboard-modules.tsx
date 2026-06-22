@@ -1,11 +1,14 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Shield, Activity, BarChart3 } from "lucide-react"
+import { Users, Shield, Activity, BarChart3, Lock } from "lucide-react"
 import UserDropdown from "@/components/user-dropdown"
+import ThemeToggle from "@/components/temadelsistema" // Asegúrate de que el nombre del archivo coincida con el tuyo
 
-const modules = [
+// Unificamos todos los módulos en una sola lista
+const allModules = [
     {
         id: "convictos",
         title: "Panel de Convictos",
@@ -14,6 +17,8 @@ const modules = [
         href: "/dashboard/convictos",
         color: "text-blue-400",
         glow: "group-hover:shadow-blue-500/30",
+        requiresAdmin: false,
+        fullWidth: false,
     },
     {
         id: "seguridad",
@@ -23,6 +28,8 @@ const modules = [
         href: "/dashboard/seguridad",
         color: "text-red-400",
         glow: "group-hover:shadow-red-500/30",
+        requiresAdmin: false,
+        fullWidth: false,
     },
     {
         id: "medico",
@@ -32,6 +39,8 @@ const modules = [
         href: "/dashboard/medico",
         color: "text-green-400",
         glow: "group-hover:shadow-green-500/30",
+        requiresAdmin: false,
+        fullWidth: false,
     },
     {
         id: "reportes",
@@ -41,14 +50,46 @@ const modules = [
         href: "/dashboard/reportes",
         color: "text-purple-400",
         glow: "group-hover:shadow-purple-500/30",
+        requiresAdmin: false,
+        fullWidth: false,
+    },
+    {
+        id: "usuarios",
+        title: "Gestión de Usuarios",
+        description: "Administra usuarios, permisos y control de acceso de todo el sistema SGC.",
+        icon: Lock,
+        href: "/dashboard/usuarios",
+        color: "text-yellow-400",
+        glow: "group-hover:shadow-yellow-500/30",
+        requiresAdmin: true,
+        fullWidth: true, // Propiedad especial para que ocupe las dos columnas
     },
 ]
 
 export default function DashboardModules() {
     const router = useRouter()
+    
+    // Solo necesitamos saber si es admin o no para bloquear la tarjeta visualmente
+    const [isAdmin, setIsAdmin] = useState(false)
 
-    return (
-        /* Envolvemos todo en sgc-bg para heredar las partículas y el fondo oscuro radial */
+    useEffect(() => {
+        const storedUser = localStorage.getItem('currentUser')
+        if (storedUser) {
+            try {
+                const userData = JSON.parse(storedUser)
+                const rol = userData.nivelacceso || userData.Nivelacceso || userData.nivelAcceso || ''
+                
+                // Verificamos si tiene el rol de administrador
+                if (rol.toLowerCase() === 'administrador' || rol.toLowerCase() === 'admin') {
+                    setIsAdmin(true)
+                }
+            } catch (e) {
+                console.error("Error al analizar los datos del usuario:", e)
+            }
+        }
+    }, [])
+
+    return (    
         <div className="sgc-bg min-h-screen w-full py-10 px-4 md:px-8 font-sans text-slate-200">
             <div className="container mx-auto max-w-6xl space-y-8 relative z-10">
                 
@@ -64,37 +105,72 @@ export default function DashboardModules() {
                         </div>
                     </div>
                     
-                    {/* User Dropdown Menu */}
-                    <UserDropdown />
+                    <div className="flex items-center gap-3">
+                        <ThemeToggle />
+                        <UserDropdown />
+                    </div>
                 </div>
 
                 {/* --- GRID DE MÓDULOS --- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {modules.map((module) => {
+                    {allModules.map((module) => {
                         const Icon = module.icon
+                        
+                        // Lógica para saber si el módulo debe bloquearse para este usuario
+                        const isLocked = module.requiresAdmin && !isAdmin
+
                         return (
                             <Card
                                 key={module.id}
-                                /* sgc-card aplica el acristalado, bordes y sombras del globals.css */
-                                className={`sgc-card group cursor-pointer border-0 hover:-translate-y-1 transition-all duration-300 ${module.glow}`}
-                                onClick={() => router.push(module.href)}
+                                className={`sgc-card border-0 transition-all duration-300 
+                                    ${module.fullWidth ? 'md:col-span-2' : ''} 
+                                    ${isLocked 
+                                        ? 'opacity-60 cursor-not-allowed grayscale-30%' 
+                                        : `group cursor-pointer hover:-translate-y-1 ${module.glow}`
+                                    }`}
+                                onClick={() => {
+                                    if (!isLocked) router.push(module.href)
+                                }}
                             >
                                 <CardHeader className="pb-4">
                                     <div className="flex items-start gap-5">
-                                        {/* Contenedor del ícono que brilla al pasar el mouse */}
-                                        <div className="rounded-xl bg-[#060a12] p-4 border border-slate-800 shadow-inner group-hover:bg-slate-800/40 transition-colors">
-                                            <Icon className={`h-8 w-8 ${module.color}`} />
+                                        <div className={`rounded-xl bg-[#060a12] p-4 border border-slate-800 shadow-inner transition-colors ${isLocked ? 'bg-slate-900/50' : 'group-hover:bg-slate-800/40'}`}>
+                                            <Icon className={`h-8 w-8 ${isLocked ? 'text-slate-500' : module.color}`} />
                                         </div>
                                         <div className="flex-1 mt-1">
-                                            <CardTitle className="text-2xl font-bold text-white mb-1.5 tracking-wide">{module.title}</CardTitle>
-                                            <CardDescription className="text-slate-400 text-sm leading-relaxed">{module.description}</CardDescription>
+                                            <div className="flex items-center justify-between">
+                                                <CardTitle className={`text-2xl font-bold mb-1.5 tracking-wide ${isLocked ? 'text-slate-400' : 'text-white'}`}>
+                                                    {module.title}
+                                                </CardTitle>
+                                                
+                                                {/* Etiqueta roja de bloqueado si no es admin */}
+                                                {isLocked && (
+                                                    <span className="px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border border-red-500/20 bg-red-500/10 text-red-400">
+                                                        Bloqueado
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <CardDescription className="text-slate-400 text-sm leading-relaxed">
+                                                {module.description}
+                                            </CardDescription>
                                         </div>
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    {/* Falso botón que se anima con la tarjeta completa */}
-                                    <div className="w-full h-11 rounded-lg flex items-center justify-center gap-2 bg-blue-500/5 text-blue-400 font-semibold border border-blue-500/10 group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent transition-all duration-300">
-                                        Acceder al módulo
+                                    <div className={`w-full h-11 rounded-lg flex items-center justify-center gap-2 font-semibold transition-all duration-300
+                                        ${isLocked 
+                                            ? 'bg-slate-800/30 text-slate-500 border border-slate-800/50' 
+                                            : 'bg-blue-500/5 text-blue-400 border border-blue-500/10 group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent'
+                                        }`}
+                                    >
+                                        {isLocked ? (
+                                            <>
+                                                <Lock className="w-4 h-4 mr-1" />
+                                                Requiere permisos de Administrador
+                                            </>
+                                        ) : (
+                                            'Acceder al módulo'
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -105,4 +181,4 @@ export default function DashboardModules() {
             </div>
         </div>
     )
-    }
+}

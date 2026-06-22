@@ -27,7 +27,7 @@ services:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-sgc}:${POSTGRES_PASSWORD:-sgc_password}@postgres:5432/${POSTGRES_DB:-sgc}"
       FLASK_ENV: development
       FLASK_PORT: 5000
-      # Clave para firmar los tokens de sesión (ver autenticación)
+      # Clave para firmar los tokens de sesión
       SECRET_KEY: ${SECRET_KEY:-cambia-esta-clave-en-produccion}
       ALLOWED_ORIGINS: "http://localhost:3000"
       REQUIRE_AUTH: "true"

@@ -39,7 +39,9 @@ def login():
             return jsonify({'error': 'Usuario o contraseña incorrectos'}), 401
 
         user = result[0]
-        hash_guardado = user.get('ContrasenaHash')
+        
+        # A prueba de fallos: buscar tanto mayúsculas como minúsculas
+        hash_guardado = user.get('ContrasenaHash') or user.get('contrasenahash')
 
         if not hash_guardado:
             logger.error("ERROR: La columna ContrasenaHash no existe o es None")
@@ -49,13 +51,13 @@ def login():
         if not check_password_hash(hash_guardado, password_plana):
             return jsonify({'error': 'Usuario o contraseña incorrectos'}), 401
 
-        # Login exitoso
+        # Login exitoso - Extraer datos ignorando mayúsculas/minúsculas de la BD
         usuario_payload = {
-            'id': user.get('Id'),
-            'usuario': user.get('NombreUsuario'),
-            'nombre': user.get('NombreCompleto'),
-            'cargo': user.get('Cargo'),
-            'nivelAcceso': user.get('NivelAcceso'),
+            'id': user.get('Id') or user.get('id'),
+            'usuario': user.get('NombreUsuario') or user.get('nombreusuario'),
+            'nombre': user.get('NombreCompleto') or user.get('nombrecompleto'),
+            'cargo': user.get('Cargo') or user.get('cargo'),
+            'nivelAcceso': user.get('NivelAcceso') or user.get('nivelacceso'), # ¡Esta línea soluciona el bloqueo!
         }
         return jsonify({
             'success': True,
@@ -178,8 +180,7 @@ def recuperar():
             (token, usuario_id)
         )
 
-        # Enviar el enlace de recuperación por correo. El token NUNCA se
-        # devuelve en la respuesta ni se escribe en logs.
+        # Enviar el enlace de recuperación por correo. El token NUNCA se    
         enlace = f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/reset-password?token={token}"
         try:
             enviar_correo(
@@ -188,11 +189,9 @@ def recuperar():
                 f"Hola {nombre_usuario}, usa este enlace para restablecer tu "
                 f"contraseña (válido 1 hora): {enlace}"
             )
-        except Exception:
-            # No revelamos si el envío falló para no filtrar información.
+        except Exception:   
             logger.exception("No se pudo enviar el correo de recuperación")
 
-        # Respuesta genérica: no confirma existencia de la cuenta ni expone el token.
         return jsonify({
             "success": True,
             "message": "Si el correo existe, se ha enviado un enlace de recuperación"

@@ -14,7 +14,7 @@ interface UserData {
     nombre?: string
     apellido?: string
     nombre_completo?: string
-    cargo?: string
+    nivelAcceso?: string
     email?: string
 }
 
@@ -33,7 +33,7 @@ export default function UserDropdown() {
                 const currentUser = JSON.parse(currentUserStr)
                 setUserData(currentUser)
             } catch (e) {
-                console.error("[v0] Error parsing user data:", e)
+                console.error("Error obteniendo dato del usuario:", e)
             }
         }
     }, [])
@@ -94,7 +94,7 @@ export default function UserDropdown() {
     }
 
     const nombre = userData?.nombre_completo || `${userData?.nombre || ""} ${userData?.apellido || ""}`.trim() || "Usuario"
-    const cargo = userData?.cargo || "Sin cargo"
+    const nivelAcceso = userData?.nivelAcceso || "Sin nivel de acceso"
     const initials = getInitials(userData?.nombre, userData?.apellido)
 
 return (
@@ -112,10 +112,8 @@ return (
                 {/* Nombre y cargo */}
                 <div className="hidden sm:flex flex-col items-start">
                     <p className="text-sm font-semibold text-white leading-tight">{nombre}</p>
-                    <p className="text-xs text-purple-300 leading-tight">{cargo}</p>
-                </div>
-
-                {/* 🔥 CAMBIO 1: Ícono estilo "V" (ChevronDown) */}
+                    <p className="text-xs text-purple-300 leading-tight">{nivelAcceso}</p>
+                </div>  
                 <ChevronDown className={`w-4 h-4 text-purple-300 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
             </button>
 
@@ -128,8 +126,7 @@ return (
                         <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Mi cuenta</p>
                     </div>
 
-                    {/* Opciones del menú */}
-                    {/* 🔥 CAMBIO 2: Reducción de space-y y padding general */}
+                    {/* Opciones del menú */}   
                     <nav className="px-2 py-1.5 space-y-0.5">
                         <button
                             onClick={() => {
@@ -154,8 +151,7 @@ return (
                         </button>
                     </nav>
 
-                    {/* Divisor */}
-                    {/* 🔥 CAMBIO 3: Margen vertical reducido (my-1 en lugar de my-2) */}
+                    {/* Divisor */} 
                     <div className="h-px bg-slate-800/50 my-1"></div>
 
                     {/* Botón de logout */}
