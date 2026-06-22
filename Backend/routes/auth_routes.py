@@ -42,6 +42,10 @@ def login():
         
         # A prueba de fallos: buscar tanto mayúsculas como minúsculas
         hash_guardado = user.get('ContrasenaHash') or user.get('contrasenahash')
+        
+        estado = user.get('Estado') or user.get('estado') or 'activo'
+        if estado.lower() != 'activo':
+            return jsonify({'error': 'Cuenta desactivada. Contacte a un administrador.'}), 403
 
         if not hash_guardado:
             logger.error("ERROR: La columna ContrasenaHash no existe o es None")
@@ -57,7 +61,7 @@ def login():
             'usuario': user.get('NombreUsuario') or user.get('nombreusuario'),
             'nombre': user.get('NombreCompleto') or user.get('nombrecompleto'),
             'cargo': user.get('Cargo') or user.get('cargo'),
-            'nivelAcceso': user.get('NivelAcceso') or user.get('nivelacceso'), # ¡Esta línea soluciona el bloqueo!
+            'nivelAcceso': user.get('NivelAcceso') or user.get('nivelacceso'),
         }
         return jsonify({
             'success': True,

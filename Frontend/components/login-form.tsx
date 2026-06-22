@@ -40,35 +40,40 @@ export default function LoginForm() {
     const [isLoadingRecuperar, setIsLoadingRecuperar] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+        e.preventDefault()
+        setIsLoading(true)
         try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ usuario, password: contrasena }),
-        })
-        const data = await response.json()
-        if (response.ok) {
-            if (data.token) localStorage.setItem("authToken", data.token)
-            localStorage.setItem("currentUser", JSON.stringify(data.usuario))
-            toast({ title: "Inicio de sesión exitoso", description: `Bienvenido, ${data.usuario.nombre}` })
-            router.push("/dashboard")
-        } else {
-            toast({
-            title: "Error de inicio de sesión",
-            description: "Usuario o contraseña incorrectos",
-            variant: "destructive",
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ usuario, password: contrasena }),
             })
-        }
-        } catch {
-        toast({
-            title: "Error de conexión",
-            description: "No se pudo conectar al servidor.",
-            variant: "destructive",
-        })
+            const data = await response.json()
+            
+            if (response.ok) {
+                if (data.token) localStorage.setItem("authToken", data.token)
+                localStorage.setItem("currentUser", JSON.stringify(data.usuario))
+                toast({ 
+                    title: "Inicio de sesión exitoso", 
+                    description: `Bienvenido, ${data.usuario.nombre}` 
+                })
+                router.push("/dashboard")
+            } else {
+                // AQUÍ CAPTURAMOS EL ERROR ESPECÍFICO DEL BACKEND
+                toast({
+                    title: response.status === 403 ? "Acceso denegado" : "Error de inicio de sesión",
+                    description: data.error || "Usuario o contraseña incorrectos",
+                    variant: "destructive",
+                })
+            }
+        } catch (error) {
+            toast({
+                title: "Error de conexión",
+                description: "No se pudo conectar al servidor.",
+                variant: "destructive",
+            })
         } finally {
-        setIsLoading(false)
+            setIsLoading(false)
         }
     }
 
