@@ -17,8 +17,10 @@ def requiere_admin(f):
     """Decorador para verificar que el usuario sea administrador"""
     @wraps(f)
     def wrapper(*args, **kwargs):
+        # g.get('usuario') trae el payload del token JWT desencriptado
         payload = g.get('usuario', {})
-        # BUSCAMOS TODAS LAS VARIANTES POSIBLES EN EL TOKEN
+        
+        # BUSCAMOS TODAS LAS VARIANTES POSIBLES EN EL TOKEN (incluyendo 'nivelAcceso')
         rol = payload.get('nivelAcceso') or payload.get('nivelacceso') or payload.get('Nivelacceso') or payload.get('rol') or ''
         
         if rol.lower() not in ['administrador', 'admin']:
