@@ -332,11 +332,12 @@ export default function ReportesPanel() {
                         >
                             <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
                         </Button>
-                        <div>
-                            <h1 className="text-3xl font-black tracking-wide text-white flex items-center gap-3">
-                                <BarChart className="h-7 w-7 text-blue-400" /> Panel de Reportes
-                            </h1>
-                            <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Estadísticas y Analíticas del Sistema</p>
+                        <div className="flex items-center gap-4">
+                            <BarChart className="h-14 w-14 text-purple-400 shrink-0" />
+                            <div>
+                                <h1 className="text-3xl font-black tracking-wide text-white">Panel de Reportes</h1>
+                                <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Estadísticas y Analíticas del Sistema</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -345,7 +346,7 @@ export default function ReportesPanel() {
                 <Card className="sgc-card border-0 shadow-2xl">
                     <CardHeader className="border-b border-slate-800/60 pb-4">
                         <CardTitle className="text-xl text-white">Visualización de datos en tiempo real</CardTitle>
-                        <CardDescription className="text-slate-400">Resumen consolidado de la población y estado de la carceleta</CardDescription>
+                        <CardDescription className="text-slate-400 text-[15px]">Resumen consolidado de la población y estado de la carceleta</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
                         {chartsLoading ? (
@@ -502,10 +503,9 @@ export default function ReportesPanel() {
                         <CardTitle className="text-xl flex items-center gap-2 text-white">
                             <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
                                 <Plus className="h-5 w-5 text-blue-400"/>
-                            </div>
-                            Generar Nuevo Reporte
+                            </div>Generar Nuevo Reporte
                         </CardTitle>
-                        <CardDescription className="text-slate-400">Selecciona el módulo de datos que deseas procesar</CardDescription>
+                        <CardDescription className="text-slate-400 text-[15px]">Selecciona el módulo de datos que deseas procesar</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -546,7 +546,7 @@ export default function ReportesPanel() {
                             </div>
                             Registro de Reportes Emitidos
                         </CardTitle>
-                        <CardDescription className="text-slate-400">Documentos generados y almacenados en la base de datos</CardDescription>
+                        <CardDescription className="text-slate-400 text-[15px]">Documentos generados y almacenados en la base de datos</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
                         {loading ? (

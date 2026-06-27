@@ -23,7 +23,7 @@ const allModules = [
         id: "seguridad",
         title: "Panel de Seguridad",
         description: "Control de pabellones, accesos y movimientos",
-        icon: Shield,
+        icon: Lock,
         href: "/dashboard/seguridad",
         color: "text-red-400",
         glow: "group-hover:shadow-red-500/30",
@@ -56,7 +56,7 @@ const allModules = [
         id: "usuarios",
         title: "Gestión de Usuarios",
         description: "Administra usuarios, permisos y control de acceso de todo el sistema SGC",
-        icon: Lock,
+        icon: Users,
         href: "/dashboard/usuarios",
         color: "text-yellow-400",
         glow: "group-hover:shadow-yellow-500/30",
@@ -99,7 +99,7 @@ export default function DashboardModules() {
                             <Shield className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
                         </div>
                         <div className="flex flex-col">
-                            <h1 className="text-xl md:text-3xl font-black text-white tracking-wide leading-none">Panel Principal</h1>
+                            <h1 className="text-xl md:text-3xl font-black text-white tracking-wide leading-none">PANEL PRINCIPAL</h1>
                             <p className="text-blue-400 text-[9px] md:text-xs font-bold uppercase tracking-widest mt-1">SGC - Carceleta San Martín</p>
                         </div>
                     </div>

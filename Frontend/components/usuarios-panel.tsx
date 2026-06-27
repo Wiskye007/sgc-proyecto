@@ -43,7 +43,7 @@ export default function UsuariosPanel() {
   const [usuario, setUsuario] = useState<any>(null);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false); // <-- Nuevo estado para el botón de actualizar
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -82,8 +82,7 @@ export default function UsuariosPanel() {
   }, [page, searchTerm, nivelFilter, estadoFilter, sesionFilter, usuario]);
 
   const fetchUsuarios = async (isManualClick = false) => {
-  try { 
-    // Solo activamos cargando general si es la primera vez que entra
+  try {
     if (usuarios.length === 0) {
       setLoading(true);
     }
@@ -114,7 +113,7 @@ export default function UsuariosPanel() {
   }
 };
 
-// 2. La función exclusiva para el botón "Actualizar registros"
+//Función para el botón "Actualizar registros"
   const handleManualRefresh = () => {
     fetchUsuarios(true); // Pasamos true para avisarle que fue manual
   };
@@ -215,11 +214,12 @@ export default function UsuariosPanel() {
                 <Button aria-label="Volver" className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
                 </Button>
-                <div>
-                    <h1 className="text-3xl font-black text-white tracking-wide flex items-center gap-3">
-                        <Users className="w-7 h-7 text-blue-400" /> Gestión de Usuarios
-                    </h1>
-                    <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Panel exclusivo de Administración</p>
+                <div className="flex items-center gap-4">
+                  <Users className="h-13 w-13 text-yellow-400 shrink-0" />
+                    <div>
+                        <h1 className="text-3xl font-black tracking-wide text-white">Gestión de Usuarios</h1>
+                        <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Panel exclusivo de Administración</p>
+                    </div>
                 </div>
             </div>  
         </div>

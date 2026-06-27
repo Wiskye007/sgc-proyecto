@@ -18,7 +18,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import {ArrowLeft, AlertTriangle, CheckCircle, Clock, Shield, MoveRight, AlertOctagon, KeyRound, Users} from "lucide-react"
+import {ArrowLeft, AlertTriangle, CheckCircle, Clock, Lock, MoveRight, AlertOctagon, KeyRound, Users} from "lucide-react"
 import {useToast} from "@/hooks/use-toast"
 import { authFetch } from "@/lib/auth"
 
@@ -328,15 +328,15 @@ export default function SeguridadPanel() {
                         <Button 
                             aria-label="Volver al menú principal" 
                             className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" 
-                            onClick={() => router.push("/dashboard")}
-                        >
+                            onClick={() => router.push("/dashboard")}>
                             <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
                         </Button>
-                        <div>
-                            <h1 className="text-3xl font-black tracking-wide text-white flex items-center gap-3">
-                                <Shield className="h-7 w-7 text-blue-400" /> Panel de Seguridad
-                            </h1>
-                            <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Control Táctico de Pabellones y Accesos</p>
+                        <div className="flex items-center gap-4">
+                            <Lock className="h-14 w-14 text-red-400 shrink-0" />
+                            <div>
+                                <h1 className="text-3xl font-black tracking-wide text-white">Panel de Seguridad</h1>
+                                <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Control Táctico de Pabellones y Accesos</p>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import React, {useEffect, useState} from "react"
+import { Users } from "lucide-react";
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
@@ -580,16 +581,19 @@ const ConvictosPanel: React.FC = () => {
                             onClick={() => (window.location.href = "/dashboard")}>
                             <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
                         </Button>
-                        <div>
-                            <h1 className="text-3xl font-black text-white tracking-wide">Panel de Convictos</h1>
-                            <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Gestión integral de internos</p>
+                        <div className="flex items-center gap-4">
+                            <Users className="h-14 w-14 text-blue-400 shrink-0" />
+                            <div>
+                                <h1 className="text-3xl font-black tracking-wide text-white">Panel de Convictos</h1>
+                                <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Gestión integral de internos</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <Tabs defaultValue="datos" className="w-full">
                     {/* --- NAVEGACIÓN DE TABS --- */}
-                    <TabsList className="mb-6 flex w-full bg-[#0a0f1a]/60 border border-slate-800/50 p-1.5 rounded-xl h-auto">
+                    <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6 bg-[#060a12]/80 border border-slate-800/80 rounded-xl p-1 gap-1">
                         <TabsTrigger value="datos" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Datos Generales</TabsTrigger>
                         <TabsTrigger value="movimientos" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Traslados</TabsTrigger>
                         <TabsTrigger value="conducta" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Conducta</TabsTrigger>
@@ -605,13 +609,15 @@ const ConvictosPanel: React.FC = () => {
                                     Registros totales: {convictosData.length}
                                 </Badge>
                             </CardHeader>
+                            
+                        {/*FILTROS*/}
                             <CardContent className="pt-0">
                                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                    <div className="relative md:w-1/3">
+                                    <div className="relative md:w-1/3 h-10!">
                                         <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"/>
                                         <Input aria-label="Búsqueda de registros" placeholder="Buscar por ID, Nombre o DNI..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10!"/>
                                     </div>
-                                    <div className="flex gap-4 md:w-auto">
+                                    <div className="md:w-auto flex flex-col lg:flex-row gap-6 items-end w-full">
                                         <Select value={estadoFilter} onValueChange={setEstadoFilter}>
                                             <SelectTrigger className="sgc-input h-10! w-[180px]"><SelectValue placeholder="Estado"/></SelectTrigger>
                                             <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
@@ -632,16 +638,15 @@ const ConvictosPanel: React.FC = () => {
                                         </Select>
                                     </div>
                                 </div>
+                                    <div className="flex flex-wrap gap-3 mt-6">
+                                        <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoConvicto(true)}><Plus className="h-4 w-4"/> Nuevo convicto</Button>
+                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(convictosData, "convictos")}><Download className="h-4 w-4"/> Exportar CSV</Button>
+                                        <div className="basis-full sm:basis-auto">
+                                            <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                                        </div>
+                                    </div>
                             </CardContent>
                         </Card>
-
-                        <div className="flex flex-wrap gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoConvicto(true)}><Plus className="h-4 w-4"/> Nuevo convicto</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(convictosData, "convictos")}><Download className="h-4 w-4"/> Exportar CSV</Button>
-                            <div className="basis-full sm:basis-auto">
-                                <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
-                            </div>
-                        </div>
 
                         <Card className="sgc-card border-0 overflow-hidden">
                             <CardContent className="p-0">
@@ -649,7 +654,7 @@ const ConvictosPanel: React.FC = () => {
                                     <Table>
                                         <TableHeader className="bg-[#0a0f1a]/80 border-b border-slate-800/50">
                                             <TableRow className="border-0 hover:bg-transparent">
-                                                <TableHead className="min-w-20 text-slate-300 font-bold">IDConv</TableHead>
+                                                <TableHead className="min-w-20 text-slate-300 font-bold text-center">IDConv</TableHead>
                                                 <TableHead className="min-w-[260px] text-slate-300 font-bold">Nombre completo</TableHead>
                                                 <TableHead className="min-w-[90px] text-slate-300 font-bold">Alias</TableHead>
                                                 <TableHead className="min-w-[100px] text-slate-300 font-bold">DNI</TableHead>
@@ -671,7 +676,7 @@ const ConvictosPanel: React.FC = () => {
                                             ) : (
                                                 filteredConvictos.map(c => (
                                                     <TableRow key={c.id} className="border-slate-800/50 hover:bg-blue-500/10 transition-colors">
-                                                        <TableCell className="font-mono text-blue-400 font-bold">C{c.id}</TableCell>
+                                                        <TableCell className="font-mono text-blue-400 font-bold text-center">C{c.id}</TableCell>
                                                         <TableCell className="font-semibold text-slate-200">{c.nombre}</TableCell>
                                                         <TableCell className="text-slate-400 text-sm">{c.alias || "-"}</TableCell>
                                                         <TableCell className="font-mono text-slate-300">{c.dni}</TableCell>
@@ -709,26 +714,26 @@ const ConvictosPanel: React.FC = () => {
                         <Card className="sgc-card border-0 mb-4">
                             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4">
                                 <CardTitle className="text-xl text-white font-bold tracking-wide">Registro de traslados</CardTitle>
-                                <div className="relative w-full md:w-72 mt-2 md:mt-0">
-                                    <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
+                                <div className="relative w-full md:w-80 mt-2 md:mt-0">
+                                    <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"/>
                                     <Input placeholder="Buscar traslado..." value={searchMovimientos} onChange={(e) => setSearchMovimientos(e.target.value)} className="sgc-input pl-10 h-10"/>
                                 </div>
                             </CardHeader>
-                        </Card>
-                        <div className="flex flex-wrap gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoMovimiento(true)}><Plus className="h-4 w-4"/>Registrar traslado</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(movimientosData, "movimientos")}><Download className="h-4 w-4"/>Exportar CSV</Button>
-                            <div className="basis-full sm:basis-auto">
-                                <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                            <div className="flex flex-wrap gap-3 ml-6 mb-0">
+                                <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoMovimiento(true)}><Plus className="h-4 w-4"/>Registrar traslado</Button>
+                                <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(movimientosData, "movimientos")}><Download className="h-4 w-4"/>Exportar CSV</Button>
+                                <div className="basis-full sm:basis-auto">
+                                    <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                                </div>
                             </div>
-                        </div>
+                        </Card>
                         <Card className="sgc-card border-0 overflow-hidden">
                             <CardContent className="p-0">
                                 <div className="overflow-x-auto">
                                     <Table>
                                         <TableHeader className="bg-[#0a0f1a]/80 border-b border-slate-800/50">
                                             <TableRow className="border-0 hover:bg-transparent">
-                                                <TableHead className="min-w-20 text-slate-300 font-bold">IDMov</TableHead>
+                                                <TableHead className="min-w-20 text-slate-300 font-bold text-center">IDMov</TableHead>
                                                 <TableHead className="text-slate-300 font-bold">Fecha</TableHead>
                                                 <TableHead className="text-center text-slate-300 font-bold">Hora</TableHead>
                                                 <TableHead className="text-center text-slate-300 font-bold">IDConv</TableHead>
@@ -747,7 +752,7 @@ const ConvictosPanel: React.FC = () => {
                                             ) : (
                                                 filteredMovimientos.map(m => (
                                                     <TableRow key={m.id} className="border-slate-800/50 hover:bg-blue-500/10 transition-colors">
-                                                        <TableCell className="font-mono text-purple-400 font-bold">M{m.id}</TableCell>
+                                                        <TableCell className="font-mono text-purple-400 font-bold text-center">M{m.id}</TableCell>
                                                         <TableCell className="text-slate-300 text-sm">{m.fecha}</TableCell>
                                                         <TableCell className="text-slate-300 text-sm text-center">{m.hora}</TableCell>
                                                         <TableCell className="text-center font-mono text-blue-400">C{m.convictoId}</TableCell>
@@ -778,11 +783,11 @@ const ConvictosPanel: React.FC = () => {
                     {/* ========== CONDUCTA ========== */}
                     <TabsContent value="conducta" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
-                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 gap-4">
+                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4">
                                 <CardTitle className="text-xl text-white font-bold tracking-wide">Registro disciplinario</CardTitle>
                                 <div className="flex flex-col md:flex-row w-full md:w-auto gap-4">
                                     <div className="relative w-full md:w-72">
-                                        <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
+                                        <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"/>
                                         <Input placeholder="Buscar incidentes..." value={searchConducta} onChange={(e) => setSearchConducta(e.target.value)} className="sgc-input pl-10 h-10!"/>
                                     </div>
                                     {/*SELECT DE TIPO DE CONDUCTA */}
@@ -799,21 +804,22 @@ const ConvictosPanel: React.FC = () => {
                                     </Select>
                                 </div>
                             </CardHeader>
-                        </Card>
-                        <div className="flex flex-wrap gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaConducta(true)}><Plus className="h-4 w-4"/>Registrar conducta</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(conductaData, "conducta")}><Download className="h-4 w-4"/>Exportar CSV</Button>
-                            <div className="basis-full sm:basis-auto">
-                                <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                            <div className="flex flex-wrap gap-3 ml-6 mb-4">
+                                <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaConducta(true)}><Plus className="h-4 w-4"/>Registrar conducta</Button>
+                                <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(conductaData, "conducta")}><Download className="h-4 w-4"/>Exportar CSV</Button>
+                                <div className="basis-full sm:basis-auto">
+                                    <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                                </div>
                             </div>
-                        </div>
+                        </Card>
+
                         <Card className="sgc-card border-0 overflow-hidden">
                             <CardContent className="p-0">
                                 <div className="overflow-x-auto">
                                     <Table>
                                         <TableHeader className="bg-[#0a0f1a]/80 border-b border-slate-800/50">
                                             <TableRow className="border-0 hover:bg-transparent">
-                                                <TableHead className="min-w-20 text-slate-300 font-bold">IDCond</TableHead>
+                                                <TableHead className="min-w-20 text-slate-300 font-bold text-center">IDCond</TableHead>
                                                 <TableHead className="text-slate-300 font-bold">Fecha</TableHead>
                                                 <TableHead className="text-center text-slate-300 font-bold">IDConv</TableHead>
                                                 <TableHead className="min-w-50 text-slate-300 font-bold">Nombre</TableHead>
@@ -831,7 +837,7 @@ const ConvictosPanel: React.FC = () => {
                                             ) : (
                                                 filteredConducta.map(c => (
                                                     <TableRow key={c.id} className="border-slate-800/50 hover:bg-blue-500/10 transition-colors">
-                                                        <TableCell className="font-mono text-orange-400 font-bold">{c.id}</TableCell>
+                                                        <TableCell className="font-mono text-orange-400 font-bold text-center">CO{c.id}</TableCell>
                                                         <TableCell className="text-slate-300 text-sm">{c.fecha}</TableCell>
                                                         <TableCell className="text-center font-mono text-blue-400">C{c.convictoId}</TableCell>
                                                         <TableCell className="font-medium text-slate-200">{c.nombre}</TableCell>
@@ -861,11 +867,11 @@ const ConvictosPanel: React.FC = () => {
                     {/* ========== VISITAS ========== */}
                     <TabsContent value="visitas" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
-                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 gap-4">
+                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4">
                                 <CardTitle className="text-xl text-white font-bold tracking-wide">Control de visitas</CardTitle>
                                 <div className="flex flex-col md:flex-row w-full md:w-auto gap-4">
                                     <div className="relative w-full md:w-72">
-                                        <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
+                                        <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"/>
                                         <Input placeholder="Buscar visita..." value={searchVisitas} onChange={(e) => setSearchVisitas(e.target.value)} className="sgc-input pl-10 h-10!"/>
                                     </div>
                                     {/*SELECT DE ESTADO DE VISITA */}
@@ -882,21 +888,22 @@ const ConvictosPanel: React.FC = () => {
                                     </Select>
                                 </div>
                             </CardHeader>
-                        </Card>
-                        <div className="flex flex-wrap gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaVisita(true)}><Plus className="h-4 w-4"/>Registrar visita</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(visitasData, "visitas")}><Download className="h-4 w-4"/>Exportar CSV</Button>
-                            <div className="basis-full sm:basis-auto">
-                                <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                            <div className="flex flex-wrap gap-3 mb-4 ml-6">
+                                <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaVisita(true)}><Plus className="h-4 w-4"/>Registrar visita</Button>
+                                <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(visitasData, "visitas")}><Download className="h-4 w-4"/>Exportar CSV</Button>
+                                <div className="basis-full sm:basis-auto">
+                                    <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                                </div>
                             </div>
-                        </div>
+                        </Card>
+
                         <Card className="sgc-card border-0 overflow-hidden">
                             <CardContent className="p-0">
                                 <div className="overflow-x-auto">
                                     <Table>
                                         <TableHeader className="bg-[#0a0f1a]/80 border-b border-slate-800/50">
                                             <TableRow className="border-0 hover:bg-transparent">
-                                                <TableHead className="min-w-20 text-slate-300 font-bold">IDVisita</TableHead>
+                                                <TableHead className="min-w-20 text-slate-300 font-bold text-center">IDVisita</TableHead>
                                                 <TableHead className="text-slate-300 font-bold">Fecha</TableHead>
                                                 <TableHead className="text-slate-300 font-bold">Hora</TableHead>
                                                 <TableHead className="text-center text-slate-300 font-bold">IDConv</TableHead>
@@ -916,7 +923,7 @@ const ConvictosPanel: React.FC = () => {
                                             ) : (
                                                 filteredVisitas.map(v => (
                                                     <TableRow key={v.id} className="border-slate-800/50 hover:bg-blue-500/10 transition-colors">
-                                                        <TableCell className="font-mono text-cyan-400 font-bold">V{v.id}</TableCell>
+                                                        <TableCell className="font-mono text-cyan-400 font-bold text-center">V{v.id}</TableCell>
                                                         <TableCell className="text-slate-300 text-sm">{v.fecha}</TableCell>
                                                         <TableCell className="text-slate-300 text-sm">{v.hora}</TableCell>
                                                         <TableCell className="text-center font-mono text-blue-400">C{v.convictoId}</TableCell>

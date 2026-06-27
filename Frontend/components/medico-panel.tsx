@@ -29,7 +29,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {ArrowLeft, AlertCircle, Calendar, Pill, Plus, Edit2, Printer, Trash2, Download, Stethoscope} from 'lucide-react'
+import {ArrowLeft, AlertCircle, Calendar, Pill, Plus, Edit2, Printer, Trash2, Download, Stethoscope, Search} from 'lucide-react'
 import {useToast} from "@/hooks/use-toast"
 import { authFetch } from "@/lib/auth"  
 
@@ -51,6 +51,10 @@ const CONVICTOS_URL = typeof window !== "undefined" && window.location.hostname 
 export default function MedicoPanel() {
     const router = useRouter()
     const {toast} = useToast()
+
+    const [searchTerm, setSearchTerm] = useState("")
+    const [prioridadFilter, setPrioridadFilter] = useState("todos")
+    const [estadoDerivacionFilter, setEstadoDerivacionFilter] = useState("todos")
 
     const [revisionDialog, setRevisionDialog] = useState(false)
     const [tratamientoDialog, setTratamientoDialog] = useState(false)
@@ -363,7 +367,30 @@ export default function MedicoPanel() {
         toast({title: "Descargado", description: `${filename}.csv`})
     }
 
-    const handleImprimir = () => window.print() 
+    const handleImprimir = () => window.print()
+    
+    // --- LÓGICAS DE FILTRADO ---
+    const safeLower = (val: any) => (val || "").toString().toLowerCase()
+
+    const filteredRevisiones = revisionesData.filter(r => {
+        const matchSearch = safeLower(r.id).includes(searchTerm) || safeLower(r.nombre ?? convictoIdToName(r.convictoId)).includes(searchTerm) || safeLower(r.diagnostico).includes(searchTerm)
+        const matchPrior = prioridadFilter === "todos" || safeLower(r.prioridad) === prioridadFilter
+        return matchSearch && matchPrior
+    })
+
+    const filteredTratamientos = tratamientosDataState.filter(t => 
+        safeLower(t.id).includes(searchTerm) || safeLower(t.nombre ?? convictoIdToName(t.convictoId)).includes(searchTerm) || safeLower(t.medicamento).includes(searchTerm)
+    )
+
+    const filteredDerivaciones = derivacionesDataState.filter(d => {
+        const matchSearch = safeLower(d.id).includes(searchTerm) || safeLower(d.nombre ?? convictoIdToName(d.convictoId)).includes(searchTerm) || safeLower(d.especialidad).includes(searchTerm)
+        const matchEstado = estadoDerivacionFilter === "todos" || safeLower(d.estado) === estadoDerivacionFilter
+        return matchSearch && matchEstado
+    })
+
+    const filteredHistorial = historialDataState.filter(h => 
+        safeLower(h.id).includes(searchTerm) || safeLower(h.nombre ?? convictoIdToName(h.convictoId)).includes(searchTerm) || safeLower(h.diagnostico).includes(searchTerm)
+    )
 
     return (
         <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-slate-200">
@@ -379,11 +406,12 @@ export default function MedicoPanel() {
                         >
                             <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
                         </Button>
-                        <div>
-                            <h1 className="text-3xl font-black tracking-wide text-white flex items-center gap-3">
-                                <Stethoscope className="h-7 w-7 text-blue-400" /> Panel Médico
-                            </h1>
-                            <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Gestión de revisiones y tratamientos</p>
+                        <div className="flex items-center gap-4">
+                            <Stethoscope className="h-14 w-14 text-green-500 shrink-0" />
+                                <div>
+                                    <h1 className="text-3xl font-black tracking-wide text-white">Panel Médico</h1>
+                                    <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Gestión de revisiones y tratamientos</p>
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -424,9 +452,8 @@ export default function MedicoPanel() {
                     </Card>
                 </div>
 
-                {/* --- PESTAÑAS --- */}
-                <Card className="sgc-card border-0 p-2 md:p-6 shadow-2xl">
-                    <Tabs defaultValue="revisiones" className="w-full mt-2">    
+                {/* --- PESTAÑAS CON TIP DE UX (onValueChange) --- */}
+                <Tabs defaultValue="revisiones" className="w-full mt-2" onValueChange={() => { setSearchTerm(""); setPrioridadFilter("todos"); setEstadoDerivacionFilter("todos"); }}>    
                         <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6 bg-[#060a12]/80 border border-slate-800/80 rounded-xl p-1 gap-1">
                             <TabsTrigger value="revisiones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Revisiones</TabsTrigger>
                             <TabsTrigger value="tratamientos" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Tratamientos</TabsTrigger>
@@ -436,105 +463,135 @@ export default function MedicoPanel() {
 
                         {/* ======================= REVISIONES ======================= */}
                         <TabsContent value="revisiones" className="space-y-6">
-                            <div className="flex flex-wrap gap-3 mb-4">
-                                <Dialog open={revisionDialog} onOpenChange={(open) => { 
-                                    setRevisionDialog(open); 
-                                    if(!open) {
-                                        setBusquedaPaciente("");
-                                        setRevision({ convictoId: "", diagnostico: "", tratamiento: "", medico: "", prioridad: "", fecha: "", hora: "", proximaRevision: "" });
-                                    } 
-                                }}>
-                                    <DialogTrigger asChild>
-                                        <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva revisión</Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-                                        <DialogHeader>
-                                            <DialogTitle className="text-xl font-bold text-white">Nueva revisión médica</DialogTitle>
-                                            <DialogDescription className="text-slate-400 text-[15px]">Registre una evaluación para un interno.</DialogDescription>
-                                        </DialogHeader>
-                                        <form onSubmit={handleNuevaRevision} className="space-y-4 pt-3">
-                                            
-                                            {/* FILTRO Y SELECTOR DE PACIENTE */}
-                                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
-                                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
-                                                <Input
-                                                    placeholder="Buscar por DNI, Nombre o ID..."
-                                                    value={busquedaPaciente}
-                                                    onChange={(e) => {
-                                                        const valor = e.target.value;
-                                                        setBusquedaPaciente(valor);
-                                                        if (valor.trim() === "") {
-                                                            setRevision({ ...revision, convictoId: "" });
-                                                        } else {
-                                                            const filtrados = convictos.filter(c => 
-                                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
-                                                                (c.dni && c.dni.includes(valor)) ||
-                                                                (c.id && c.id.toString() === valor)
-                                                            );
-                                                            if (filtrados.length > 0) {
-                                                                setRevision({ ...revision, convictoId: String(filtrados[0].id) });
-                                                            } else {
-                                                                setRevision({ ...revision, convictoId: "" });
-                                                            }
-                                                        }
-                                                    }}
-                                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
-                                                />
-                                                <Select value={revision.convictoId} onValueChange={(v) => setRevision({...revision, convictoId: v})}>
-                                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
-                                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
-                                                        {convictosFiltrados.length > 0 ? (
-                                                            convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
-                                                        ) : (
-                                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
+                            <Card className="sgc-card border-0 mb-4">
+                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
+                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de Revisiones</CardTitle>
+                                    <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${filteredRevisiones.length > 50 ? "border-red-500 text-red-400 bg-red-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
+                                        Registros totales: {filteredRevisiones.length}
+                                    </Badge>
+                                </CardHeader>
+                                <CardContent className="pt-4">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                        <div className="relative md:w-1/3 h-10!">
+                                            <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"/>
+                                            <Input aria-label="Búsqueda" placeholder="Buscar por ID, Paciente o Diagnóstico..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10!"/>
+                                        </div>
+                                        <div className="md:w-auto flex flex-col lg:flex-row gap-4 items-end w-full">
+                                            <Select value={prioridadFilter} onValueChange={setPrioridadFilter}>
+                                                <SelectTrigger className="sgc-input h-10! w-full md:w-[200px]"><SelectValue placeholder="Prioridad"/></SelectTrigger>
+                                                <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
+                                                    <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todas las prioridades</SelectItem>
+                                                    <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-white">Urgente</SelectItem>
+                                                    <SelectItem value="alta" className="focus:bg-blue-600 focus:text-white">Alta</SelectItem>
+                                                    <SelectItem value="media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>
+                                                    <SelectItem value="baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3 mt-6">
+                                        
+                                        <Dialog open={revisionDialog} onOpenChange={(open) => { 
+                                            setRevisionDialog(open); 
+                                            if(!open) {
+                                                setBusquedaPaciente("");
+                                                setRevision({ convictoId: "", diagnostico: "", tratamiento: "", medico: "", prioridad: "", fecha: "", hora: "", proximaRevision: "" });
+                                            } 
+                                        }}>
+                                            <DialogTrigger asChild>
+                                                <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva revisión</Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                                                <DialogHeader>
+                                                    <DialogTitle className="text-xl font-bold text-white">Nueva revisión médica</DialogTitle>
+                                                    <DialogDescription className="text-slate-400 text-[15px]">Registre una evaluación para un interno.</DialogDescription>
+                                                </DialogHeader>
+                                                <form onSubmit={handleNuevaRevision} className="space-y-4 pt-3">
+                                                    
+                                                    {/* FILTRO Y SELECTOR DE PACIENTE */}
+                                                    <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                                        <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
+                                                        <Input
+                                                            placeholder="Buscar por DNI, Nombre o ID..."
+                                                            value={busquedaPaciente}
+                                                            onChange={(e) => {
+                                                                const valor = e.target.value;
+                                                                setBusquedaPaciente(valor);
+                                                                if (valor.trim() === "") {
+                                                                    setRevision({ ...revision, convictoId: "" });
+                                                                } else {
+                                                                    const filtrados = convictos.filter(c => 
+                                                                        (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                                        (c.dni && c.dni.includes(valor)) ||
+                                                                        (c.id && c.id.toString() === valor)
+                                                                    );
+                                                                    if (filtrados.length > 0) {
+                                                                        setRevision({ ...revision, convictoId: String(filtrados[0].id) });
+                                                                    } else {
+                                                                        setRevision({ ...revision, convictoId: "" });
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                                        />
+                                                        <Select value={revision.convictoId} onValueChange={(v) => setRevision({...revision, convictoId: v})}>
+                                                            <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
+                                                            <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                                                {convictosFiltrados.length > 0 ? (
+                                                                    convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                                ) : (
+                                                                    <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
 
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-1.5"><Label className="sgc-label">Fecha</Label><Input type="date" className="sgc-input h-11" value={revision.fecha} onChange={e => setRevision({...revision, fecha: e.target.value})}/></div>
-                                                <div className="space-y-1.5"><Label className="sgc-label">Hora</Label><Input type="time" className="sgc-input h-11" value={revision.hora} onChange={e => setRevision({...revision, hora: e.target.value})}/></div>
-                                            </div>
-                                            
-                                            <div className="space-y-1.5">
-                                                <Label className="sgc-label">Médico Tratante</Label>
-                                                <Input className="sgc-input h-11" placeholder="Ej. Dr. Juan Pérez (Dejar en blanco para usar tu usuario)" value={revision.medico} onChange={e => setRevision({...revision, medico: e.target.value})} />
-                                            </div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-1.5"><Label className="sgc-label">Fecha</Label><Input type="date" className="sgc-input h-11" value={revision.fecha} onChange={e => setRevision({...revision, fecha: e.target.value})}/></div>
+                                                        <div className="space-y-1.5"><Label className="sgc-label">Hora</Label><Input type="time" className="sgc-input h-11" value={revision.hora} onChange={e => setRevision({...revision, hora: e.target.value})}/></div>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-1.5">
+                                                        <Label className="sgc-label">Médico Tratante</Label>
+                                                        <Input className="sgc-input h-11" placeholder="Ej. Dr. Juan Pérez (Dejar en blanco para usar tu usuario)" value={revision.medico} onChange={e => setRevision({...revision, medico: e.target.value})} />
+                                                    </div>
 
-                                            <div className="space-y-1.5"><Label className="sgc-label">Diagnóstico *</Label><Input className="sgc-input h-11" value={revision.diagnostico} onChange={e => setRevision({...revision, diagnostico: e.target.value})} required/></div>
-                                            <div className="space-y-1.5"><Label className="sgc-label">Tratamiento</Label><Textarea className="sgc-input" value={revision.tratamiento} onChange={e => setRevision({...revision, tratamiento: e.target.value})} rows={3}/></div>
-                                            
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-1.5">
-                                                    <Label className="sgc-label">Prioridad</Label>
-                                                    <Select value={revision.prioridad} onValueChange={v => setRevision({...revision, prioridad: v})}>
-                                                        <SelectTrigger className="sgc-input h-11! w-full"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                        <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                            <SelectItem value="baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
-                                                            <SelectItem value="media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>
-                                                            <SelectItem value="alta" className="focus:bg-blue-600 focus:text-white">Alta</SelectItem>
-                                                            <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-white">Urgente</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-1.5"><Label className="sgc-label">Próxima revisión</Label><Input type="date" className="sgc-input h-11" value={revision.proximaRevision} onChange={e => setRevision({...revision, proximaRevision: e.target.value})}/></div>
-                                            </div>
-                                            
-                                            <div className="flex gap-3 pt-2">
-                                                <Button type="button" onClick={() => {
-                                                    setRevisionDialog(false); 
-                                                    setBusquedaPaciente("");
-                                                    setRevision({ convictoId: "", diagnostico: "", tratamiento: "", medico: "", prioridad: "", fecha: "", hora: "", proximaRevision: "" });
-                                                }} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
-                                                <Button type="submit" className="sgc-btn-primary flex-1 h-11">Registrar</Button>
-                                            </div>
-                                        </form>
-                                    </DialogContent>
-                                </Dialog>
-                                <Button className="sgc-btn-secondary h-10 px-5" onClick={() => exportToCSV(revisionesData, "revisiones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                <Button className="sgc-btn-secondary h-10 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
-                            </div>
+                                                    <div className="space-y-1.5"><Label className="sgc-label">Diagnóstico *</Label><Input className="sgc-input h-11" value={revision.diagnostico} onChange={e => setRevision({...revision, diagnostico: e.target.value})} required/></div>
+                                                    <div className="space-y-1.5"><Label className="sgc-label">Tratamiento</Label><Textarea className="sgc-input" value={revision.tratamiento} onChange={e => setRevision({...revision, tratamiento: e.target.value})} rows={3}/></div>
+                                                    
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-1.5">
+                                                            <Label className="sgc-label">Prioridad</Label>
+                                                            <Select value={revision.prioridad} onValueChange={v => setRevision({...revision, prioridad: v})}>
+                                                                <SelectTrigger className="sgc-input h-11! w-full"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
+                                                                <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
+                                                                    <SelectItem value="baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
+                                                                    <SelectItem value="media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>
+                                                                    <SelectItem value="alta" className="focus:bg-blue-600 focus:text-white">Alta</SelectItem>
+                                                                    <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-white">Urgente</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="space-y-1.5"><Label className="sgc-label">Próxima revisión</Label><Input type="date" className="sgc-input h-11" value={revision.proximaRevision} onChange={e => setRevision({...revision, proximaRevision: e.target.value})}/></div>
+                                                    </div>
+                                                    
+                                                    <div className="flex gap-3 pt-2">
+                                                        <Button type="button" onClick={() => {
+                                                            setRevisionDialog(false); 
+                                                            setBusquedaPaciente("");
+                                                            setRevision({ convictoId: "", diagnostico: "", tratamiento: "", medico: "", prioridad: "", fecha: "", hora: "", proximaRevision: "" });
+                                                        }} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
+                                                        <Button type="submit" className="sgc-btn-primary flex-1 h-11">Registrar</Button>
+                                                    </div>
+                                                </form>
+                                            </DialogContent>
+                                        </Dialog>
+
+                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(filteredRevisiones, "revisiones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
 
                             <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
                                 <Table>
@@ -552,7 +609,7 @@ export default function MedicoPanel() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {revisionesData.map((rev) => (
+                                        {filteredRevisiones.map((rev) => (
                                             <TableRow key={rev.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
                                                 <TableCell className="font-bold text-blue-400">R-{rev.id}</TableCell>
                                                 <TableCell className="text-slate-300">{rev.fecha}</TableCell>
@@ -581,83 +638,101 @@ export default function MedicoPanel() {
 
                         {/* ======================= TRATAMIENTOS ======================= */}
                         <TabsContent value="tratamientos" className="space-y-6">
-                            <div className="flex flex-wrap gap-3 mb-4">
-                                <Dialog open={tratamientoDialog} onOpenChange={(open) => { 
-                                    setTratamientoDialog(open); 
-                                    if(!open) {
-                                        setBusquedaPaciente("");
-                                        setTratamiento({ convictoId: "", medicamento: "", dosis: "", frecuencia: "", duracion: "", medico: "", fechaInicio: "" });
-                                    } 
-                                }}>
-                                    <DialogTrigger asChild>
-                                        <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/>Nuevo tratamiento</Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-                                        <DialogHeader>
-                                            <DialogTitle className="text-xl font-bold text-white">Registrar tratamiento</DialogTitle>
-                                            <DialogDescription className="text-slate-400 text-[15px]">Asigne medicamentos y dosis a un interno.</DialogDescription>
-                                        </DialogHeader>
-                                        <form onSubmit={handleRegistrarTratamiento} className="space-y-4 pt-3">
-                                            
-                                            {/* FILTRO Y SELECTOR DE PACIENTE */}
-                                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
-                                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
-                                                <Input
-                                                    placeholder="Buscar por DNI, Nombre o ID..."
-                                                    value={busquedaPaciente}
-                                                    onChange={(e) => {
-                                                        const valor = e.target.value;
-                                                        setBusquedaPaciente(valor);
-                                                        if (valor.trim() === "") {
-                                                            setTratamiento({ ...tratamiento, convictoId: "" });
-                                                        } else {
-                                                            const filtrados = convictos.filter(c => 
-                                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
-                                                                (c.dni && c.dni.includes(valor)) ||
-                                                                (c.id && c.id.toString() === valor)
-                                                            );
-                                                            if (filtrados.length > 0) {
-                                                                setTratamiento({ ...tratamiento, convictoId: String(filtrados[0].id) });
-                                                            } else {
-                                                                setTratamiento({ ...tratamiento, convictoId: "" });
-                                                            }
-                                                        }
-                                                    }}
-                                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
-                                                />
-                                                <Select value={tratamiento.convictoId} onValueChange={(v) => setTratamiento({...tratamiento, convictoId: v})}>
-                                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
-                                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
-                                                        {convictosFiltrados.length > 0 ? (
-                                                            convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
-                                                        ) : (
-                                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
+                            <Card className="sgc-card border-0 mb-4">
+                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
+                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de Tratamientos</CardTitle>
+                                    <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${filteredTratamientos.length > 50 ? "border-red-500 text-red-400 bg-red-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
+                                        Registros totales: {filteredTratamientos.length}
+                                    </Badge>
+                                </CardHeader>
+                                <CardContent className="pt-4">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-start gap-4">
+                                        <div className="relative md:w-1/3 h-10!">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500"/>
+                                            <Input aria-label="Búsqueda" placeholder="Buscar por ID, Paciente o Medicamento..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10!"/>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3 mt-6">
+                                        
+                                        <Dialog open={tratamientoDialog} onOpenChange={(open) => { 
+                                            setTratamientoDialog(open); 
+                                            if(!open) {
+                                                setBusquedaPaciente("");
+                                                setTratamiento({ convictoId: "", medicamento: "", dosis: "", frecuencia: "", duracion: "", medico: "", fechaInicio: "" });
+                                            } 
+                                        }}>
+                                            <DialogTrigger asChild>
+                                                <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/>Nuevo tratamiento</Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                                                <DialogHeader>
+                                                    <DialogTitle className="text-xl font-bold text-white">Registrar tratamiento</DialogTitle>
+                                                    <DialogDescription className="text-slate-400 text-[15px]">Asigne medicamentos y dosis a un interno.</DialogDescription>
+                                                </DialogHeader>
+                                                <form onSubmit={handleRegistrarTratamiento} className="space-y-4 pt-3">
+                                                    
+                                                    {/* FILTRO Y SELECTOR DE PACIENTE */}
+                                                    <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                                        <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
+                                                        <Input
+                                                            placeholder="Buscar por DNI, Nombre o ID..."
+                                                            value={busquedaPaciente}
+                                                            onChange={(e) => {
+                                                                const valor = e.target.value;
+                                                                setBusquedaPaciente(valor);
+                                                                if (valor.trim() === "") {
+                                                                    setTratamiento({ ...tratamiento, convictoId: "" });
+                                                                } else {
+                                                                    const filtrados = convictos.filter(c => 
+                                                                        (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                                        (c.dni && c.dni.includes(valor)) ||
+                                                                        (c.id && c.id.toString() === valor)
+                                                                    );
+                                                                    if (filtrados.length > 0) {
+                                                                        setTratamiento({ ...tratamiento, convictoId: String(filtrados[0].id) });
+                                                                    } else {
+                                                                        setTratamiento({ ...tratamiento, convictoId: "" });
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                                        />
+                                                        <Select value={tratamiento.convictoId} onValueChange={(v) => setTratamiento({...tratamiento, convictoId: v})}>
+                                                            <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
+                                                            <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                                                {convictosFiltrados.length > 0 ? (
+                                                                    convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                                ) : (
+                                                                    <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
 
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-1.5"><Label className="sgc-label">Medicamento *</Label><Input className="sgc-input h-11" value={tratamiento.medicamento} onChange={(e) => setTratamiento({...tratamiento, medicamento: e.target.value})} required/></div>
-                                                <div className="space-y-1.5"><Label className="sgc-label">Dosis *</Label><Input className="sgc-input h-11" value={tratamiento.dosis} onChange={(e) => setTratamiento({...tratamiento, dosis: e.target.value})} required/></div>
-                                                <div className="space-y-1.5"><Label className="sgc-label">Frecuencia *</Label><Input className="sgc-input h-11" value={tratamiento.frecuencia} onChange={(e) => setTratamiento({...tratamiento, frecuencia: e.target.value})} required/></div>
-                                                <div className="space-y-1.5"><Label className="sgc-label">Duración *</Label><Input className="sgc-input h-11" value={tratamiento.duracion} onChange={(e) => setTratamiento({...tratamiento, duracion: e.target.value})} required/></div>
-                                                <div className="space-y-1.5"><Label className="sgc-label">Fecha inicio</Label><Input type="date" className="sgc-input h-11" value={tratamiento.fechaInicio} onChange={(e) => setTratamiento({...tratamiento, fechaInicio: e.target.value})}/></div>
-                                            </div>
-                                            <div className="flex gap-3 pt-2">
-                                                <Button type="button" onClick={() => {
-                                                    setTratamientoDialog(false); 
-                                                    setBusquedaPaciente("");
-                                                    setTratamiento({ convictoId: "", medicamento: "", dosis: "", frecuencia: "", duracion: "", medico: "", fechaInicio: "" });
-                                                }} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
-                                                <Button type="submit" className="sgc-btn-primary flex-1 h-11">Registrar</Button>
-                                            </div>
-                                        </form>
-                                    </DialogContent>
-                                </Dialog>
-                                <Button className="sgc-btn-secondary h-10 px-5" onClick={() => exportToCSV(tratamientosDataState, "tratamientos")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                <Button className="sgc-btn-secondary h-10 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
-                            </div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-1.5"><Label className="sgc-label">Medicamento *</Label><Input className="sgc-input h-11" value={tratamiento.medicamento} onChange={(e) => setTratamiento({...tratamiento, medicamento: e.target.value})} required/></div>
+                                                        <div className="space-y-1.5"><Label className="sgc-label">Dosis *</Label><Input className="sgc-input h-11" value={tratamiento.dosis} onChange={(e) => setTratamiento({...tratamiento, dosis: e.target.value})} required/></div>
+                                                        <div className="space-y-1.5"><Label className="sgc-label">Frecuencia *</Label><Input className="sgc-input h-11" value={tratamiento.frecuencia} onChange={(e) => setTratamiento({...tratamiento, frecuencia: e.target.value})} required/></div>
+                                                        <div className="space-y-1.5"><Label className="sgc-label">Duración *</Label><Input className="sgc-input h-11" value={tratamiento.duracion} onChange={(e) => setTratamiento({...tratamiento, duracion: e.target.value})} required/></div>
+                                                        <div className="space-y-1.5"><Label className="sgc-label">Fecha inicio</Label><Input type="date" className="sgc-input h-11" value={tratamiento.fechaInicio} onChange={(e) => setTratamiento({...tratamiento, fechaInicio: e.target.value})}/></div>
+                                                    </div>
+                                                    <div className="flex gap-3 pt-2">
+                                                        <Button type="button" onClick={() => {
+                                                            setTratamientoDialog(false); 
+                                                            setBusquedaPaciente("");
+                                                            setTratamiento({ convictoId: "", medicamento: "", dosis: "", frecuencia: "", duracion: "", medico: "", fechaInicio: "" });
+                                                        }} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
+                                                        <Button type="submit" className="sgc-btn-primary flex-1 h-11">Registrar</Button>
+                                                    </div>
+                                                </form>
+                                            </DialogContent>
+                                        </Dialog>
+
+                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(filteredTratamientos, "tratamientos")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
 
                             <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
                                 <Table>
@@ -674,7 +749,7 @@ export default function MedicoPanel() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {tratamientosDataState.map(tr => (
+                                        {filteredTratamientos.map(tr => (
                                             <TableRow key={tr.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
                                                 <TableCell className="font-bold text-blue-400">T-{tr.id}</TableCell>    
                                                 <TableCell className="font-medium text-white">{tr.nombre ?? convictoIdToName(tr.convictoId)}</TableCell>    
@@ -702,105 +777,134 @@ export default function MedicoPanel() {
 
                         {/* ======================= DERIVACIONES ======================= */}
                         <TabsContent value="derivaciones" className="space-y-6">
-                            <div className="flex flex-wrap gap-3 mb-4">
-                                <Dialog open={derivacionDialog} onOpenChange={(open) => { 
-                                    setDerivacionDialog(open); 
-                                    if(!open) {
-                                        setBusquedaPaciente("");
-                                        setDerivacion({convictoId: "", especialidad: "", motivo: "", urgencia: "", institucion: "", fecha: ""});
-                                    } 
-                                }}>
-                                    <DialogTrigger asChild>
-                                        <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva derivación</Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-                                        <DialogHeader>
-                                            <DialogTitle className="text-xl font-bold text-white">Registrar derivación</DialogTitle>
-                                            <DialogDescription className="text-slate-400 text-[15px]">Derive a un paciente a un centro de salud externo.</DialogDescription>
-                                        </DialogHeader>
-                                        <form onSubmit={handleRegistrarDerivacion} className="space-y-4 pt-3">
-                                            
-                                            {/* FILTRO Y SELECTOR DE PACIENTE */}
-                                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
-                                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
-                                                <Input
-                                                    placeholder="Buscar por DNI, Nombre o ID..."
-                                                    value={busquedaPaciente}
-                                                    onChange={(e) => {
-                                                        const valor = e.target.value;
-                                                        setBusquedaPaciente(valor);
-                                                        if (valor.trim() === "") {
-                                                            setDerivacion({ ...derivacion, convictoId: "" });
-                                                        } else {
-                                                            const filtrados = convictos.filter(c => 
-                                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
-                                                                (c.dni && c.dni.includes(valor)) ||
-                                                                (c.id && c.id.toString() === valor)
-                                                            );
-                                                            if (filtrados.length > 0) {
-                                                                setDerivacion({ ...derivacion, convictoId: String(filtrados[0].id) });
-                                                            } else {
-                                                                setDerivacion({ ...derivacion, convictoId: "" });
-                                                            }
-                                                        }
-                                                    }}
-                                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
-                                                />
-                                                <Select value={derivacion.convictoId} onValueChange={(v) => setDerivacion({...derivacion, convictoId: v})}>
-                                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
-                                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
-                                                        {convictosFiltrados.length > 0 ? (
-                                                            convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
-                                                        ) : (
-                                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
+                            <Card className="sgc-card border-0 mb-4">
+                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
+                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de Derivaciones</CardTitle>
+                                    <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${filteredDerivaciones.length > 50 ? "border-red-500 text-red-400 bg-red-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
+                                        Registros totales: {filteredDerivaciones.length}
+                                    </Badge>
+                                </CardHeader>
+                                <CardContent className="pt-4">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                        <div className="relative md:w-1/3 h-10!">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500"/>
+                                            <Input aria-label="Búsqueda" placeholder="Buscar por ID, Paciente o Especialidad..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10!"/>
+                                        </div>
+                                        <div className="md:w-auto flex flex-col lg:flex-row gap-4 items-end w-full">
+                                            <Select value={estadoDerivacionFilter} onValueChange={setEstadoDerivacionFilter}>
+                                                <SelectTrigger className="sgc-input h-10! w-full md:w-[200px]"><SelectValue placeholder="Estado"/></SelectTrigger>
+                                                <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
+                                                    <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los estados</SelectItem>
+                                                    <SelectItem value="pendiente" className="focus:bg-blue-600 focus:text-white">Pendiente</SelectItem>
+                                                    <SelectItem value="realizada" className="focus:bg-blue-600 focus:text-white">Realizada</SelectItem>
+                                                    <SelectItem value="rechazada" className="focus:bg-blue-600 focus:text-white">Rechazada</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3 mt-6">
+                                        
+                                        <Dialog open={derivacionDialog} onOpenChange={(open) => { 
+                                            setDerivacionDialog(open); 
+                                            if(!open) {
+                                                setBusquedaPaciente("");
+                                                setDerivacion({convictoId: "", especialidad: "", motivo: "", urgencia: "", institucion: "", fecha: ""});
+                                            } 
+                                        }}>
+                                            <DialogTrigger asChild>
+                                                <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva derivación</Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                                                <DialogHeader>
+                                                    <DialogTitle className="text-xl font-bold text-white">Registrar derivación</DialogTitle>
+                                                    <DialogDescription className="text-slate-400 text-[15px]">Derive a un paciente a un centro de salud externo.</DialogDescription>
+                                                </DialogHeader>
+                                                <form onSubmit={handleRegistrarDerivacion} className="space-y-4 pt-3">
+                                                    
+                                                    {/* FILTRO Y SELECTOR DE PACIENTE */}
+                                                    <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                                        <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
+                                                        <Input
+                                                            placeholder="Buscar por DNI, Nombre o ID..."
+                                                            value={busquedaPaciente}
+                                                            onChange={(e) => {
+                                                                const valor = e.target.value;
+                                                                setBusquedaPaciente(valor);
+                                                                if (valor.trim() === "") {
+                                                                    setDerivacion({ ...derivacion, convictoId: "" });
+                                                                } else {
+                                                                    const filtrados = convictos.filter(c => 
+                                                                        (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                                        (c.dni && c.dni.includes(valor)) ||
+                                                                        (c.id && c.id.toString() === valor)
+                                                                    );
+                                                                    if (filtrados.length > 0) {
+                                                                        setDerivacion({ ...derivacion, convictoId: String(filtrados[0].id) });
+                                                                    } else {
+                                                                        setDerivacion({ ...derivacion, convictoId: "" });
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                                        />
+                                                        <Select value={derivacion.convictoId} onValueChange={(v) => setDerivacion({...derivacion, convictoId: v})}>
+                                                            <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
+                                                            <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                                                {convictosFiltrados.length > 0 ? (
+                                                                    convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                                ) : (
+                                                                    <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
 
-                                            <div className="space-y-1.5">
-                                                <Label className="sgc-label">Especialidad *</Label>
-                                                <Select value={derivacion.especialidad} onValueChange={v => setDerivacion({...derivacion, especialidad: v})}>
-                                                    <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                        <SelectItem value="Cardiología" className="focus:bg-blue-600 focus:text-white">Cardiología</SelectItem>
-                                                        <SelectItem value="Traumatología" className="focus:bg-blue-600 focus:text-white">Traumatología</SelectItem>
-                                                        <SelectItem value="Psiquiatría" className="focus:bg-blue-600 focus:text-white">Psiquiatría</SelectItem>
-                                                        <SelectItem value="Odontología" className="focus:bg-blue-600 focus:text-white">Odontología</SelectItem>
-                                                        <SelectItem value="Otra" className="focus:bg-blue-600 focus:text-white">Otra</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-1.5"><Label className="sgc-label">Motivo *</Label><Textarea className="sgc-input" value={derivacion.motivo} onChange={e => setDerivacion({...derivacion, motivo: e.target.value})} rows={3} required/></div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-1.5">
-                                                    <Label className="sgc-label">Urgencia</Label>
-                                                    <Select value={derivacion.urgencia} onValueChange={v => setDerivacion({...derivacion, urgencia: v})}>
-                                                        <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                        <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                            <SelectItem value="normal" className="focus:bg-blue-600 focus:text-white">Normal</SelectItem>
-                                                            <SelectItem value="preferente" className="focus:bg-blue-600 focus:text-white">Preferente</SelectItem>
-                                                            <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-white">Urgente</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-1.5"><Label className="sgc-label">Fecha</Label><Input type="date" className="sgc-input h-11" value={derivacion.fecha} onChange={e => setDerivacion({...derivacion, fecha: e.target.value})}/></div>
-                                            </div>
-                                            <div className="space-y-1.5"><Label className="sgc-label">Institución externa</Label><Input className="sgc-input h-11" value={derivacion.institucion} onChange={e => setDerivacion({...derivacion, institucion: e.target.value})}/></div>
-                                            <div className="flex gap-3 pt-2">
-                                                <Button type="button" onClick={() => {
-                                                    setDerivacionDialog(false); 
-                                                    setBusquedaPaciente("");
-                                                    setDerivacion({convictoId: "", especialidad: "", motivo: "", urgencia: "", institucion: "", fecha: ""});
-                                                }} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
-                                                <Button type="submit" className="sgc-btn-primary flex-1 h-11">Registrar</Button>
-                                            </div>
-                                        </form>
-                                    </DialogContent>
-                                </Dialog>
-                                <Button className="sgc-btn-secondary h-10 px-5" onClick={() => exportToCSV(derivacionesDataState, "derivaciones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                <Button className="sgc-btn-secondary h-10 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
-                            </div>
+                                                    <div className="space-y-1.5">
+                                                        <Label className="sgc-label">Especialidad *</Label>
+                                                        <Select value={derivacion.especialidad} onValueChange={v => setDerivacion({...derivacion, especialidad: v})}>
+                                                            <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
+                                                            <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
+                                                                <SelectItem value="Cardiología" className="focus:bg-blue-600 focus:text-white">Cardiología</SelectItem>
+                                                                <SelectItem value="Traumatología" className="focus:bg-blue-600 focus:text-white">Traumatología</SelectItem>
+                                                                <SelectItem value="Psiquiatría" className="focus:bg-blue-600 focus:text-white">Psiquiatría</SelectItem>
+                                                                <SelectItem value="Odontología" className="focus:bg-blue-600 focus:text-white">Odontología</SelectItem>
+                                                                <SelectItem value="Otra" className="focus:bg-blue-600 focus:text-white">Otra</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-1.5"><Label className="sgc-label">Motivo *</Label><Textarea className="sgc-input" value={derivacion.motivo} onChange={e => setDerivacion({...derivacion, motivo: e.target.value})} rows={3} required/></div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-1.5">
+                                                            <Label className="sgc-label">Urgencia</Label>
+                                                            <Select value={derivacion.urgencia} onValueChange={v => setDerivacion({...derivacion, urgencia: v})}>
+                                                                <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
+                                                                <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
+                                                                    <SelectItem value="normal" className="focus:bg-blue-600 focus:text-white">Normal</SelectItem>
+                                                                    <SelectItem value="preferente" className="focus:bg-blue-600 focus:text-white">Preferente</SelectItem>
+                                                                    <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-white">Urgente</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="space-y-1.5"><Label className="sgc-label">Fecha</Label><Input type="date" className="sgc-input h-11" value={derivacion.fecha} onChange={e => setDerivacion({...derivacion, fecha: e.target.value})}/></div>
+                                                    </div>
+                                                    <div className="space-y-1.5"><Label className="sgc-label">Institución externa</Label><Input className="sgc-input h-11" value={derivacion.institucion} onChange={e => setDerivacion({...derivacion, institucion: e.target.value})}/></div>
+                                                    <div className="flex gap-3 pt-2">
+                                                        <Button type="button" onClick={() => {
+                                                            setDerivacionDialog(false); 
+                                                            setBusquedaPaciente("");
+                                                            setDerivacion({convictoId: "", especialidad: "", motivo: "", urgencia: "", institucion: "", fecha: ""});
+                                                        }} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
+                                                        <Button type="submit" className="sgc-btn-primary flex-1 h-11">Registrar</Button>
+                                                    </div>
+                                                </form>
+                                            </DialogContent>
+                                        </Dialog>
+
+                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(filteredDerivaciones, "derivaciones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
 
                             <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
                                 <Table>
@@ -816,7 +920,7 @@ export default function MedicoPanel() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {derivacionesDataState.map(d => (
+                                        {filteredDerivaciones.map(d => (
                                             <TableRow key={d.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
                                                 <TableCell className="font-bold text-blue-400">D-{d.id}</TableCell>
                                                 <TableCell><Badge variant="outline" className={getEstadoColor(d.estado)}>{(d.estado || "").toUpperCase()}</Badge></TableCell>
@@ -843,10 +947,27 @@ export default function MedicoPanel() {
 
                         {/* ======================= HISTORIAL ======================= */}
                         <TabsContent value="historial" className="space-y-6">
-                            <div className="flex flex-wrap gap-3 mb-4">
-                                <Button className="sgc-btn-secondary h-10 px-5" onClick={() => exportToCSV(historialDataState, "historial")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                <Button className="sgc-btn-secondary h-10 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
-                            </div>
+                            <Card className="sgc-card border-0 mb-4">
+                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
+                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Historial Médico Completo</CardTitle>
+                                    <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 border-green-500 text-green-400 bg-green-500/10`}>
+                                        Registros totales: {filteredHistorial.length}
+                                    </Badge>
+                                </CardHeader>
+                                <CardContent className="pt-4">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-start gap-4">
+                                        <div className="relative md:w-1/3 h-10!">
+                                            <Search className=" absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500"/>
+                                            <Input aria-label="Búsqueda" placeholder="Buscar por ID, Paciente o Diagnóstico..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10!"/>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3 mt-6">
+                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(filteredHistorial, "historial")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
                             <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
                                 <Table>
                                     <TableHeader>
@@ -862,7 +983,7 @@ export default function MedicoPanel() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {historialDataState.map(h => (
+                                        {filteredHistorial.map(h => (
                                             <TableRow key={h.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
                                                 <TableCell className="font-bold text-blue-400">H-{h.id}</TableCell>
                                                 <TableCell className="text-slate-300">{h.fecha}</TableCell>
@@ -878,9 +999,7 @@ export default function MedicoPanel() {
                                 </Table>
                             </div>
                         </TabsContent>
-
-                    </Tabs>
-                </Card>
+                </Tabs>
 
                 {/* --- DIALOG DE EDICIÓN GENÉRICO --- */}
                 {editingId && editingData && (
