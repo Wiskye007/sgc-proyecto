@@ -27,6 +27,7 @@ interface Usuario {
   enLinea: boolean;
   fechaCreacion: string;
   fechaActualizacion: string;
+  ultimaActividad: string;
 }
 
 interface PaginacionInfo {
@@ -317,6 +318,9 @@ export default function UsuariosPanel() {
                       <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Cargo</th>
                       <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Nivel</th>
                       <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Estado/Conexión</th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs min-w-[180px]">Fecha creación</th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs min-w-[180px]">Última actualización<noscript></noscript></th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs min-w-[180px]">Última actividad</th>
                       <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Acciones</th>
                     </tr>
                   </thead>
@@ -341,7 +345,7 @@ export default function UsuariosPanel() {
                         <td className="py-4 px-6 text-slate-400">{usr.correo}</td>
                         <td className="py-4 px-6 text-center text-slate-300">{usr.cargo}</td>
                         <td className="py-4 px-6 text-center">
-                          <span className="px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide bg-blue-500/10 text-blue-400 border border-blue-500/20">{usr.nivelAcceso}</span>
+                          <span className="inline-block whitespace-nowrap px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide bg-blue-500/10 text-blue-400 border border-blue-500/20">{usr.nivelAcceso}</span>
                         </td>
                         <td className="py-4 px-6 text-center">
                           <div className="flex flex-col items-center gap-2">
@@ -359,6 +363,13 @@ export default function UsuariosPanel() {
                                 </div>
                               )}
                           </div>
+                        </td>
+                        <td className="py-4 px-6 text-center text-slate-400 font-mono text-[14px]">{usr.fechaCreacion || 'Sin registros'}</td>
+                        <td className="py-4 px-6 text-center text-slate-400 font-mono text-[14px]">{usr.fechaActualizacion || 'Sin registros'}</td>
+                        <td className="py-4 px-6 text-center text-slate-400 font-mono text-[14px]">
+                          {usr.ultimaActividad !== 'Sin actividad' ? usr.ultimaActividad : (
+                            <span className="italic text-slate-600">Nunca</span>
+                          )}
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex gap-2 justify-center">

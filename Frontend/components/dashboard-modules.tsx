@@ -90,18 +90,22 @@ export default function DashboardModules() {
         <div className="sgc-bg min-h-screen w-full py-10 px-4 md:px-8 font-sans text-slate-200">
             <div className="container mx-auto max-w-6xl space-y-8 relative z-10">
                 
-                {/* --- HEADER DEL DASHBOARD --- */}
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0a0f1a]/80 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl relative z-50">
-                    <div className="flex items-center gap-5">
-                        <div className="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
-                            <Shield className="h-8 w-8 text-blue-400" />
+                {/* --- TÍTULO DEL DASHBOARD --- */}
+                <div className="w-full flex flex-row items-center justify-between bg-[#0a0f1a]/80 p-4 md:p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl gap-2 relative z-50">
+                    
+                    {/* LADO IZQUIERDO: Escudo y títulos */}
+                    <div className="flex items-center gap-3 md:gap-4 shrink-0">
+                        <div className="hidden sm:flex h-10 w-10 md:h-12 md:w-12 rounded-xl border border-blue-500/20 bg-blue-500/10 items-center justify-center">
+                            <Shield className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-black tracking-wide text-white">Panel Principal</h1>
-                            <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">SGC - Carceleta San Martín</p>
+                        <div className="flex flex-col">
+                            <h1 className="text-xl md:text-3xl font-black text-white tracking-wide leading-none">Panel Principal</h1>
+                            <p className="text-blue-400 text-[9px] md:text-xs font-bold uppercase tracking-widest mt-1">SGC - Carceleta San Martín</p>
                         </div>
-                    </div>  
-                    <div className="flex items-center gap-3">
+                    </div>
+
+                    {/* LADO DERECHO: Componentes modulares (Ícono y perfil) */}
+                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
                         <ThemeToggle />
                         <UserDropdown />
                     </div>

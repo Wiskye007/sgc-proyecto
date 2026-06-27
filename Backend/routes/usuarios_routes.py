@@ -34,13 +34,12 @@ def requiere_admin(f):
 # -------------------------------------------------------
 @bp.route('/perfil', methods=['GET'])
 @requiere_auth
-def obtener_perfil():
-    """Obtener datos del perfil del usuario autenticado"""
+def obtener_perfil():   
     try:
         usuario_id = g.usuario.get('id')
         query = """
             SELECT id, nombrecompleto, dni, cargo, nivelacceso, 
-                nombreusuario, fechacreacion, correo 
+                nombreusuario, fechacreacion, correo, fecha_actualizacion 
             FROM usuarios 
             WHERE id = %s
         """
@@ -60,15 +59,13 @@ def obtener_perfil():
                 'dni': usuario.get('Dni') or usuario.get('dni') or 'No registrado',
                 'correo': usuario.get('Correo') or usuario.get('correo') or '',
                 'cargo': usuario.get('Cargo') or usuario.get('cargo') or 'Usuario',
-                'nivelAcceso': usuario.get('Nivelacceso') or usuario.get('nivelacceso') or 'Estándar',
-                # Como no tienes columna 'estado', forzamos 'activo' para que el frontend no falle
+                'nivelAcceso': usuario.get('Nivelacceso') or usuario.get('nivelacceso') or 'Estándar',  
                 'estado': 'activo', 
-                'fechaCreacion': str(usuario.get('Fechacreacion') or usuario.get('fechacreacion') or ''),
-                # Como no tienes 'fecha_actualizacion', enviamos la fecha de hoy
-                'fechaActualizacion': str(datetime.now().strftime('%Y-%m-%d'))
+                # Fechas reales formateadas
+                'fechaCreacion': str(usuario.get('Fechacreacion') or usuario.get('fechacreacion') or '')[:19],
+                'fechaActualizacion': str(usuario.get('Fecha_actualizacion') or usuario.get('fecha_actualizacion') or 'Sin modificaciones')[:19]
             }
-        }), 200
-    
+        }), 200 
     except Exception as e:
         logger.exception(f"Error al obtener perfil: {e}")
         return jsonify({'error': 'Error interno del servidor'}), 500
@@ -79,8 +76,7 @@ def obtener_perfil():
 # -------------------------------------------------------
 @bp.route('/perfil', methods=['PUT'])
 @requiere_auth
-def actualizar_perfil():
-    """Actualizar datos del perfil del usuario autenticado"""
+def actualizar_perfil():    
     try:
         usuario_id = g.usuario.get('id')
         data = request.get_json()
@@ -91,22 +87,20 @@ def actualizar_perfil():
         
         if nombre_completo and len(nombre_completo) < 3:
             return jsonify({'error': 'El nombre debe tener al menos 3 caracteres'}), 400
+        
+        # CORRECCIÓN: Actualiza la fecha restando 5 horas (Perú)
         query = """
             UPDATE usuarios
-            SET nombrecompleto = %s, correo = %s, cargo = %s
+            SET nombrecompleto = %s, correo = %s, cargo = %s, fecha_actualizacion = (NOW() - INTERVAL '5 hours')
             WHERE id = %s
         """
         db.execute_update(query, (nombre_completo, correo, cargo, usuario_id))
-        return jsonify({
-            'success': True,
-            'mensaje': 'Perfil actualizado correctamente'
-        }), 200
+        return jsonify({'success': True, 'mensaje': 'Perfil actualizado correctamente'}), 200
     
     except Exception as e:
         logger.exception(f"Error al actualizar perfil: {e}")
-        return jsonify({'error': 'Error al actualizar perfil'}), 500
-
-
+        return jsonify({'error': 'Error al actualizar perfil'}), 500    
+    
 # -------------------------------------------------------
 # ENDPOINT: CAMBIAR CONTRASEÑA
 # -------------------------------------------------------
@@ -271,9 +265,8 @@ def limpiar_dispositivo(ua_string):
 @bp.route('/historial-conexiones', methods=['GET'])
 @requiere_auth
 def historial_conexiones():
-    try:
-        usuario_id = g.usuario.get('id')
-        # Asegúrate de usar %s o ? dependiendo de tu BD
+    try:    
+        usuario_id = g.usuario.get('id')    
         query = """
             SELECT fecha_hora, direccion_ip, dispositivo 
             FROM historial_conexiones 
@@ -330,7 +323,7 @@ def listar_usuarios():
             params.append(cargo_filter)
         
         if nivel_filter:
-            where_clauses.append("LOWER(nivelacceso) = LOWER(%s)") # Corregido a nivelacceso
+            where_clauses.append("LOWER(nivelacceso) = LOWER(%s)")
             params.append(nivel_filter)
         
         if estado_filter:
@@ -339,9 +332,9 @@ def listar_usuarios():
             
         # --- FILTRADO POR SESIÓN ---
         if sesion_filter == 'online':
-            where_clauses.append("ultima_actividad >= CURRENT_TIMESTAMP - INTERVAL '5 minutes'")
+            where_clauses.append("ultima_actividad >= (NOW() - INTERVAL '5 hours') - INTERVAL '5 minutes'")
         elif sesion_filter == 'offline':
-            where_clauses.append("(ultima_actividad < CURRENT_TIMESTAMP - INTERVAL '5 minutes' OR ultima_actividad IS NULL)")
+            where_clauses.append("(ultima_actividad < (NOW() - INTERVAL '5 hours') - INTERVAL '5 minutes' OR ultima_actividad IS NULL)")
         # -------------------------------------------
 
         where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
@@ -354,8 +347,8 @@ def listar_usuarios():
         # Obtener usuarios
         query = f"""
             SELECT id, nombreusuario, nombrecompleto, dni, correo, cargo, nivelacceso,
-                estado, fechacreacion, fecha_actualizacion,
-                CASE WHEN ultima_actividad >= CURRENT_TIMESTAMP - INTERVAL '5 minutes' THEN true ELSE false END as en_linea
+                estado, fechacreacion, fecha_actualizacion, ultima_actividad,
+                CASE WHEN ultima_actividad >= (NOW() - INTERVAL '5 hours') - INTERVAL '5 minutes' THEN true ELSE false END as en_linea
             FROM usuarios
             {where_sql}
             ORDER BY id DESC
@@ -375,9 +368,10 @@ def listar_usuarios():
                 'cargo': user.get('cargo') or 'Usuario',
                 'nivelAcceso': user.get('nivelacceso') or 'Estandar',
                 'estado': user.get('estado') or 'activo',
-                'enLinea': user.get('en_linea') or False, # <--- Nuevo campo para el Frontend
-                'fechaCreacion': str(user.get('fechacreacion') or ''),
-                'fechaActualizacion': str(user.get('fecha_actualizacion') or '')
+                'enLinea': user.get('en_linea') or False, 
+                'fechaCreacion': str(user.get('fechacreacion') or '')[:19],
+                'fechaActualizacion': str(user.get('fecha_actualizacion') or '')[:19],
+                'ultimaActividad': str(user.get('ultima_actividad') or 'Sin actividad')[:19] # <--- NUEVO
             })
         
         return jsonify({
@@ -520,11 +514,11 @@ def eliminar_usuario(usuario_id):
 # -------------------------------------------------------
 @bp.route('/ping', methods=['POST'])
 @requiere_auth
-def ping_usuario():
-    """Actualiza la última actividad del usuario para marcarlo 'En línea'"""
+def ping_usuario(): 
     try:
         usuario_id = g.usuario.get('id')
-        db.execute_update("UPDATE usuarios SET ultima_actividad = CURRENT_TIMESTAMP WHERE id = %s", (usuario_id,))
+        # CORRECCIÓN: Registra la última actividad en hora local
+        db.execute_update("UPDATE usuarios SET ultima_actividad = (NOW() - INTERVAL '5 hours') WHERE id = %s", (usuario_id,))
         return jsonify({'success': True}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -445,7 +445,7 @@ export default function MedicoPanel() {
                                     } 
                                 }}>
                                     <DialogTrigger asChild>
-                                        <Button className="sgc-btn-primary h-11 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva revisión</Button>
+                                        <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva revisión</Button>
                                     </DialogTrigger>
                                     <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                         <DialogHeader>
@@ -532,8 +532,8 @@ export default function MedicoPanel() {
                                         </form>
                                     </DialogContent>
                                 </Dialog>
-                                <Button className="sgc-btn-secondary h-11 px-5" onClick={() => exportToCSV(revisionesData, "revisiones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                <Button className="sgc-btn-secondary h-11 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                <Button className="sgc-btn-secondary h-10 px-5" onClick={() => exportToCSV(revisionesData, "revisiones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                <Button className="sgc-btn-secondary h-10 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
                             </div>
 
                             <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
@@ -590,7 +590,7 @@ export default function MedicoPanel() {
                                     } 
                                 }}>
                                     <DialogTrigger asChild>
-                                        <Button className="sgc-btn-primary h-11 px-5"><Plus className="h-4 w-4 mr-2"/>Nuevo tratamiento</Button>
+                                        <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/>Nuevo tratamiento</Button>
                                     </DialogTrigger>
                                     <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                         <DialogHeader>
@@ -655,8 +655,8 @@ export default function MedicoPanel() {
                                         </form>
                                     </DialogContent>
                                 </Dialog>
-                                <Button className="sgc-btn-secondary h-11 px-5" onClick={() => exportToCSV(tratamientosDataState, "tratamientos")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                <Button className="sgc-btn-secondary h-11 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                <Button className="sgc-btn-secondary h-10 px-5" onClick={() => exportToCSV(tratamientosDataState, "tratamientos")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                <Button className="sgc-btn-secondary h-10 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
                             </div>
 
                             <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
@@ -711,7 +711,7 @@ export default function MedicoPanel() {
                                     } 
                                 }}>
                                     <DialogTrigger asChild>
-                                        <Button className="sgc-btn-primary h-11 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva derivación</Button>
+                                        <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva derivación</Button>
                                     </DialogTrigger>
                                     <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                         <DialogHeader>
@@ -798,8 +798,8 @@ export default function MedicoPanel() {
                                         </form>
                                     </DialogContent>
                                 </Dialog>
-                                <Button className="sgc-btn-secondary h-11 px-5" onClick={() => exportToCSV(derivacionesDataState, "derivaciones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                <Button className="sgc-btn-secondary h-11 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                <Button className="sgc-btn-secondary h-10 px-5" onClick={() => exportToCSV(derivacionesDataState, "derivaciones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                <Button className="sgc-btn-secondary h-10 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
                             </div>
 
                             <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
@@ -844,8 +844,8 @@ export default function MedicoPanel() {
                         {/* ======================= HISTORIAL ======================= */}
                         <TabsContent value="historial" className="space-y-6">
                             <div className="flex flex-wrap gap-3 mb-4">
-                                <Button className="sgc-btn-secondary h-11 px-5" onClick={() => exportToCSV(historialDataState, "historial")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                <Button className="sgc-btn-secondary h-11 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                <Button className="sgc-btn-secondary h-10 px-5" onClick={() => exportToCSV(historialDataState, "historial")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                <Button className="sgc-btn-secondary h-10 px-5" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
                             </div>
                             <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
                                 <Table>

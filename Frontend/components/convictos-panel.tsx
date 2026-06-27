@@ -635,10 +635,12 @@ const ConvictosPanel: React.FC = () => {
                             </CardContent>
                         </Card>
 
-                        <div className="flex gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoConvicto(true)}><Plus className="mr-2 h-4 w-4"/> Nuevo convicto</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(convictosData, "convictos")}><Download className="mr-2 h-4 w-4"/> Exportar CSV</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="mr-2 h-4 w-4"/> Imprimir</Button>
+                        <div className="flex flex-wrap gap-3 mb-4">
+                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoConvicto(true)}><Plus className="h-4 w-4"/> Nuevo convicto</Button>
+                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(convictosData, "convictos")}><Download className="h-4 w-4"/> Exportar CSV</Button>
+                            <div className="basis-full sm:basis-auto">
+                                <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                            </div>
                         </div>
 
                         <Card className="sgc-card border-0 overflow-hidden">
@@ -713,10 +715,12 @@ const ConvictosPanel: React.FC = () => {
                                 </div>
                             </CardHeader>
                         </Card>
-                        <div className="flex gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoMovimiento(true)}><Plus className="mr-2 h-4 w-4"/>Registrar traslado</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(movimientosData, "movimientos")}><Download className="mr-2 h-4 w-4"/>Exportar CSV</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="mr-2 h-4 w-4"/>Imprimir</Button>
+                        <div className="flex flex-wrap gap-3 mb-4">
+                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoMovimiento(true)}><Plus className="h-4 w-4"/>Registrar traslado</Button>
+                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(movimientosData, "movimientos")}><Download className="h-4 w-4"/>Exportar CSV</Button>
+                            <div className="basis-full sm:basis-auto">
+                                <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                            </div>
                         </div>
                         <Card className="sgc-card border-0 overflow-hidden">
                             <CardContent className="p-0">
@@ -796,10 +800,12 @@ const ConvictosPanel: React.FC = () => {
                                 </div>
                             </CardHeader>
                         </Card>
-                        <div className="flex gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaConducta(true)}><Plus className="mr-2 h-4 w-4"/>Registrar conducta</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(conductaData, "conducta")}><Download className="mr-2 h-4 w-4"/>Exportar CSV</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="mr-2 h-4 w-4"/>Imprimir</Button>
+                        <div className="flex flex-wrap gap-3 mb-4">
+                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaConducta(true)}><Plus className="h-4 w-4"/>Registrar conducta</Button>
+                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(conductaData, "conducta")}><Download className="h-4 w-4"/>Exportar CSV</Button>
+                            <div className="basis-full sm:basis-auto">
+                                <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                            </div>
                         </div>
                         <Card className="sgc-card border-0 overflow-hidden">
                             <CardContent className="p-0">
@@ -877,10 +883,12 @@ const ConvictosPanel: React.FC = () => {
                                 </div>
                             </CardHeader>
                         </Card>
-                        <div className="flex gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaVisita(true)}><Plus className="mr-2 h-4 w-4"/>Registrar visita</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(visitasData, "visitas")}><Download className="mr-2 h-4 w-4"/>Exportar CSV</Button>
-                            <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="mr-2 h-4 w-4"/>Imprimir</Button>
+                        <div className="flex flex-wrap gap-3 mb-4">
+                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaVisita(true)}><Plus className="h-4 w-4"/>Registrar visita</Button>
+                            <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(visitasData, "visitas")}><Download className="h-4 w-4"/>Exportar CSV</Button>
+                            <div className="basis-full sm:basis-auto">
+                                <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                            </div>
                         </div>
                         <Card className="sgc-card border-0 overflow-hidden">
                             <CardContent className="p-0">

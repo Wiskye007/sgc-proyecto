@@ -29,7 +29,7 @@ interface Perfil {
 
 export default function PerfilPanel() {
   const router = useRouter();
-  const { toast } = useToast(); // <-- INICIALIZACIÓN DEL TOAST
+  const { toast } = useToast();
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [loading, setLoading] = useState(true);
   const [editando, setEditando] = useState(false);
@@ -277,7 +277,7 @@ export default function PerfilPanel() {
               </CardHeader>
               <CardContent className="space-y-5 pt-0">
                 <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">Nombre Completo *</label>
+                  <label className="block text-slate-300 text-sm font-medium mb-2">Nombre completo *</label>
                   <Input
                     disabled={!editando}
                     name="nombreCompleto"
@@ -289,7 +289,7 @@ export default function PerfilPanel() {
 
                 <div>
                   <label className="block text-slate-300 text-sm font-medium mb-2">
-                    <Mail className="w-4 h-4 inline mr-2 text-slate-500" /> Correo Electrónico
+                    <Mail className="w-4 h-4 inline mr-2 text-slate-500" /> Correo electrónico
                   </label>
                   <Input
                     disabled={!editando}
@@ -302,7 +302,7 @@ export default function PerfilPanel() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">Cargo Institucional</label>
+                  <label className="block text-slate-300 text-sm font-medium mb-2">Cargo institucional</label>
                   <Input
                     disabled={!editando}
                     name="cargo"
@@ -315,7 +315,7 @@ export default function PerfilPanel() {
                 <div className="flex gap-3 pt-4 border-t border-slate-800/50 mt-4">
                   {!editando ? (
                     <Button onClick={() => setEditando(true)} className="sgc-btn-primary flex-1 h-11">
-                      <Save className="w-4 h-4 mr-2" /> Editar Información
+                      <Save className="w-4 h-4 mr-2" /> Editar información
                     </Button>
                   ) : (
                     <>
@@ -327,7 +327,7 @@ export default function PerfilPanel() {
                         Cancelar
                       </Button>
                       <Button onClick={handleUpdatePerfil} className="sgc-btn-primary flex-1 h-11">
-                        <Save className="w-4 h-4 mr-2" /> Guardar Cambios
+                        <Save className="w-4 h-4 mr-2" /> Guardar cambios
                       </Button>
                     </>
                   )}
@@ -337,7 +337,7 @@ export default function PerfilPanel() {
 
             {/* Auditoría */}
             <div className="flex justify-between items-center text-xs text-slate-500 px-4 font-mono">
-              <p>CREADO: {perfil.fechaCreacion ? perfil.fechaCreacion.split('T')[0] : 'N/A'}</p>
+              <p>CREACIÓN DE LA CUENTA: {perfil.fechaCreacion ? perfil.fechaCreacion.split('T')[0] : 'N/A'}</p>
               <p>ÚLTIMA MODIFICACIÓN: {perfil.fechaActualizacion ? perfil.fechaActualizacion.split('T')[0] : 'N/A'}</p>
             </div>
           </TabsContent>
@@ -407,7 +407,7 @@ export default function PerfilPanel() {
 
                 <div className="pt-4 border-t border-slate-800/50 mt-4">
                     <Button onClick={handleChangePassword} className="sgc-btn-primary w-full md:w-auto md:px-8 h-11 float-right">
-                    <Lock className="w-4 h-4 mr-2" /> Actualizar Contraseña
+                    <Lock className="w-4 h-4 mr-2" /> Actualizar contraseña
                     </Button>
                     <div className="clear-both"></div>
                 </div>

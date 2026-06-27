@@ -54,8 +54,10 @@ def login():
 
         # --- REGISTRAMOS LA CONEXIÓN EXITOSA ---
         # Obtenemos la IP real (incluso si está detrás de un proxy)
-        if request.headers.getlist("X-Forwarded-For"):
-            ip_usuario = request.headers.getlist("X-Forwarded-For")[0]
+        xff_header = request.headers.get("X-Forwarded-For")
+        if xff_header:
+            # Dividimos por la coma y nos quedamos con el primer elemento [0] limpiando espacios (.strip())
+            ip_usuario = xff_header.split(',')[0].strip()
         else:
             ip_usuario = request.remote_addr
             

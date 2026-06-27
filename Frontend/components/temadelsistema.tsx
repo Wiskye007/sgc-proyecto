@@ -5,7 +5,7 @@ import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(true); // Asumimos oscuro por defecto en tu diseño
+  const [isDark, setIsDark] = useState(true); // Asumimos oscuro por defecto
 
 useEffect(() => {
     // Al cargar, verificamos qué tema prefiere el usuario o el navegador

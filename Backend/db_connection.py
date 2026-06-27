@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 logger = logging.getLogger(__name__)
 
 class DatabaseConnection:
-    """Gestor de conexiones a PostgreSQL en Supabase"""
     def __init__(self):
         load_dotenv()
         self.connection_string = os.getenv("DATABASE_URL")
