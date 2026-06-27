@@ -87,7 +87,7 @@ export default function DashboardModules() {
     }, [])
 
     return (    
-        <div className="sgc-bg min-h-screen w-full py-10 px-4 md:px-8 font-sans text-slate-200">
+        <div className="sgc-bg min-h-screen w-full py-5 px-4 md:px-8 font-sans text-slate-200">
             <div className="container mx-auto max-w-6xl space-y-8 relative z-10">
                 
                 {/* --- TÍTULO DEL DASHBOARD --- */}

@@ -1,29 +1,12 @@
-# 1. Usamos una imagen de Python base
-FROM python:3.11-slim
+FROM python:3.11-slim   
 
-# 2. Instalamos dependencias del sistema necesarias para SQL Server/ODBC
-# Instalación limpia de dependencias ODBC
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    unixodbc \
-    unixodbc-dev \
-    freetds-dev \
-    freetds-bin \
-    tdsodbc \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app    
 
-# 3. Definimos el directorio de trabajo
-WORKDIR /app
+COPY Backend/requirements.txt . 
+RUN pip install --no-cache-dir -r requirements.txt  
 
-# 4. Copiamos solo los requirements primero
-COPY Backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY Backend/ . 
 
-# 5. Copiamos el resto del código del backend
-COPY Backend/ .
+EXPOSE 5000 
 
-# 6. Exponemos el puerto
-EXPOSE 5000
-
-# 7. Comando para iniciar con gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]   
