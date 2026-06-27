@@ -27,48 +27,91 @@ def login():
         if not usuario or not password_plana:
             return jsonify({'error': 'Usuario y contraseña requeridos'}), 400
 
-        # Traer datos del usuario
-        query = """
-                SELECT Id, NombreUsuario, NombreCompleto, Cargo, NivelAcceso, ContrasenaHash
-                FROM Usuarios
-                WHERE NombreUsuario = ? \
-                """
-        # 1. Ejecutar query y verificar existencia
+        # 1. Traer TODOS los datos del usuario
+        query = "SELECT * FROM Usuarios WHERE NombreUsuario = %s"
         result = db.execute_query(query, (usuario,))
+
         if not result:
             return jsonify({'error': 'Usuario o contraseña incorrectos'}), 401
 
-        user = result[0]
+        # 2. Convertir todas las llaves a minúsculas
+        user = {k.lower(): v for k, v in result[0].items()}
 
-        # 2. Validación robusta del estado (independiente de mayúsculas/minúsculas)
-        # Buscamos en ambas llaves posibles por si tu DB devuelve distinto formato
-        estado_raw = user.get('estado') or user.get('Estado') or 'activo'
-        
-        if str(estado_raw).lower() != 'activo':
-            return jsonify({'error': 'Cuenta desactivada. Contacte a un administrador.'}), 403
-
-        # 3. Obtención segura del hash
-        hash_guardado = user.get('ContrasenaHash') or user.get('contrasenahash')
+        # 3. Extraer el hash y verificar la contraseña PRIMERO
+        hash_guardado = user.get('contrasenahash')
         
         if not hash_guardado:
-            return jsonify({'error': 'Error en la configuración del usuario'}), 500
+            return jsonify({'error': 'Error de configuración de credenciales'}), 500
 
-        if not hash_guardado:
-            logger.error("ERROR: La columna ContrasenaHash no existe o es None")
-            return jsonify({'error': 'Error interno (hash no encontrado)'}), 500
-
-        # Validación de la contraseña
         if not check_password_hash(hash_guardado, password_plana):
             return jsonify({'error': 'Usuario o contraseña incorrectos'}), 401
 
-        # Login exitoso - Extraer datos ignorando mayúsculas/minúsculas de la BD
+        # 4. Validar estrictamente el estado de la cuenta
+        estado_usuario = str(user.get('estado', 'activo')).strip().lower()
+        
+        if estado_usuario == 'inactivo':
+            return jsonify({'error': 'Tu cuenta ha sido desactivada. Contacte a un administrador.'}), 403
+
+        # --- REGISTRAMOS LA CONEXIÓN EXITOSA ---
+        # Obtenemos la IP real (incluso si está detrás de un proxy)
+        if request.headers.getlist("X-Forwarded-For"):
+            ip_usuario = request.headers.getlist("X-Forwarded-For")[0]
+        else:
+            ip_usuario = request.remote_addr
+            
+        dispositivo = request.headers.get('User-Agent')
+
+        try:
+            db.execute_update(
+                "INSERT INTO historial_conexiones (id_usuario, fecha_hora, direccion_ip, dispositivo) VALUES (%s, (NOW() - INTERVAL '5 hours'), %s, %s)",
+                (user.get('id'), ip_usuario, dispositivo)
+            )
+        except Exception as e:
+            logger.error(f"No se pudo registrar la conexión en el historial: {e}")
+
+        # 5. Si todo está correcto, generar el Token de acceso
         usuario_payload = {
-            'id': user.get('Id') or user.get('id'),
-            'usuario': user.get('NombreUsuario') or user.get('nombreusuario'),
-            'nombre': user.get('NombreCompleto') or user.get('nombrecompleto'),
-            'cargo': user.get('Cargo') or user.get('cargo'),
-            'nivelAcceso': user.get('NivelAcceso') or user.get('nivelacceso'),
+            'id': user.get('id'),
+            'usuario': user.get('nombreusuario'),
+            'nombre': user.get('nombrecompleto'),
+            'cargo': user.get('cargo'),
+            'nivelAcceso': user.get('nivelacceso'),
         }
+        
+        usuario_payload = {
+            'id': user.get('id'),
+            'usuario': user.get('nombreusuario'),
+            'nombre': user.get('nombrecompleto'),
+            'cargo': user.get('cargo'),
+            'nivelAcceso': user.get('nivelacceso'),
+        }
+        
+        # --- OBTENER PANTALLA DE INICIO ---
+        pantalla_inicio = 'dashboard' # Valor por defecto
+        try:
+            config_query = "SELECT pantalla_inicio FROM configuracion_usuarios WHERE id_usuario = %s"
+            config_res = db.execute_query(config_query, (user.get('id'),))
+            
+            # Verificamos si hay resultados y usamos .get() de forma defensiva
+            if config_res and len(config_res) > 0:
+                row = config_res[0]
+                # Probamos ambos formatos (minúsculas y mayúsculas) para evitar errores
+                valor = row.get('pantalla_inicio') or row.get('PANTALLA_INICIO')
+                if valor:
+                    pantalla_inicio = valor
+        except Exception as e:
+            logger.error(f"Error obteniendo pantalla de inicio: {e}")
+        # -----------------------------------------
+
+        return jsonify({
+            'success': True,
+            'token': generar_token(usuario_payload),
+            'usuario': usuario_payload,
+            'pantallaInicio': pantalla_inicio
+        }), 200
+
+    except Exception as e:
+
         return jsonify({
             'success': True,
             'token': generar_token(usuario_payload),
@@ -77,9 +120,8 @@ def login():
 
     except Exception as e:
         logger.exception(f"Error en login: {e}")
-        return jsonify({'error': 'Error interno del servidor'}), 500
-
-
+        return jsonify({'error': 'Error interno del servidor'}), 500           
+    
 # -------------------------------------------------------
 # LOGOUT
 # -------------------------------------------------------
@@ -115,7 +157,7 @@ def registro():
 
         # Verificar nombre de usuario
         result_check = db.execute_query(
-            "SELECT 1 FROM Usuarios WHERE NombreUsuario = ?",
+            "SELECT 1 FROM Usuarios WHERE NombreUsuario = %s",
             (nombre_usuario_frontend,)
         )
         if result_check:
@@ -123,7 +165,7 @@ def registro():
 
         # Verificar DNI
         result_check = db.execute_query(
-            "SELECT 1 FROM Usuarios WHERE DNI = ?",
+            "SELECT 1 FROM Usuarios WHERE DNI = %s",
             (dni_frontend,)
         )
         if result_check:
@@ -184,13 +226,13 @@ def recuperar():
         # Generar token seguro
         token = secrets.token_urlsafe(32)
 
-        # Guardarlo en la BD (PostgreSQL: NOW() + INTERVAL)
+        # Guardarlo en la BD
         db.execute_update(
-            "UPDATE Usuarios SET TokenRecuperacion = ?, TokenExpira = NOW() + INTERVAL '1 hour' WHERE Id = ?",
+            "UPDATE Usuarios SET TokenRecuperacion = ?, TokenExpira = NOW() + INTERVAL '1 hour' WHERE Id = %s",
             (token, usuario_id)
         )
 
-        # Enviar el enlace de recuperación por correo. El token NUNCA se    
+        # Enviar el enlace de recuperación por correo.   
         enlace = f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/reset-password?token={token}"
         try:
             enviar_correo(
@@ -238,7 +280,7 @@ def reset_password():
         db.execute_update(
             """
             UPDATE Usuarios
-            SET ContrasenaHash    = ?,
+            SET ContrasenaHash    = %s,
                 TokenRecuperacion = NULL,
                 TokenExpira       = NULL
             WHERE Id = ?

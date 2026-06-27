@@ -31,7 +31,7 @@ export default function LoginForm() {
     const [emailRecuperacion, setEmailRecuperacion] = useState("")
     const [dialogRecuperarOpen, setDialogRecuperarOpen] = useState(false)
 
-    // Toggles de visibilidad de contraseña
+    // íconos de visibilidad de contraseña
     const [showPass, setShowPass] = useState(false)
     const [showRegPass, setShowRegPass] = useState(false)
     const [showRegPass2, setShowRegPass2] = useState(false)
@@ -372,7 +372,7 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
                 <Input
                     id="correo"
                     type="email"
-                    placeholder="ejemplo@dominio.com"
+                    placeholder="correo@ejemplo.com"
                     value={nuevoUsuario.correo}
                     onChange={(e) =>setNuevoUsuario({...nuevoUsuario, correo: e.target.value,})}
                     onKeyDown={(e) => e.stopPropagation()}

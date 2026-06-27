@@ -33,10 +33,10 @@ import {ArrowLeft, AlertCircle, Calendar, Pill, Plus, Edit2, Printer, Trash2, Do
 import {useToast} from "@/hooks/use-toast"
 import { authFetch } from "@/lib/auth"  
 
-    const getFormattedDate = (dateString?: string): string => {
-        if (!dateString) return new Date().toISOString().split("T")[0];
+const getFormattedDate = (dateString?: string): string => {
+    if (!dateString) return new Date().toISOString().split("T")[0];
     const parts = dateString.split("/");
-        if (parts.length === 3) {
+    if (parts.length === 3) {
         return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
     }
     if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
@@ -59,6 +59,9 @@ export default function MedicoPanel() {
     const [editingId, setEditingId] = useState<number | null>(null)
     const [editingData, setEditingData] = useState<any>(null)
 
+    // --- ESTADO PARA EL BUSCADOR DE PACIENTES ---
+    const [busquedaPaciente, setBusquedaPaciente] = useState("")
+
     const [revisionesData, setRevisionesData] = useState<any[]>([])
     const [tratamientosDataState, setTratamientosData] = useState<any[]>([])
     const [derivacionesDataState, setDerivacionesData] = useState<any[]>([])
@@ -66,6 +69,7 @@ export default function MedicoPanel() {
     const [convictos, setConvictos] = useState<any[]>([])
 
     const [loading, setLoading] = useState(false)
+
     const convictoIdToName = (convictoId: number | string): string => {
         const id = Number(convictoId);
         const convicto = convictos.find(c => c.id === id);
@@ -77,6 +81,13 @@ export default function MedicoPanel() {
         const convicto = convictos.find(c => c.id === id);
         return convicto ? convicto.dni : 'N/A';
     };
+
+    // --- LÓGICA DE FILTRADO DE PACIENTES ---
+    const convictosFiltrados = convictos.filter(c => 
+        (c.nombre && c.nombre.toLowerCase().includes(busquedaPaciente.toLowerCase())) ||
+        (c.dni && c.dni.includes(busquedaPaciente)) ||
+        (c.id && c.id.toString() === busquedaPaciente)
+    );
 
     const [revision, setRevision] = useState({
         fecha: "", 
@@ -108,7 +119,7 @@ export default function MedicoPanel() {
         fecha: "",
     })
 
-        const fetchAll = async () => {
+    const fetchAll = async () => {
         setLoading(true)
         try {
             const [rRev, rTra, rDer, rHis, rCon] = await Promise.all([
@@ -135,8 +146,9 @@ export default function MedicoPanel() {
         fetchAll()
     }, [])
 
-        const getConvictoLabel = (c: any) => `${c.nombre} (${c.dni})`
-        const getPrioridadColor = (prioridad: string) => {
+    const getConvictoLabel = (c: any) => `${c.nombre} (${c.dni})`
+    
+    const getPrioridadColor = (prioridad: string) => {
         switch ((prioridad || "").toLowerCase()) {
             case "urgente": return "bg-red-500/10 text-red-400 border-red-500/20"
             case "alta": return "bg-orange-500/10 text-orange-400 border-orange-500/20"
@@ -144,7 +156,8 @@ export default function MedicoPanel() {
             case "baja": return "bg-green-500/10 text-green-400 border-green-500/20"
             default: return "bg-slate-500/10 text-slate-400 border-slate-500/20"
         }
-        }
+    }
+
     const getEstadoColor = (estado: string) => {
         switch ((estado || "").toLowerCase()) {
             case "pendiente": return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
@@ -152,26 +165,27 @@ export default function MedicoPanel() {
             case "rechazada": return "bg-red-500/10 text-red-400 border-red-500/20"
             default: return "bg-slate-500/10 text-slate-400 border-slate-500/20"
         }
-        }
+    }
 
     const handleStartEdit = (type: string, id: number, data: any) => {
         setEditingId(id)
         setEditingData({type, data: {...data}})
-        }
+    }
 
-        const handleSaveEdit = async () => {
-            if (!editingId || !editingData) return
-            switch (editingData.type) {
-                case "revision": await handleUpdateRevision(editingId); break
-                case "tratamiento": await handleUpdateTratamiento(editingId); break
-                case "derivacion": await handleUpdateDerivacion(editingId); break
-                default: toast({ title: "Error", description: "Tipo desconocido", variant: "destructive" })
-            }
-            setEditingId(null)
-            setEditingData(null)
+    const handleSaveEdit = async () => {
+        if (!editingId || !editingData) return
+        switch (editingData.type) {
+            case "revision": await handleUpdateRevision(editingId); break
+            case "tratamiento": await handleUpdateTratamiento(editingId); break
+            case "derivacion": await handleUpdateDerivacion(editingId); break
+            default: toast({ title: "Error", description: "Tipo desconocido", variant: "destructive" })
         }
+        setEditingId(null)
+        setEditingData(null)
+        setBusquedaPaciente("") 
+    }
 
-    // ----------------- CRUD LÓGICA (Oculta para mantener limpieza visual en respuesta, es igual) -----------------
+    // ----------------- CRUD LÓGICA -----------------
     const handleNuevaRevision = async (e?: React.FormEvent) => {
         e?.preventDefault()
         if (!revision.convictoId || !revision.diagnostico) {
@@ -195,13 +209,14 @@ export default function MedicoPanel() {
             if (res.ok) {
                 toast({title: "Revisión registrada"})
                 setRevisionDialog(false)
+                setBusquedaPaciente("")
                 setRevision({ convictoId: "", diagnostico: "", tratamiento: "", medico: "", prioridad: "", fecha: "", hora: "", proximaRevision: "" })
                 await fetchAll()
             } else {
                 const err = await res.json().catch(() => null)
                 toast({ title: "Error", description: err?.error || "Error al registrar", variant: "destructive" })
             }
-            } catch (e) {
+        } catch (e) {
             toast({title: "Error", description: "Error de conexión", variant: "destructive"})
         }
     }
@@ -216,7 +231,7 @@ export default function MedicoPanel() {
                 convictoId: Number(editingData.data.convictoId),
                 diagnostico: editingData.data.diagnostico,
                 tratamiento: editingData.data.tratamiento,
-                medico: editingData.data.medico,
+                medico: editingData.data.medico || "Usuario actual",
                 proximaRevision: editingData.data.proximaRevision ? getFormattedDate(editingData.data.proximaRevision) : null
             }
             const res = await authFetch(`${API_URL}/revisiones/${id}`, {
@@ -228,12 +243,12 @@ export default function MedicoPanel() {
                 toast({title: "Error", description: "No se pudo actualizar", variant: "destructive"})
             }
         } catch (e) { toast({title: "Error", description: "Error de conexión", variant: "destructive"}) }
-        }
+    }
 
-        const handleRegistrarTratamiento = async (e?: React.FormEvent) => {
-            e?.preventDefault()
-            if (!tratamiento.convictoId || !tratamiento.medicamento) return toast({title: "Error", description: "Paciente y medicamento obligatorios", variant: "destructive"})
-            try {
+    const handleRegistrarTratamiento = async (e?: React.FormEvent) => {
+        e?.preventDefault()
+        if (!tratamiento.convictoId || !tratamiento.medicamento) return toast({title: "Error", description: "Paciente y medicamento obligatorios", variant: "destructive"})
+        try {
             const payload = {
                 IDConv: Number(tratamiento.convictoId),
                 Medicamento: tratamiento.medicamento,
@@ -247,7 +262,9 @@ export default function MedicoPanel() {
                 method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
             })
             if (res.ok) {
-                toast({title: "Tratamiento registrado"}); setTratamientoDialog(false)
+                toast({title: "Tratamiento registrado"}); 
+                setTratamientoDialog(false)
+                setBusquedaPaciente("")
                 setTratamiento({ convictoId: "", medicamento: "", dosis: "", frecuencia: "", duracion: "", medico: "", fechaInicio: "" })
                 await fetchAll()
             } else { toast({title: "Error", description: "Error al registrar", variant: "destructive"}) }
@@ -272,7 +289,7 @@ export default function MedicoPanel() {
             if (res.ok) { toast({title: "Tratamiento actualizado"}); await fetchAll() } 
             else { toast({title: "Error", description: "No se pudo actualizar", variant: "destructive"}) }
         } catch (e) { toast({title: "Error", variant: "destructive"}) }
-        }
+    }
 
     const handleRegistrarDerivacion = async (e?: React.FormEvent) => {
         e?.preventDefault()
@@ -291,7 +308,9 @@ export default function MedicoPanel() {
                 method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
             })
             if (res.ok) {
-                toast({title: "Derivación registrada"}); setDerivacionDialog(false)
+                toast({title: "Derivación registrada"}); 
+                setDerivacionDialog(false)
+                setBusquedaPaciente("")
                 setDerivacion({convictoId: "", especialidad: "", motivo: "", urgencia: "", institucion: "", fecha: ""})
                 await fetchAll()
             } else { toast({ title: "Error", variant: "destructive" }) }
@@ -316,7 +335,7 @@ export default function MedicoPanel() {
             if (res.ok) { toast({title: "Actualizada"}); await fetchAll() } 
             else { toast({title: "Error", variant: "destructive"}) }
         } catch (e) { toast({title: "Error", variant: "destructive"}) }
-        }
+    }
 
     const handleDelete = async (type: string, id: number) => {
         try {
@@ -330,7 +349,7 @@ export default function MedicoPanel() {
                 toast({title: "Eliminado"}); setDeleteConfirm(null); await fetchAll()
             } else { toast({title: "Error", variant: "destructive"}) }
         } catch (e) { toast({title: "Error", variant: "destructive"}) }
-        }
+    }
 
     const exportToCSV = (data: any[], filename: string) => {
         if (!data || data.length === 0) return toast({title: "Nada que exportar", variant: "destructive"});
@@ -342,16 +361,15 @@ export default function MedicoPanel() {
         const a = document.createElement("a"); a.href = url; a.download = `${filename}.csv`
         document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url)
         toast({title: "Descargado", description: `${filename}.csv`})
-        }
+    }
 
-    const handleImprimir = () => window.print()
+    const handleImprimir = () => window.print() 
 
-// ----------------- RENDER VISUAL ESTILIZADO -----------------
     return (
         <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-slate-200">
             <div className="container mx-auto max-w-7xl relative z-10 space-y-8">
                 
-                {/* --- HEADER DEL PANEL MÉDICO --- */}
+                {/* --- HEADER --- */}
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0a0f1a]/80 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl">
                     <div className="flex items-center gap-5">
                         <Button 
@@ -365,16 +383,16 @@ export default function MedicoPanel() {
                             <h1 className="text-3xl font-black tracking-wide text-white flex items-center gap-3">
                                 <Stethoscope className="h-7 w-7 text-blue-400" /> Panel Médico
                             </h1>
-                            <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Gestión de Revisiones y Tratamientos</p>
+                            <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Gestión de revisiones y tratamientos</p>
                         </div>
                     </div>
                 </div>
 
-                {/* --- TARJETAS DE RESUMEN --- */}
+                {/* --- TARJETAS --- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6" aria-hidden={loading ? "true" : "false"}>
                     <Card className="sgc-card border-0 hover:-translate-y-1 transition-transform">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-bold tracking-widest text-slate-300 uppercase">Revisiones Pendientes</CardTitle>
+                            <CardTitle className="text-sm font-bold tracking-widest text-slate-300 uppercase">Revisiones pendientes</CardTitle>
                             <Calendar className="h-6 w-6 text-blue-400"/>
                         </CardHeader>
                         <CardContent>
@@ -385,7 +403,7 @@ export default function MedicoPanel() {
 
                     <Card className="sgc-card border-0 hover:-translate-y-1 transition-transform">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-bold tracking-widest text-slate-300 uppercase">Casos Urgentes</CardTitle>
+                            <CardTitle className="text-sm font-bold tracking-widest text-slate-300 uppercase">Casos urgentes</CardTitle>
                             <AlertCircle className="h-6 w-6 text-red-400"/>
                         </CardHeader>
                         <CardContent>
@@ -396,7 +414,7 @@ export default function MedicoPanel() {
 
                     <Card className="sgc-card border-0 hover:-translate-y-1 transition-transform">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-bold tracking-widest text-slate-300 uppercase">En Tratamiento</CardTitle>
+                            <CardTitle className="text-sm font-bold tracking-widest text-slate-300 uppercase">En tratamiento</CardTitle>
                             <Pill className="h-6 w-6 text-green-400"/>
                         </CardHeader>
                         <CardContent>
@@ -406,10 +424,9 @@ export default function MedicoPanel() {
                     </Card>
                 </div>
 
-                {/* --- CONTENEDOR PRINCIPAL DE PESTAÑAS --- */}
+                {/* --- PESTAÑAS --- */}
                 <Card className="sgc-card border-0 p-2 md:p-6 shadow-2xl">
-                    <Tabs defaultValue="revisiones" className="w-full mt-2">
-                        
+                    <Tabs defaultValue="revisiones" className="w-full mt-2">    
                         <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6 bg-[#060a12]/80 border border-slate-800/80 rounded-xl p-1 gap-1">
                             <TabsTrigger value="revisiones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Revisiones</TabsTrigger>
                             <TabsTrigger value="tratamientos" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Tratamientos</TabsTrigger>
@@ -417,41 +434,82 @@ export default function MedicoPanel() {
                             <TabsTrigger value="historial" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Historial</TabsTrigger>
                         </TabsList>
 
-                        {/* ========================================================================= */}
-                        {/* TAB 1: REVISIONES */}
-                        {/* ========================================================================= */}
+                        {/* ======================= REVISIONES ======================= */}
                         <TabsContent value="revisiones" className="space-y-6">
                             <div className="flex flex-wrap gap-3 mb-4">
-                                <Dialog open={revisionDialog} onOpenChange={setRevisionDialog}>
+                                <Dialog open={revisionDialog} onOpenChange={(open) => { 
+                                    setRevisionDialog(open); 
+                                    if(!open) {
+                                        setBusquedaPaciente("");
+                                        setRevision({ convictoId: "", diagnostico: "", tratamiento: "", medico: "", prioridad: "", fecha: "", hora: "", proximaRevision: "" });
+                                    } 
+                                }}>
                                     <DialogTrigger asChild>
-                                        <Button className="sgc-btn-primary h-11 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva Revisión</Button>
+                                        <Button className="sgc-btn-primary h-11 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva revisión</Button>
                                     </DialogTrigger>
                                     <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                         <DialogHeader>
-                                            <DialogTitle className="text-xl font-bold text-white">Nueva Revisión Médica</DialogTitle>
-                                            <DialogDescription className="text-slate-400 text-xs">Registre una evaluación para un interno.</DialogDescription>
+                                            <DialogTitle className="text-xl font-bold text-white">Nueva revisión médica</DialogTitle>
+                                            <DialogDescription className="text-slate-400 text-[15px]">Registre una evaluación para un interno.</DialogDescription>
                                         </DialogHeader>
                                         <form onSubmit={handleNuevaRevision} className="space-y-4 pt-3">
-                                            <div className="space-y-1.5">
-                                                <Label className="sgc-label">Paciente *</Label>
+                                            
+                                            {/* FILTRO Y SELECTOR DE PACIENTE */}
+                                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
+                                                <Input
+                                                    placeholder="Buscar por DNI, Nombre o ID..."
+                                                    value={busquedaPaciente}
+                                                    onChange={(e) => {
+                                                        const valor = e.target.value;
+                                                        setBusquedaPaciente(valor);
+                                                        if (valor.trim() === "") {
+                                                            setRevision({ ...revision, convictoId: "" });
+                                                        } else {
+                                                            const filtrados = convictos.filter(c => 
+                                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                                (c.dni && c.dni.includes(valor)) ||
+                                                                (c.id && c.id.toString() === valor)
+                                                            );
+                                                            if (filtrados.length > 0) {
+                                                                setRevision({ ...revision, convictoId: String(filtrados[0].id) });
+                                                            } else {
+                                                                setRevision({ ...revision, convictoId: "" });
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                                />
                                                 <Select value={revision.convictoId} onValueChange={(v) => setRevision({...revision, convictoId: v})}>
-                                                    <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar paciente"/></SelectTrigger>
+                                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
                                                     <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
-                                                        {convictos.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))}
+                                                        {convictosFiltrados.length > 0 ? (
+                                                            convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                        ) : (
+                                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                        )}
                                                     </SelectContent>
                                                 </Select>
                                             </div>
+
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-1.5"><Label className="sgc-label">Fecha</Label><Input type="date" className="sgc-input h-11" value={revision.fecha} onChange={e => setRevision({...revision, fecha: e.target.value})}/></div>
                                                 <div className="space-y-1.5"><Label className="sgc-label">Hora</Label><Input type="time" className="sgc-input h-11" value={revision.hora} onChange={e => setRevision({...revision, hora: e.target.value})}/></div>
                                             </div>
+                                            
+                                            <div className="space-y-1.5">
+                                                <Label className="sgc-label">Médico Tratante</Label>
+                                                <Input className="sgc-input h-11" placeholder="Ej. Dr. Juan Pérez (Dejar en blanco para usar tu usuario)" value={revision.medico} onChange={e => setRevision({...revision, medico: e.target.value})} />
+                                            </div>
+
                                             <div className="space-y-1.5"><Label className="sgc-label">Diagnóstico *</Label><Input className="sgc-input h-11" value={revision.diagnostico} onChange={e => setRevision({...revision, diagnostico: e.target.value})} required/></div>
                                             <div className="space-y-1.5"><Label className="sgc-label">Tratamiento</Label><Textarea className="sgc-input" value={revision.tratamiento} onChange={e => setRevision({...revision, tratamiento: e.target.value})} rows={3}/></div>
+                                            
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-1.5">
                                                     <Label className="sgc-label">Prioridad</Label>
                                                     <Select value={revision.prioridad} onValueChange={v => setRevision({...revision, prioridad: v})}>
-                                                        <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
+                                                        <SelectTrigger className="sgc-input h-11! w-full"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
                                                         <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
                                                             <SelectItem value="baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
                                                             <SelectItem value="media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>
@@ -462,8 +520,13 @@ export default function MedicoPanel() {
                                                 </div>
                                                 <div className="space-y-1.5"><Label className="sgc-label">Próxima revisión</Label><Input type="date" className="sgc-input h-11" value={revision.proximaRevision} onChange={e => setRevision({...revision, proximaRevision: e.target.value})}/></div>
                                             </div>
+                                            
                                             <div className="flex gap-3 pt-2">
-                                                <Button type="button" onClick={() => setRevisionDialog(false)} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
+                                                <Button type="button" onClick={() => {
+                                                    setRevisionDialog(false); 
+                                                    setBusquedaPaciente("");
+                                                    setRevision({ convictoId: "", diagnostico: "", tratamiento: "", medico: "", prioridad: "", fecha: "", hora: "", proximaRevision: "" });
+                                                }} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
                                                 <Button type="submit" className="sgc-btn-primary flex-1 h-11">Registrar</Button>
                                             </div>
                                         </form>
@@ -482,9 +545,9 @@ export default function MedicoPanel() {
                                             <TableHead className="text-slate-300">Hora</TableHead>
                                             <TableHead className="text-slate-300">Prioridad</TableHead>
                                             <TableHead className="text-slate-300 min-w-[200px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300">DNI</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Diagnóstico</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[270px]">Diagnóstico</TableHead>
                                             <TableHead className="text-slate-300 min-w-[200px]">Tratamiento</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[200px]">Médico</TableHead>
                                             <TableHead className="text-center text-slate-300">Acciones</TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -494,11 +557,11 @@ export default function MedicoPanel() {
                                                 <TableCell className="font-bold text-blue-400">R-{rev.id}</TableCell>
                                                 <TableCell className="text-slate-300">{rev.fecha}</TableCell>
                                                 <TableCell className="text-slate-300">{rev.hora}</TableCell>
-                                                <TableCell><Badge variant="outline" className={getPrioridadColor(rev.prioridad)}>{(rev.prioridad || "").toString().toUpperCase()}</Badge></TableCell>
-                                                <TableCell className="font-medium text-white">{rev.nombre ?? convictoIdToName(rev.convictoId)}</TableCell>
-                                                <TableCell className="text-slate-400 font-mono">{convictoIdToDni(rev.convictoId)}</TableCell>
+                                                <TableCell><Badge variant="outline" className={getPrioridadColor(rev.prioridad)}>{(rev.prioridad || "").toString().toUpperCase()}</Badge></TableCell>   
+                                                <TableCell className="font-medium text-white">{rev.nombre ?? convictoIdToName(rev.convictoId)}</TableCell>  
                                                 <TableCell className="text-slate-300">{rev.diagnostico}</TableCell>
                                                 <TableCell className="text-slate-300">{rev.tratamiento}</TableCell>
+                                                <TableCell className="text-slate-300 font-medium">{rev.medico}</TableCell>
                                                 <TableCell className="flex justify-center gap-2">
                                                     <Button size="icon" className="h-8 w-8 bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group"
                                                         onClick={() => handleStartEdit("revision", rev.id, rev)}>
@@ -516,30 +579,64 @@ export default function MedicoPanel() {
                             </div>
                         </TabsContent>
 
-                        {/* ========================================================================= */}
-                        {/* TAB 2: TRATAMIENTOS */}
-                        {/* ========================================================================= */}
+                        {/* ======================= TRATAMIENTOS ======================= */}
                         <TabsContent value="tratamientos" className="space-y-6">
                             <div className="flex flex-wrap gap-3 mb-4">
-                                <Dialog open={tratamientoDialog} onOpenChange={setTratamientoDialog}>
+                                <Dialog open={tratamientoDialog} onOpenChange={(open) => { 
+                                    setTratamientoDialog(open); 
+                                    if(!open) {
+                                        setBusquedaPaciente("");
+                                        setTratamiento({ convictoId: "", medicamento: "", dosis: "", frecuencia: "", duracion: "", medico: "", fechaInicio: "" });
+                                    } 
+                                }}>
                                     <DialogTrigger asChild>
-                                        <Button className="sgc-btn-primary h-11 px-5"><Plus className="h-4 w-4 mr-2"/> Nuevo Tratamiento</Button>
+                                        <Button className="sgc-btn-primary h-11 px-5"><Plus className="h-4 w-4 mr-2"/>Nuevo tratamiento</Button>
                                     </DialogTrigger>
                                     <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                         <DialogHeader>
-                                            <DialogTitle className="text-xl font-bold text-white">Registrar Tratamiento</DialogTitle>
-                                            <DialogDescription className="text-slate-400 text-xs">Asigne medicamentos y dosis a un interno.</DialogDescription>
+                                            <DialogTitle className="text-xl font-bold text-white">Registrar tratamiento</DialogTitle>
+                                            <DialogDescription className="text-slate-400 text-[15px]">Asigne medicamentos y dosis a un interno.</DialogDescription>
                                         </DialogHeader>
                                         <form onSubmit={handleRegistrarTratamiento} className="space-y-4 pt-3">
-                                            <div className="space-y-1.5">
-                                                <Label className="sgc-label">Paciente *</Label>
+                                            
+                                            {/* FILTRO Y SELECTOR DE PACIENTE */}
+                                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
+                                                <Input
+                                                    placeholder="Buscar por DNI, Nombre o ID..."
+                                                    value={busquedaPaciente}
+                                                    onChange={(e) => {
+                                                        const valor = e.target.value;
+                                                        setBusquedaPaciente(valor);
+                                                        if (valor.trim() === "") {
+                                                            setTratamiento({ ...tratamiento, convictoId: "" });
+                                                        } else {
+                                                            const filtrados = convictos.filter(c => 
+                                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                                (c.dni && c.dni.includes(valor)) ||
+                                                                (c.id && c.id.toString() === valor)
+                                                            );
+                                                            if (filtrados.length > 0) {
+                                                                setTratamiento({ ...tratamiento, convictoId: String(filtrados[0].id) });
+                                                            } else {
+                                                                setTratamiento({ ...tratamiento, convictoId: "" });
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                                />
                                                 <Select value={tratamiento.convictoId} onValueChange={(v) => setTratamiento({...tratamiento, convictoId: v})}>
-                                                    <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar paciente"/></SelectTrigger>
+                                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
                                                     <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
-                                                        {convictos.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))}
+                                                        {convictosFiltrados.length > 0 ? (
+                                                            convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                        ) : (
+                                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                        )}
                                                     </SelectContent>
                                                 </Select>
                                             </div>
+
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-1.5"><Label className="sgc-label">Medicamento *</Label><Input className="sgc-input h-11" value={tratamiento.medicamento} onChange={(e) => setTratamiento({...tratamiento, medicamento: e.target.value})} required/></div>
                                                 <div className="space-y-1.5"><Label className="sgc-label">Dosis *</Label><Input className="sgc-input h-11" value={tratamiento.dosis} onChange={(e) => setTratamiento({...tratamiento, dosis: e.target.value})} required/></div>
@@ -548,7 +645,11 @@ export default function MedicoPanel() {
                                                 <div className="space-y-1.5"><Label className="sgc-label">Fecha inicio</Label><Input type="date" className="sgc-input h-11" value={tratamiento.fechaInicio} onChange={(e) => setTratamiento({...tratamiento, fechaInicio: e.target.value})}/></div>
                                             </div>
                                             <div className="flex gap-3 pt-2">
-                                                <Button type="button" onClick={() => setTratamientoDialog(false)} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
+                                                <Button type="button" onClick={() => {
+                                                    setTratamientoDialog(false); 
+                                                    setBusquedaPaciente("");
+                                                    setTratamiento({ convictoId: "", medicamento: "", dosis: "", frecuencia: "", duracion: "", medico: "", fechaInicio: "" });
+                                                }} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
                                                 <Button type="submit" className="sgc-btn-primary flex-1 h-11">Registrar</Button>
                                             </div>
                                         </form>
@@ -562,26 +663,26 @@ export default function MedicoPanel() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400">ID</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300">DNI</TableHead>
-                                            <TableHead className="text-slate-300">Medicamento</TableHead>
-                                            <TableHead className="text-slate-300">Dosis</TableHead>
-                                            <TableHead className="text-slate-300">Frecuencia</TableHead>
-                                            <TableHead className="text-slate-300">Duración</TableHead>
+                                            <TableHead className="font-bold text-blue-400 min-w-[60px]">ID</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[250px]">Paciente</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[180px]">Medicamento</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[170px]">Dosis</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[180px]">Frecuencia</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[150px]">Duración</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[120px]">Inicio</TableHead>
                                             <TableHead className="text-center text-slate-300">Acciones</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {tratamientosDataState.map(tr => (
                                             <TableRow key={tr.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                                <TableCell className="font-bold text-blue-400">T-{tr.id}</TableCell>
-                                                <TableCell className="font-medium text-white">{tr.nombre ?? convictoIdToName(tr.convictoId)}</TableCell>
-                                                <TableCell className="text-slate-400 font-mono">{convictoIdToDni(tr.convictoId)}</TableCell>
+                                                <TableCell className="font-bold text-blue-400">T-{tr.id}</TableCell>    
+                                                <TableCell className="font-medium text-white">{tr.nombre ?? convictoIdToName(tr.convictoId)}</TableCell>    
                                                 <TableCell className="text-slate-300">{tr.medicamento}</TableCell>
                                                 <TableCell className="text-slate-300">{tr.dosis}</TableCell>
                                                 <TableCell className="text-slate-300">{tr.frecuencia}</TableCell>
                                                 <TableCell className="text-slate-300">{tr.duracion}</TableCell>
+                                                <TableCell className="text-slate-300">{tr.fechaInicio}</TableCell>
                                                 <TableCell className="flex justify-center gap-2">
                                                     <Button size="icon" className="h-8 w-8 bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group"
                                                         onClick={() => handleStartEdit("tratamiento", tr.id, tr)}>
@@ -599,30 +700,64 @@ export default function MedicoPanel() {
                             </div>
                         </TabsContent>
 
-                        {/* ========================================================================= */}
-                        {/* TAB 3: DERIVACIONES */}
-                        {/* ========================================================================= */}
+                        {/* ======================= DERIVACIONES ======================= */}
                         <TabsContent value="derivaciones" className="space-y-6">
                             <div className="flex flex-wrap gap-3 mb-4">
-                                <Dialog open={derivacionDialog} onOpenChange={setDerivacionDialog}>
+                                <Dialog open={derivacionDialog} onOpenChange={(open) => { 
+                                    setDerivacionDialog(open); 
+                                    if(!open) {
+                                        setBusquedaPaciente("");
+                                        setDerivacion({convictoId: "", especialidad: "", motivo: "", urgencia: "", institucion: "", fecha: ""});
+                                    } 
+                                }}>
                                     <DialogTrigger asChild>
-                                        <Button className="sgc-btn-primary h-11 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva Derivación</Button>
+                                        <Button className="sgc-btn-primary h-11 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva derivación</Button>
                                     </DialogTrigger>
                                     <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                         <DialogHeader>
-                                            <DialogTitle className="text-xl font-bold text-white">Registrar Derivación</DialogTitle>
-                                            <DialogDescription className="text-slate-400 text-xs">Derive a un paciente a un centro de salud externo.</DialogDescription>
+                                            <DialogTitle className="text-xl font-bold text-white">Registrar derivación</DialogTitle>
+                                            <DialogDescription className="text-slate-400 text-[15px]">Derive a un paciente a un centro de salud externo.</DialogDescription>
                                         </DialogHeader>
                                         <form onSubmit={handleRegistrarDerivacion} className="space-y-4 pt-3">
-                                            <div className="space-y-1.5">
-                                                <Label className="sgc-label">Paciente *</Label>
+                                            
+                                            {/* FILTRO Y SELECTOR DE PACIENTE */}
+                                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
+                                                <Input
+                                                    placeholder="Buscar por DNI, Nombre o ID..."
+                                                    value={busquedaPaciente}
+                                                    onChange={(e) => {
+                                                        const valor = e.target.value;
+                                                        setBusquedaPaciente(valor);
+                                                        if (valor.trim() === "") {
+                                                            setDerivacion({ ...derivacion, convictoId: "" });
+                                                        } else {
+                                                            const filtrados = convictos.filter(c => 
+                                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                                (c.dni && c.dni.includes(valor)) ||
+                                                                (c.id && c.id.toString() === valor)
+                                                            );
+                                                            if (filtrados.length > 0) {
+                                                                setDerivacion({ ...derivacion, convictoId: String(filtrados[0].id) });
+                                                            } else {
+                                                                setDerivacion({ ...derivacion, convictoId: "" });
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                                />
                                                 <Select value={derivacion.convictoId} onValueChange={(v) => setDerivacion({...derivacion, convictoId: v})}>
-                                                    <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar paciente"/></SelectTrigger>
+                                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
                                                     <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
-                                                        {convictos.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))}
+                                                        {convictosFiltrados.length > 0 ? (
+                                                            convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                        ) : (
+                                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                        )}
                                                     </SelectContent>
                                                 </Select>
                                             </div>
+
                                             <div className="space-y-1.5">
                                                 <Label className="sgc-label">Especialidad *</Label>
                                                 <Select value={derivacion.especialidad} onValueChange={v => setDerivacion({...derivacion, especialidad: v})}>
@@ -651,9 +786,13 @@ export default function MedicoPanel() {
                                                 </div>
                                                 <div className="space-y-1.5"><Label className="sgc-label">Fecha</Label><Input type="date" className="sgc-input h-11" value={derivacion.fecha} onChange={e => setDerivacion({...derivacion, fecha: e.target.value})}/></div>
                                             </div>
-                                            <div className="space-y-1.5"><Label className="sgc-label">Institución Externa</Label><Input className="sgc-input h-11" value={derivacion.institucion} onChange={e => setDerivacion({...derivacion, institucion: e.target.value})}/></div>
+                                            <div className="space-y-1.5"><Label className="sgc-label">Institución externa</Label><Input className="sgc-input h-11" value={derivacion.institucion} onChange={e => setDerivacion({...derivacion, institucion: e.target.value})}/></div>
                                             <div className="flex gap-3 pt-2">
-                                                <Button type="button" onClick={() => setDerivacionDialog(false)} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
+                                                <Button type="button" onClick={() => {
+                                                    setDerivacionDialog(false); 
+                                                    setBusquedaPaciente("");
+                                                    setDerivacion({convictoId: "", especialidad: "", motivo: "", urgencia: "", institucion: "", fecha: ""});
+                                                }} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
                                                 <Button type="submit" className="sgc-btn-primary flex-1 h-11">Registrar</Button>
                                             </div>
                                         </form>
@@ -702,9 +841,7 @@ export default function MedicoPanel() {
                             </div>
                         </TabsContent>
 
-                        {/* ========================================================================= */}
-                        {/* TAB 4: HISTORIAL */}
-                        {/* ========================================================================= */}
+                        {/* ======================= HISTORIAL ======================= */}
                         <TabsContent value="historial" className="space-y-6">
                             <div className="flex flex-wrap gap-3 mb-4">
                                 <Button className="sgc-btn-secondary h-11 px-5" onClick={() => exportToCSV(historialDataState, "historial")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
@@ -714,13 +851,14 @@ export default function MedicoPanel() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400">ID</TableHead>
-                                            <TableHead className="text-slate-300">Fecha</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300">DNI</TableHead>
-                                            <TableHead className="text-slate-300">Tipo</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Diagnóstico</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Observaciones</TableHead>
+                                            <TableHead className="font-bold text-blue-400 min-w-[60px]">ID</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[110px]">Fecha</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[250px]">Paciente</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[120px]">DNI</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[120px]">Tipo</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[230px]">Diagnóstico</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[250px]">Observaciones</TableHead>
+                                            <TableHead className="text-slate-300 min-w-[180px]">Médico</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -733,6 +871,7 @@ export default function MedicoPanel() {
                                                 <TableCell><Badge variant="outline" className="bg-slate-800 text-slate-300 border-slate-700">{h.tipo}</Badge></TableCell>
                                                 <TableCell className="text-slate-300">{h.diagnostico}</TableCell>
                                                 <TableCell className="text-slate-400 max-w-[250px] truncate">{h.observaciones}</TableCell>
+                                                <TableCell className="text-slate-300 font-medium">{h.medico}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -743,9 +882,9 @@ export default function MedicoPanel() {
                     </Tabs>
                 </Card>
 
-                {/* --- DIALOG DE EDICIÓN GENÉRICO (Se recicla para los 3 tipos) --- */}
+                {/* --- DIALOG DE EDICIÓN GENÉRICO --- */}
                 {editingId && editingData && (
-                    <Dialog open={true} onOpenChange={(open) => { if (!open) { setEditingId(null); setEditingData(null) } }}>
+                    <Dialog open={true} onOpenChange={(open) => { if (!open) { setEditingId(null); setEditingData(null); setBusquedaPaciente(""); } }}>
                         <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                                 <DialogTitle className="text-xl font-bold text-white uppercase tracking-wider">
@@ -753,12 +892,40 @@ export default function MedicoPanel() {
                                 </DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4 pt-3">
-                                <div className="space-y-1.5">
-                                    <Label className="sgc-label">Paciente *</Label>
+                                
+                                {/* FILTRO Y SELECTOR EN MODAL DE EDICIÓN */}
+                                <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                    <Label className="sgc-label text-blue-400 font-bold tracking-wider">Cambiar paciente asignado</Label>
+                                    <Input
+                                        placeholder="Buscar por DNI, Nombre o ID..."
+                                        value={busquedaPaciente}
+                                        onChange={(e) => {
+                                            const valor = e.target.value;
+                                            setBusquedaPaciente(valor);
+                                            if (valor.trim() === "") {
+                                                setEditingData({...editingData, data: {...editingData.data, convictoId: ""}});
+                                            } else {
+                                                const filtrados = convictos.filter(c => 
+                                                    (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                    (c.dni && c.dni.includes(valor)) ||
+                                                    (c.id && c.id.toString() === valor)
+                                                );
+                                                if (filtrados.length > 0) {
+                                                    setEditingData({...editingData, data: {...editingData.data, convictoId: String(filtrados[0].id)}});
+                                                } else {
+                                                    setEditingData({...editingData, data: {...editingData.data, convictoId: ""}});
+                                                }
+                                            }
+                                        }}
+                                        className="sgc-input h-10 border-slate-700 bg-[#060a12]"/>
                                     <Select value={String(editingData.data.convictoId)} onValueChange={(v) => setEditingData({...editingData, data: {...editingData.data, convictoId: v}})}>
-                                        <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar paciente"/></SelectTrigger>
+                                        <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccionar paciente"/></SelectTrigger>
                                         <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                            {convictos.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))}
+                                            {convictosFiltrados.length > 0 ? (
+                                                convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                            ) : (
+                                                <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                            )}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -770,6 +937,12 @@ export default function MedicoPanel() {
                                             <div className="space-y-1.5"><Label className="sgc-label">Fecha</Label><Input type="date" className="sgc-input h-11" value={getFormattedDate(editingData.data.fecha)} onChange={(e) => setEditingData({...editingData, data: {...editingData.data, fecha: e.target.value}})}/></div>
                                             <div className="space-y-1.5"><Label className="sgc-label">Hora</Label><Input type="time" className="sgc-input h-11" value={editingData.data.hora} onChange={(e) => setEditingData({...editingData, data: {...editingData.data, hora: e.target.value}})}/></div>
                                         </div>
+                                        
+                                        <div className="space-y-1.5">
+                                            <Label className="sgc-label">Médico Tratante</Label>
+                                            <Input className="sgc-input h-11" placeholder="Ej. Dr. Juan Pérez" value={editingData.data.medico || ''} onChange={(e) => setEditingData({...editingData, data: {...editingData.data, medico: e.target.value}})}/>
+                                        </div>
+
                                         <div className="space-y-1.5"><Label className="sgc-label">Diagnóstico</Label><Input className="sgc-input h-11" value={editingData.data.diagnostico} onChange={(e) => setEditingData({...editingData, data: {...editingData.data, diagnostico: e.target.value}})}/></div>
                                         <div className="space-y-1.5"><Label className="sgc-label">Tratamiento</Label><Textarea className="sgc-input" value={editingData.data.tratamiento} onChange={(e) => setEditingData({...editingData, data: {...editingData.data, tratamiento: e.target.value}})} rows={3}/></div>
                                     </>
@@ -802,13 +975,13 @@ export default function MedicoPanel() {
                                             </div>
                                             <div className="space-y-1.5"><Label className="sgc-label">Especialidad</Label><Input className="sgc-input h-11" value={editingData.data.especialidad} onChange={(e) => setEditingData({...editingData, data: {...editingData.data, especialidad: e.target.value}})}/></div>
                                         </div>
-                                        <div className="space-y-1.5"><Label className="sgc-label">Institución Externa</Label><Input className="sgc-input h-11" value={editingData.data.institucion} onChange={(e) => setEditingData({...editingData, data: {...editingData.data, institucion: e.target.value}})}/></div>
+                                        <div className="space-y-1.5"><Label className="sgc-label">Institución externa</Label><Input className="sgc-input h-11" value={editingData.data.institucion} onChange={(e) => setEditingData({...editingData, data: {...editingData.data, institucion: e.target.value}})}/></div>
                                     </>
                                 )}
 
                                 <div className="flex gap-3 pt-4 border-t border-slate-800/80">
-                                    <Button variant="outline" className="sgc-btn-secondary flex-1 h-11" onClick={() => { setEditingId(null); setEditingData(null) }}>Cancelar</Button>
-                                    <Button className="sgc-btn-primary flex-1 h-11" onClick={handleSaveEdit}>Guardar Cambios</Button>
+                                    <Button variant="outline" className="sgc-btn-secondary flex-1 h-11" onClick={() => { setEditingId(null); setEditingData(null); setBusquedaPaciente(""); }}>Cancelar</Button>
+                                    <Button className="sgc-btn-primary flex-1 h-11" onClick={handleSaveEdit}>Guardar cambios</Button>
                                 </div>
                             </div>
                         </DialogContent>
@@ -819,12 +992,12 @@ export default function MedicoPanel() {
                 <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
                     <AlertDialogContent className="sgc-card border-red-500/30 text-slate-100 shadow-[0_0_40px_rgba(239,68,68,0.15)]">
                         <AlertDialogHeader>
-                            <AlertDialogTitle className="text-xl font-bold text-white flex items-center gap-2"><AlertCircle className="text-red-400 h-6 w-6"/> Eliminar Registro</AlertDialogTitle>
-                            <AlertDialogDescription className="text-slate-400">¿Está seguro de que desea eliminar este registro médico de la base de datos? Esta acción es irreversible y quedará en los logs de seguridad.</AlertDialogDescription>
+                            <AlertDialogTitle className="text-xl font-bold text-white flex items-center gap-2"><AlertCircle className="text-red-400 h-6 w-6"/> Eliminar registro</AlertDialogTitle>
+                            <AlertDialogDescription className="text-slate-400 text-[14px]">Esta acción es irreversible ¿Está seguro de que desea eliminar este registro médico?</AlertDialogDescription>
                         </AlertDialogHeader>
                         <div className="flex gap-3 mt-4">
                             <AlertDialogCancel className="sgc-btn-secondary flex-1 border-slate-700 m-0">Cancelar</AlertDialogCancel>
-                            <AlertDialogAction className="flex-1 bg-red-600 text-white hover:bg-red-700 m-0 border-0 shadow-lg shadow-red-900/20" onClick={() => deleteConfirm && handleDelete(deleteConfirm.type, deleteConfirm.id)}>Eliminar Permanentemente</AlertDialogAction>
+                            <AlertDialogAction className="flex-1 bg-red-600 text-white hover:bg-red-700 m-0 border-0 shadow-lg shadow-red-900/20" onClick={() => deleteConfirm && handleDelete(deleteConfirm.type, deleteConfirm.id)}>Eliminar permanentemente</AlertDialogAction>
                         </div>
                     </AlertDialogContent>
                 </AlertDialog>

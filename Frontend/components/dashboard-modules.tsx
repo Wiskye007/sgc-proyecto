@@ -5,8 +5,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Shield, Activity, BarChart3, Lock } from "lucide-react"
 import UserDropdown from "@/components/user-dropdown"
-import ThemeToggle from "@/components/temadelsistema" // Asegúrate de que el nombre del archivo coincida con el tuyo
-
+import ThemeToggle from "@/components/temadelsistema"
 // Unificamos todos los módulos en una sola lista
 const allModules = [
     {
@@ -56,19 +55,18 @@ const allModules = [
     {
         id: "usuarios",
         title: "Gestión de Usuarios",
-        description: "Administra usuarios, permisos y control de acceso de todo el sistema SGC.",
+        description: "Administra usuarios, permisos y control de acceso de todo el sistema SGC",
         icon: Lock,
         href: "/dashboard/usuarios",
         color: "text-yellow-400",
         glow: "group-hover:shadow-yellow-500/30",
         requiresAdmin: true,
-        fullWidth: true, // Propiedad especial para que ocupe las dos columnas
+        fullWidth: true, // Para que ocupe las dos columnas
     },
 ]
 
 export default function DashboardModules() {
-    const router = useRouter()
-    
+    const router = useRouter()  
     // Solo necesitamos saber si es admin o no para bloquear la tarjeta visualmente
     const [isAdmin, setIsAdmin] = useState(false)
 
@@ -77,8 +75,7 @@ export default function DashboardModules() {
         if (storedUser) {
             try {
                 const userData = JSON.parse(storedUser)
-                const rol = userData.nivelacceso || userData.Nivelacceso || userData.nivelAcceso || ''
-                
+                const rol = userData.nivelacceso || userData.Nivelacceso || userData.nivelAcceso || ''  
                 // Verificamos si tiene el rol de administrador
                 if (rol.toLowerCase() === 'administrador' || rol.toLowerCase() === 'admin') {
                     setIsAdmin(true)
@@ -103,19 +100,17 @@ export default function DashboardModules() {
                             <h1 className="text-3xl font-black tracking-wide text-white">Panel Principal</h1>
                             <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">SGC - Carceleta San Martín</p>
                         </div>
-                    </div>
-                    
+                    </div>  
                     <div className="flex items-center gap-3">
                         <ThemeToggle />
                         <UserDropdown />
                     </div>
                 </div>
 
-                {/* --- GRID DE MÓDULOS --- */}
+                {/* --- MÓDULOS --- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {allModules.map((module) => {
-                        const Icon = module.icon
-                        
+                    {allModules.map((module) => {   
+                        const Icon = module.icon    
                         // Lógica para saber si el módulo debe bloquearse para este usuario
                         const isLocked = module.requiresAdmin && !isAdmin
 
@@ -130,8 +125,7 @@ export default function DashboardModules() {
                                     }`}
                                 onClick={() => {
                                     if (!isLocked) router.push(module.href)
-                                }}
-                            >
+                                }}>
                                 <CardHeader className="pb-4">
                                     <div className="flex items-start gap-5">
                                         <div className={`rounded-xl bg-[#060a12] p-4 border border-slate-800 shadow-inner transition-colors ${isLocked ? 'bg-slate-900/50' : 'group-hover:bg-slate-800/40'}`}>
@@ -161,12 +155,10 @@ export default function DashboardModules() {
                                         ${isLocked 
                                             ? 'bg-slate-800/30 text-slate-500 border border-slate-800/50' 
                                             : 'bg-blue-500/5 text-blue-400 border border-blue-500/10 group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent'
-                                        }`}
-                                    >
+                                        }`}>
                                         {isLocked ? (
                                             <>
-                                                <Lock className="w-4 h-4 mr-1" />
-                                                Requiere permisos de Administrador
+                                                <Lock className="w-4 h-4 mr-1" />Requiere permisos de administrador
                                             </>
                                         ) : (
                                             'Acceder al módulo'
@@ -176,8 +168,7 @@ export default function DashboardModules() {
                             </Card>
                         )
                     })}
-                </div>
-
+                </div>  
             </div>
         </div>
     )

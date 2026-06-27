@@ -33,8 +33,8 @@ const FormField = <
     TFieldValues extends FieldValues = FieldValues,
     TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
-      ...props
-  }: ControllerProps<TFieldValues, TName>) => {
+    ...props
+}: ControllerProps<TFieldValues, TName>) => {
     return (
         <FormFieldContext.Provider value={{name: props.name}}>
             <Controller {...props} />
@@ -88,9 +88,9 @@ function FormItem({className, ...props}: React.ComponentProps<'div'>) {
 }
 
 function FormLabel({
-                       className,
-                       ...props
-                   }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+                    className,
+                    ...props
+                }: React.ComponentProps<typeof LabelPrimitive.Root>) {
     const {error, formItemId} = useFormField()
 
     return (

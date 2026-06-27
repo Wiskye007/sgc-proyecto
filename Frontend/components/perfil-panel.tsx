@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, Save, Lock, User, Mail, Briefcase, ArrowLeft } from 'lucide-react';
 import { authFetch } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast"; // <-- IMPORTACIÓN DEL TOAST
+import { useToast } from "@/hooks/use-toast";
 
 const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost"
     ? "https://sgc-backend-vbze.onrender.com/api"

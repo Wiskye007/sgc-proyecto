@@ -109,6 +109,9 @@ const ConvictosPanel: React.FC = () => {
     const [searchMovimientos, setSearchMovimientos] = useState("")
     const [searchConducta, setSearchConducta] = useState("")
     const [searchVisitas, setSearchVisitas] = useState("")
+    
+    // --- ESTADO PARA EL BUSCADOR INTELIGENTE EN MODALES ---
+    const [busquedaConvicto, setBusquedaConvicto] = useState("")
 
     // --------------------- DIALOGOS ---------------------
     const [openNuevoConvicto, setOpenNuevoConvicto] = useState(false)
@@ -123,6 +126,14 @@ const ConvictosPanel: React.FC = () => {
     const [movimientosData, setMovimientosData] = useState<Movimiento[]>([])
     const [conductaData, setConductaData] = useState<Conducta[]>([])
     const [visitasData, setVisitasData] = useState<Visita[]>([])
+
+    // --- LÓGICA DEL BUSCADOR INTELIGENTE ---
+    const convictosFiltrados = convictosData.filter(c => 
+        (c.nombre && c.nombre.toLowerCase().includes(busquedaConvicto.toLowerCase())) ||
+        (c.dni && c.dni.includes(busquedaConvicto)) ||
+        (c.id && c.id.toString() === busquedaConvicto)
+    );
+    const getConvictoLabel = (c: Convicto) => `${c.nombre} (DNI: ${c.dni})`;
 
     // --------------------- FORMULARIOS ---------------------
     const [convictoForm, setConvictoForm] = useState({
@@ -140,7 +151,7 @@ const ConvictosPanel: React.FC = () => {
     const [visitaForm, setVisitaForm] = useState({
         convictoId: "", visitante: "", dniVisitante: "", parentesco: "",
         fecha: "", hora: "", estado: ""
-        })
+    })
 
     const [isSubmittingConvicto, setIsSubmittingConvicto] = useState(false)
     const [isSubmittingMovimiento, setIsSubmittingMovimiento] = useState(false)
@@ -373,6 +384,7 @@ const ConvictosPanel: React.FC = () => {
             if (res.ok) {
                 toast({title: "Éxito", description: "Traslado registrado"})
                 setOpenNuevoMovimiento(false)
+                setBusquedaConvicto("")
                 setMovimientoForm({ convictoId: "", origen: "", destino: "", motivo: "", fecha: "", hora: "", autorizadoPor: "" })
                 await fetchDatos()
             } else {
@@ -406,6 +418,7 @@ const ConvictosPanel: React.FC = () => {
             if (res.ok) {
                 toast({title: "Éxito", description: "Conducta registrada"})
                 setOpenNuevaConducta(false)
+                setBusquedaConvicto("")
                 setConductaForm({convictoId: "", tipo: "", descripcion: "", sancion: "", fecha: ""})
                 await fetchDatos()
             } else {
@@ -440,6 +453,7 @@ const ConvictosPanel: React.FC = () => {
             if (res.ok) {
                 toast({title: "Éxito", description: "Visita programada"})
                 setOpenNuevaVisita(false)
+                setBusquedaConvicto("")
                 setVisitaForm({ convictoId: "", visitante: "", dniVisitante: "", parentesco: "", fecha: "", hora: "", estado: "" })
                 await fetchDatos()
             } else {
@@ -586,7 +600,7 @@ const ConvictosPanel: React.FC = () => {
                     <TabsContent value="datos" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
                             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
-                                <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de Internos</CardTitle>
+                                <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de internos</CardTitle>
                                 <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${convictosData.length > 800 ? "border-red-500 text-red-400 bg-red-500/10" : convictosData.length > 400 ? "border-yellow-500 text-yellow-400 bg-yellow-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
                                     Registros totales: {convictosData.length}
                                 </Badge>
@@ -622,7 +636,7 @@ const ConvictosPanel: React.FC = () => {
                         </Card>
 
                         <div className="flex gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoConvicto(true)}><Plus className="mr-2 h-4 w-4"/> Nuevo Convicto</Button>
+                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoConvicto(true)}><Plus className="mr-2 h-4 w-4"/> Nuevo convicto</Button>
                             <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(convictosData, "convictos")}><Download className="mr-2 h-4 w-4"/> Exportar CSV</Button>
                             <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="mr-2 h-4 w-4"/> Imprimir</Button>
                         </div>
@@ -692,7 +706,7 @@ const ConvictosPanel: React.FC = () => {
                     <TabsContent value="movimientos" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
                             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4">
-                                <CardTitle className="text-xl text-white font-bold tracking-wide">Registro de Traslados</CardTitle>
+                                <CardTitle className="text-xl text-white font-bold tracking-wide">Registro de traslados</CardTitle>
                                 <div className="relative w-full md:w-72 mt-2 md:mt-0">
                                     <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
                                     <Input placeholder="Buscar traslado..." value={searchMovimientos} onChange={(e) => setSearchMovimientos(e.target.value)} className="sgc-input pl-10 h-10"/>
@@ -700,7 +714,7 @@ const ConvictosPanel: React.FC = () => {
                             </CardHeader>
                         </Card>
                         <div className="flex gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoMovimiento(true)}><Plus className="mr-2 h-4 w-4"/>Registrar Traslado</Button>
+                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoMovimiento(true)}><Plus className="mr-2 h-4 w-4"/>Registrar traslado</Button>
                             <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(movimientosData, "movimientos")}><Download className="mr-2 h-4 w-4"/>Exportar CSV</Button>
                             <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="mr-2 h-4 w-4"/>Imprimir</Button>
                         </div>
@@ -761,7 +775,7 @@ const ConvictosPanel: React.FC = () => {
                     <TabsContent value="conducta" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
                             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 gap-4">
-                                <CardTitle className="text-xl text-white font-bold tracking-wide">Registro Disciplinario</CardTitle>
+                                <CardTitle className="text-xl text-white font-bold tracking-wide">Registro disciplinario</CardTitle>
                                 <div className="flex flex-col md:flex-row w-full md:w-auto gap-4">
                                     <div className="relative w-full md:w-72">
                                         <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
@@ -783,7 +797,7 @@ const ConvictosPanel: React.FC = () => {
                             </CardHeader>
                         </Card>
                         <div className="flex gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaConducta(true)}><Plus className="mr-2 h-4 w-4"/>Registrar Conducta</Button>
+                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaConducta(true)}><Plus className="mr-2 h-4 w-4"/>Registrar conducta</Button>
                             <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(conductaData, "conducta")}><Download className="mr-2 h-4 w-4"/>Exportar CSV</Button>
                             <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="mr-2 h-4 w-4"/>Imprimir</Button>
                         </div>
@@ -842,7 +856,7 @@ const ConvictosPanel: React.FC = () => {
                     <TabsContent value="visitas" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
                             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 gap-4">
-                                <CardTitle className="text-xl text-white font-bold tracking-wide">Control de Visitas</CardTitle>
+                                <CardTitle className="text-xl text-white font-bold tracking-wide">Control de visitas</CardTitle>
                                 <div className="flex flex-col md:flex-row w-full md:w-auto gap-4">
                                     <div className="relative w-full md:w-72">
                                         <Search className="sgc-input-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"/>
@@ -864,7 +878,7 @@ const ConvictosPanel: React.FC = () => {
                             </CardHeader>
                         </Card>
                         <div className="flex gap-3 mb-4">
-                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaVisita(true)}><Plus className="mr-2 h-4 w-4"/>Registrar Visita</Button>
+                            <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaVisita(true)}><Plus className="mr-2 h-4 w-4"/>Registrar visita</Button>
                             <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(visitasData, "visitas")}><Download className="mr-2 h-4 w-4"/>Exportar CSV</Button>
                             <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="mr-2 h-4 w-4"/>Imprimir</Button>
                         </div>
@@ -881,6 +895,7 @@ const ConvictosPanel: React.FC = () => {
                                                 <TableHead className="min-w-[200px] text-slate-300 font-bold">Interno</TableHead>
                                                 <TableHead className="min-w-[150px] text-slate-300 font-bold">Visitante</TableHead>
                                                 <TableHead className="text-slate-300 font-bold">DNI Visitante</TableHead>
+                                                <TableHead className="text-slate-300 font-bold">Parentesco</TableHead>
                                                 <TableHead className="text-center text-slate-300 font-bold">Estado</TableHead>
                                                 <TableHead className="text-center text-slate-300 font-bold">Acciones</TableHead>
                                             </TableRow>
@@ -900,6 +915,7 @@ const ConvictosPanel: React.FC = () => {
                                                         <TableCell className="font-medium text-slate-200">{v.nombre}</TableCell>
                                                         <TableCell className="text-slate-300">{v.visitante}</TableCell>
                                                         <TableCell className="font-mono text-slate-400">{v.dniVisitante}</TableCell>
+                                                        <TableCell className="text-slate-400">{v.parentesco}</TableCell>
                                                         <TableCell className="text-center"><Badge className={getEstadoVisitaColor(v.estado)}>{v.estado}</Badge></TableCell>
                                                         <TableCell className="flex justify-center gap-2">
                                                                 <Button 
@@ -927,11 +943,19 @@ const ConvictosPanel: React.FC = () => {
                 ========================================================= */}
 
                 {/* DIALOG: NUEVO CONVICTO */}
-                <Dialog open={openNuevoConvicto} onOpenChange={setOpenNuevoConvicto}>
+                <Dialog open={openNuevoConvicto} onOpenChange={(open) => {
+                    setOpenNuevoConvicto(open);
+                    if (!open) {
+                        setConvictoForm({
+                            nombre: "", alias: "", dni: "", edad: "", delito: "", pabellon: "",
+                            celda: "", estado: "", nivel: "", contacto: "", observaciones: "", fechaingreso: ""
+                        });
+                    }
+                }}>
                     <DialogContent className="sgc-card border-slate-800 text-slate-100 max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold text-white">Nuevo registro de convicto</DialogTitle>
-                            <DialogDescription className="text-slate-400">Ingrese los datos del interno (* obligatorio).</DialogDescription>
+                            <DialogDescription className="text-slate-400 text-[15px]">Ingrese los datos del interno (* obligatorio).</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleGuardarNuevoConvicto} className="space-y-4 pt-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -979,7 +1003,10 @@ const ConvictosPanel: React.FC = () => {
                             </div>
                             <div className="space-y-1.5"><Label className="sgc-label">Observaciones</Label><Textarea value={convictoForm.observaciones} onChange={e => setConvictoForm({...convictoForm, observaciones: e.target.value})} rows={3} className="sgc-input min-h-20"/></div>
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => setOpenNuevoConvicto(false)}>Cancelar</Button>
+                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => {
+                                    setOpenNuevoConvicto(false);
+                                    setConvictoForm({ nombre: "", alias: "", dni: "", edad: "", delito: "", pabellon: "", celda: "", estado: "", nivel: "", contacto: "", observaciones: "", fechaingreso: "" });
+                                }}>Cancelar</Button>
                                 <Button type="submit" className="sgc-btn-primary flex-1" disabled={isSubmittingConvicto}>{isSubmittingConvicto ? "Guardando..." : "Registrar Convicto"}</Button>
                             </div>
                         </form>
@@ -987,11 +1014,11 @@ const ConvictosPanel: React.FC = () => {
                 </Dialog>
 
                 {/* DIALOG: EDITAR CONVICTO */}
-                <Dialog open={editingData?.type === "convicto"} onOpenChange={() => setEditingData(null)}>
+                <Dialog open={editingData?.type === "convicto"} onOpenChange={(open) => { if (!open) setEditingData(null); }}>
                     <DialogContent className="sgc-card border-slate-800 text-slate-100 max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold text-white">Editar datos del convicto</DialogTitle>
-                            <DialogDescription className="text-slate-400">Modifique la información y guarde los cambios.</DialogDescription>
+                            <DialogDescription className="text-slate-400 text-[15px]">Modifique la información y guarde los cambios.</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }} className="space-y-4 pt-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1047,25 +1074,60 @@ const ConvictosPanel: React.FC = () => {
                 </Dialog>
 
                 {/* DIALOG: NUEVO MOVIMIENTO */}
-                <Dialog open={openNuevoMovimiento} onOpenChange={setOpenNuevoMovimiento}>
+                <Dialog open={openNuevoMovimiento} onOpenChange={(open) => {
+                    setOpenNuevoMovimiento(open);
+                    if(!open) {
+                        setBusquedaConvicto("");
+                        setMovimientoForm({ convictoId: "", origen: "", destino: "", motivo: "", fecha: "", hora: "", autorizadoPor: "" });
+                    }
+                }}>
                     <DialogContent className="sgc-card border-slate-800 text-slate-100 max-w-lg">
                         <DialogHeader>
-                            <DialogTitle className="text-xl font-bold text-white">Registrar Traslado</DialogTitle>
-                            <DialogDescription className="text-slate-400">Declare el movimiento interno o externo del convicto.</DialogDescription>
+                            <DialogTitle className="text-xl font-bold text-white">Registrar traslado</DialogTitle>
+                            <DialogDescription className="text-slate-400 text-[15px]">Declare el movimiento interno o externo del convicto.</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={(e) => { e.preventDefault(); handleRegistrarMovimiento(); }} className="space-y-4 pt-2">
+                            
+                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de Interno *</Label>
+                                <Input
+                                    placeholder="Buscar por DNI, Nombre o ID..."
+                                    value={busquedaConvicto}
+                                    onChange={(e) => {
+                                        const valor = e.target.value;
+                                        setBusquedaConvicto(valor);
+                                        if (valor.trim() === "") {
+                                            setMovimientoForm({ ...movimientoForm, convictoId: "" });
+                                        } else {
+                                            const filtrados = convictosData.filter(c =>
+                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                (c.dni && c.dni.includes(valor)) ||
+                                                (c.id && c.id.toString() === valor)
+                                            );
+                                            if (filtrados.length > 0) {
+                                                setMovimientoForm({ ...movimientoForm, convictoId: String(filtrados[0].id) });
+                                            } else {
+                                                setMovimientoForm({ ...movimientoForm, convictoId: "" });
+                                            }
+                                        }
+                                    }}
+                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                />
+                                <Select value={movimientoForm.convictoId} onValueChange={v => setMovimientoForm({...movimientoForm, convictoId: v})}>
+                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un interno de la lista"/></SelectTrigger>
+                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                        {convictosFiltrados.length > 0 ? (
+                                            convictosFiltrados.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                        ) : (
+                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaConvicto}"</div>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5"><Label className="sgc-label">Fecha *</Label><Input type="date" value={movimientoForm.fecha} onChange={e => setMovimientoForm({...movimientoForm, fecha: e.target.value})} className="sgc-input" required/></div>
                                 <div className="space-y-1.5"><Label className="sgc-label">Hora *</Label><Input type="time" value={movimientoForm.hora} onChange={e => setMovimientoForm({...movimientoForm, hora: e.target.value})} className="sgc-input" required/></div>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="sgc-label">Convicto *</Label>
-                                <Select value={movimientoForm.convictoId} onValueChange={v => setMovimientoForm({...movimientoForm, convictoId: v})}>
-                                    <SelectTrigger className="sgc-input"><SelectValue placeholder="Seleccionar interno"/></SelectTrigger>
-                                    <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                        {convictosData.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{c.nombre} (ID: {c.id})</SelectItem>))}
-                                    </SelectContent>
-                                </Select>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5"><Label className="sgc-label">Origen *</Label><Input value={movimientoForm.origen} onChange={e => setMovimientoForm({...movimientoForm, origen: e.target.value})} className="sgc-input" required/></div>
@@ -1074,7 +1136,11 @@ const ConvictosPanel: React.FC = () => {
                             <div className="space-y-1.5"><Label className="sgc-label">Motivo *</Label><Input value={movimientoForm.motivo} onChange={e => setMovimientoForm({...movimientoForm, motivo: e.target.value})} className="sgc-input" required/></div>
                             <div className="space-y-1.5"><Label className="sgc-label">Autorizado Por</Label><Input value={movimientoForm.autorizadoPor} onChange={e => setMovimientoForm({...movimientoForm, autorizadoPor: e.target.value})} placeholder="Ej. Director General" className="sgc-input"/></div>
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => setOpenNuevoMovimiento(false)}>Cancelar</Button>
+                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => {
+                                    setOpenNuevoMovimiento(false);
+                                    setBusquedaConvicto("");
+                                    setMovimientoForm({ convictoId: "", origen: "", destino: "", motivo: "", fecha: "", hora: "", autorizadoPor: "" });
+                                }}>Cancelar</Button>
                                 <Button type="submit" className="sgc-btn-primary flex-1" disabled={isSubmittingMovimiento}>{isSubmittingMovimiento ? "Guardando..." : "Registrar Traslado"}</Button>
                             </div>
                         </form>
@@ -1082,25 +1148,54 @@ const ConvictosPanel: React.FC = () => {
                 </Dialog>
 
                 {/* DIALOG: EDITAR MOVIMIENTO */}
-                <Dialog open={editingData?.type === "movimiento"} onOpenChange={() => setEditingData(null)}>
+                <Dialog open={editingData?.type === "movimiento"} onOpenChange={(open) => { if(!open) { setEditingData(null); setBusquedaConvicto(""); } }}>
                     <DialogContent className="sgc-card border-slate-800 text-slate-100 max-w-lg">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold text-white">Editar registro de traslado</DialogTitle>
-                            <DialogDescription className="text-slate-400">Actualice la bitácora de movimiento.</DialogDescription>
+                            <DialogDescription className="text-slate-400 text-[15px]">Actualice la bitácora de movimiento.</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }} className="space-y-4 pt-2">
+                            
+                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Cambiar Interno Asignado</Label>
+                                <Input
+                                    placeholder="Buscar por DNI, Nombre o ID..."
+                                    value={busquedaConvicto}
+                                    onChange={(e) => {
+                                        const valor = e.target.value;
+                                        setBusquedaConvicto(valor);
+                                        if (valor.trim() === "") {
+                                            setEditingData({...editingData!, data: {...editingData!.data, convictoId: ""}});
+                                        } else {
+                                            const filtrados = convictosData.filter(c =>
+                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                (c.dni && c.dni.includes(valor)) ||
+                                                (c.id && c.id.toString() === valor)
+                                            );
+                                            if (filtrados.length > 0) {
+                                                setEditingData({...editingData!, data: {...editingData!.data, convictoId: String(filtrados[0].id)}});
+                                            } else {
+                                                setEditingData({...editingData!, data: {...editingData!.data, convictoId: ""}});
+                                            }
+                                        }
+                                    }}
+                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                />
+                                <Select value={String(editingData?.data.convictoId ?? "")} onValueChange={v => setEditingData({...editingData!, data: {...editingData!.data, convictoId: v}})}>
+                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un interno de la lista"/></SelectTrigger>
+                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                        {convictosFiltrados.length > 0 ? (
+                                            convictosFiltrados.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                        ) : (
+                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaConvicto}"</div>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5"><Label className="sgc-label">Fecha *</Label><Input type="date" value={getFormattedDate(editingData?.data.fecha)} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, fecha: e.target.value}})} className="sgc-input" required/></div>
                                 <div className="space-y-1.5"><Label className="sgc-label">Hora *</Label><Input type="time" value={editingData?.data.hora ?? ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, hora: e.target.value}})} className="sgc-input" required/></div>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="sgc-label">Convicto *</Label>
-                                <Select value={String(editingData?.data.convictoId ?? "")} onValueChange={v => setEditingData({...editingData!, data: {...editingData!.data, convictoId: v}})}>
-                                    <SelectTrigger className="sgc-input"><SelectValue/></SelectTrigger>
-                                    <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                        {convictosData.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{c.nombre}</SelectItem>))}
-                                    </SelectContent>
-                                </Select>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5"><Label className="sgc-label">Origen *</Label><Input value={editingData?.data.origen ?? ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, origen: e.target.value}})} className="sgc-input" required/></div>
@@ -1109,7 +1204,7 @@ const ConvictosPanel: React.FC = () => {
                             <div className="space-y-1.5"><Label className="sgc-label">Motivo *</Label><Input value={editingData?.data.motivo ?? ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, motivo: e.target.value}})} className="sgc-input" required/></div>
                             <div className="space-y-1.5"><Label className="sgc-label">Autorizado Por</Label><Input value={editingData?.data.autorizadoPor ?? ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, autorizadoPor: e.target.value}})} className="sgc-input"/></div>
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => setEditingData(null)} disabled={isEditingSubmitting}>Cancelar</Button>
+                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => { setEditingData(null); setBusquedaConvicto(""); }} disabled={isEditingSubmitting}>Cancelar</Button>
                                 <Button type="submit" className="sgc-btn-primary flex-1" disabled={isEditingSubmitting}>{isEditingSubmitting ? "Guardando..." : "Actualizar"}</Button>
                             </div>
                         </form>
@@ -1117,22 +1212,57 @@ const ConvictosPanel: React.FC = () => {
                 </Dialog>
 
                 {/* DIALOG: NUEVA CONDUCTA */}
-                <Dialog open={openNuevaConducta} onOpenChange={setOpenNuevaConducta}>
+                <Dialog open={openNuevaConducta} onOpenChange={(open) => {
+                    setOpenNuevaConducta(open);
+                    if(!open) {
+                        setBusquedaConvicto("");
+                        setConductaForm({convictoId: "", tipo: "", descripcion: "", sancion: "", fecha: ""});
+                    }
+                }}>
                     <DialogContent className="sgc-card border-slate-800 text-slate-100 max-w-lg">
                         <DialogHeader>
-                            <DialogTitle className="text-xl font-bold text-white">Registrar Conducta</DialogTitle>
-                            <DialogDescription className="text-slate-400">Reporte incidencias o méritos del interno.</DialogDescription>
+                            <DialogTitle className="text-xl font-bold text-white">Registrar conducta</DialogTitle>
+                            <DialogDescription className="text-slate-400 text-[15px]">Reporte incidencias o méritos del interno.</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={(e) => { e.preventDefault(); handleRegistrarConducta(); }} className="space-y-4 pt-2">
-                            <div className="space-y-1.5">
-                                <Label className="sgc-label">Convicto *</Label>
+                            
+                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de Interno *</Label>
+                                <Input
+                                    placeholder="Buscar por DNI, Nombre o ID..."
+                                    value={busquedaConvicto}
+                                    onChange={(e) => {
+                                        const valor = e.target.value;
+                                        setBusquedaConvicto(valor);
+                                        if (valor.trim() === "") {
+                                            setConductaForm({ ...conductaForm, convictoId: "" });
+                                        } else {
+                                            const filtrados = convictosData.filter(c =>
+                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                (c.dni && c.dni.includes(valor)) ||
+                                                (c.id && c.id.toString() === valor)
+                                            );
+                                            if (filtrados.length > 0) {
+                                                setConductaForm({ ...conductaForm, convictoId: String(filtrados[0].id) });
+                                            } else {
+                                                setConductaForm({ ...conductaForm, convictoId: "" });
+                                            }
+                                        }
+                                    }}
+                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                />
                                 <Select value={conductaForm.convictoId} onValueChange={v => setConductaForm({...conductaForm, convictoId: v})}>
-                                    <SelectTrigger className="sgc-input"><SelectValue placeholder="Seleccionar interno"/></SelectTrigger>
-                                    <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                        {convictosData.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{c.nombre} (ID: {c.id})</SelectItem>))}
+                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un interno de la lista"/></SelectTrigger>
+                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                        {convictosFiltrados.length > 0 ? (
+                                            convictosFiltrados.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                        ) : (
+                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaConvicto}"</div>
+                                        )}
                                     </SelectContent>
                                 </Select>
                             </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label className="sgc-label">Tipo *</Label>
@@ -1150,7 +1280,11 @@ const ConvictosPanel: React.FC = () => {
                             <div className="space-y-1.5"><Label className="sgc-label">Descripción *</Label><Textarea value={conductaForm.descripcion} onChange={e => setConductaForm({...conductaForm, descripcion: e.target.value})} rows={3} className="sgc-input min-h-20" required/></div>
                             <div className="space-y-1.5"><Label className="sgc-label">Sanción (Opcional)</Label><Input value={conductaForm.sancion} onChange={e => setConductaForm({...conductaForm, sancion: e.target.value})} className="sgc-input"/></div>
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => setOpenNuevaConducta(false)}>Cancelar</Button>
+                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => {
+                                    setOpenNuevaConducta(false);
+                                    setBusquedaConvicto("");
+                                    setConductaForm({convictoId: "", tipo: "", descripcion: "", sancion: "", fecha: ""});
+                                }}>Cancelar</Button>
                                 <Button type="submit" className="sgc-btn-primary flex-1" disabled={isSubmittingConducta}>{isSubmittingConducta ? "Guardando..." : "Registrar"}</Button>
                             </div>
                         </form>
@@ -1158,13 +1292,51 @@ const ConvictosPanel: React.FC = () => {
                 </Dialog>
 
                 {/* DIALOG: EDITAR CONDUCTA */}
-                <Dialog open={editingData?.type === "conducta"} onOpenChange={() => setEditingData(null)}>
+                <Dialog open={editingData?.type === "conducta"} onOpenChange={(open) => { if(!open) { setEditingData(null); setBusquedaConvicto(""); } }}>
                     <DialogContent className="sgc-card border-slate-800 text-slate-100 max-w-lg">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold text-white">Editar registro disciplinario</DialogTitle>
-                            <DialogDescription className="text-slate-400">Modifique los detalles del reporte.</DialogDescription>
+                            <DialogDescription className="text-slate-400 text-[15px]">Modifique los detalles del reporte.</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }} className="space-y-4 pt-2">
+                            
+                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Cambiar Interno Asignado</Label>
+                                <Input
+                                    placeholder="Buscar por DNI, Nombre o ID..."
+                                    value={busquedaConvicto}
+                                    onChange={(e) => {
+                                        const valor = e.target.value;
+                                        setBusquedaConvicto(valor);
+                                        if (valor.trim() === "") {
+                                            setEditingData({...editingData!, data: {...editingData!.data, convictoId: ""}});
+                                        } else {
+                                            const filtrados = convictosData.filter(c =>
+                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                (c.dni && c.dni.includes(valor)) ||
+                                                (c.id && c.id.toString() === valor)
+                                            );
+                                            if (filtrados.length > 0) {
+                                                setEditingData({...editingData!, data: {...editingData!.data, convictoId: String(filtrados[0].id)}});
+                                            } else {
+                                                setEditingData({...editingData!, data: {...editingData!.data, convictoId: ""}});
+                                            }
+                                        }
+                                    }}
+                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                />
+                                <Select value={String(editingData?.data.convictoId ?? "")} onValueChange={v => setEditingData({...editingData!, data: {...editingData!.data, convictoId: v}})}>
+                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un interno de la lista"/></SelectTrigger>
+                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                        {convictosFiltrados.length > 0 ? (
+                                            convictosFiltrados.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                        ) : (
+                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaConvicto}"</div>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5"><Label className="sgc-label">Fecha *</Label><Input type="date" value={getFormattedDate(editingData?.data.fecha)} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, fecha: e.target.value}})} className="sgc-input" required/></div>
                                 <div className="space-y-1.5">
@@ -1179,20 +1351,12 @@ const ConvictosPanel: React.FC = () => {
                                     </Select>
                                 </div>
                             </div>
-                            <div className="space-y-1.5">
-                                <Label className="sgc-label">Convicto *</Label>
-                                <Select value={String(editingData?.data.convictoId ?? "")} onValueChange={v => setEditingData({...editingData!, data: {...editingData!.data, convictoId: v}})}>
-                                    <SelectTrigger className="sgc-input"><SelectValue/></SelectTrigger>
-                                    <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                        {convictosData.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{c.nombre}</SelectItem>))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                            
                             <div className="space-y-1.5"><Label className="sgc-label">Descripción *</Label><Textarea value={editingData?.data.descripcion || ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, descripcion: e.target.value}})} className="sgc-input min-h-20" required/></div>
                             <div className="space-y-1.5"><Label className="sgc-label">Sanción</Label><Input value={editingData?.data.sancion || ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, sancion: e.target.value}})} className="sgc-input"/></div>
                             <div className="space-y-1.5"><Label className="sgc-label">Registrado por</Label><Input value={editingData?.data.registrado || ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, registrado: e.target.value}})} className="sgc-input"/></div>
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => setEditingData(null)} disabled={isEditingSubmitting}>Cancelar</Button>
+                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => { setEditingData(null); setBusquedaConvicto(""); }} disabled={isEditingSubmitting}>Cancelar</Button>
                                 <Button type="submit" className="sgc-btn-primary flex-1" disabled={isEditingSubmitting}>{isEditingSubmitting ? "Guardando..." : "Actualizar"}</Button>
                             </div>
                         </form>
@@ -1200,22 +1364,57 @@ const ConvictosPanel: React.FC = () => {
                 </Dialog>
 
                 {/* DIALOG: NUEVA VISITA */}
-                <Dialog open={openNuevaVisita} onOpenChange={setOpenNuevaVisita}>
+                <Dialog open={openNuevaVisita} onOpenChange={(open) => {
+                    setOpenNuevaVisita(open);
+                    if(!open) {
+                        setBusquedaConvicto("");
+                        setVisitaForm({ convictoId: "", visitante: "", dniVisitante: "", parentesco: "", fecha: "", hora: "", estado: "" });
+                    }
+                }}>
                     <DialogContent className="sgc-card border-slate-800 text-slate-100 max-w-lg">
                         <DialogHeader>
-                            <DialogTitle className="text-xl font-bold text-white">Agendar Visita</DialogTitle>
-                            <DialogDescription className="text-slate-400">Registre una cita nueva para el interno.</DialogDescription>
+                            <DialogTitle className="text-xl font-bold text-white">Agendar visita</DialogTitle>
+                            <DialogDescription className="text-slate-400 text-[15px]">Registre una cita nueva para el interno.</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={(e) => { e.preventDefault(); handleRegistrarVisita(); }} className="space-y-4 pt-2">
-                            <div className="space-y-1.5">
-                                <Label className="sgc-label">Convicto *</Label>
+                            
+                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de Interno *</Label>
+                                <Input
+                                    placeholder="Buscar por DNI, Nombre o ID..."
+                                    value={busquedaConvicto}
+                                    onChange={(e) => {
+                                        const valor = e.target.value;
+                                        setBusquedaConvicto(valor);
+                                        if (valor.trim() === "") {
+                                            setVisitaForm({ ...visitaForm, convictoId: "" });
+                                        } else {
+                                            const filtrados = convictosData.filter(c =>
+                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                (c.dni && c.dni.includes(valor)) ||
+                                                (c.id && c.id.toString() === valor)
+                                            );
+                                            if (filtrados.length > 0) {
+                                                setVisitaForm({ ...visitaForm, convictoId: String(filtrados[0].id) });
+                                            } else {
+                                                setVisitaForm({ ...visitaForm, convictoId: "" });
+                                            }
+                                        }
+                                    }}
+                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                />
                                 <Select value={visitaForm.convictoId} onValueChange={v => setVisitaForm({...visitaForm, convictoId: v})}>
-                                    <SelectTrigger className="sgc-input"><SelectValue placeholder="Seleccionar interno"/></SelectTrigger>
-                                    <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                        {convictosData.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{c.nombre} (ID: {c.id})</SelectItem>))}
+                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un interno de la lista"/></SelectTrigger>
+                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                        {convictosFiltrados.length > 0 ? (
+                                            convictosFiltrados.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                        ) : (
+                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaConvicto}"</div>
+                                        )}
                                     </SelectContent>
                                 </Select>
                             </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5"><Label className="sgc-label">Visitante *</Label><Input value={visitaForm.visitante} onChange={e => setVisitaForm({...visitaForm, visitante: e.target.value})} className="sgc-input" required placeholder="Nombre completo"/></div>
                                 <div className="space-y-1.5"><Label className="sgc-label">DNI Visitante *</Label><Input value={visitaForm.dniVisitante} onChange={e => setVisitaForm({...visitaForm, dniVisitante: e.target.value})} className="sgc-input" required placeholder="Nro de documento"/></div>
@@ -1239,7 +1438,11 @@ const ConvictosPanel: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => setOpenNuevaVisita(false)}>Cancelar</Button>
+                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => {
+                                    setOpenNuevaVisita(false);
+                                    setBusquedaConvicto("");
+                                    setVisitaForm({ convictoId: "", visitante: "", dniVisitante: "", parentesco: "", fecha: "", hora: "", estado: "" });
+                                }}>Cancelar</Button>
                                 <Button type="submit" className="sgc-btn-primary flex-1" disabled={isSubmittingVisita}>{isSubmittingVisita ? "Agendando..." : "Programar Visita"}</Button>
                             </div>
                         </form>
@@ -1247,22 +1450,51 @@ const ConvictosPanel: React.FC = () => {
                 </Dialog>
 
                 {/* DIALOG: EDITAR VISITA */}
-                <Dialog open={editingData?.type === "visita"} onOpenChange={() => setEditingData(null)}>
+                <Dialog open={editingData?.type === "visita"} onOpenChange={(open) => { if(!open) { setEditingData(null); setBusquedaConvicto(""); } }}>
                     <DialogContent className="sgc-card border-slate-800 text-slate-100 max-w-lg">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold text-white">Editar registro de visitas</DialogTitle>
-                            <DialogDescription className="text-slate-400">Actualice el estatus o datos de la visita.</DialogDescription>
+                            <DialogDescription className="text-slate-400 text-[15px]">Actualice el estatus o datos de la visita.</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }} className="space-y-4 pt-2">
-                            <div className="space-y-1.5">
-                                <Label className="sgc-label">Convicto *</Label>
+                            
+                            <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
+                                <Label className="sgc-label text-blue-400 font-bold tracking-wider">Cambiar Interno Asignado</Label>
+                                <Input
+                                    placeholder="Buscar por DNI, Nombre o ID..."
+                                    value={busquedaConvicto}
+                                    onChange={(e) => {
+                                        const valor = e.target.value;
+                                        setBusquedaConvicto(valor);
+                                        if (valor.trim() === "") {
+                                            setEditingData({...editingData!, data: {...editingData!.data, convictoId: ""}});
+                                        } else {
+                                            const filtrados = convictosData.filter(c =>
+                                                (c.nombre && c.nombre.toLowerCase().includes(valor.toLowerCase())) ||
+                                                (c.dni && c.dni.includes(valor)) ||
+                                                (c.id && c.id.toString() === valor)
+                                            );
+                                            if (filtrados.length > 0) {
+                                                setEditingData({...editingData!, data: {...editingData!.data, convictoId: String(filtrados[0].id)}});
+                                            } else {
+                                                setEditingData({...editingData!, data: {...editingData!.data, convictoId: ""}});
+                                            }
+                                        }
+                                    }}
+                                    className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                />
                                 <Select value={String(editingData?.data.convictoId ?? "")} onValueChange={v => setEditingData({...editingData!, data: {...editingData!.data, convictoId: v}})}>
-                                    <SelectTrigger className="sgc-input"><SelectValue/></SelectTrigger>
-                                    <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                        {convictosData.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{c.nombre}</SelectItem>))}
+                                    <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un interno de la lista"/></SelectTrigger>
+                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                        {convictosFiltrados.length > 0 ? (
+                                            convictosFiltrados.map(c => (<SelectItem key={c.id} value={c.id.toString()} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                        ) : (
+                                            <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaConvicto}"</div>
+                                        )}
                                     </SelectContent>
                                 </Select>
                             </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5"><Label className="sgc-label">Visitante *</Label><Input value={editingData?.data.visitante || ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, visitante: e.target.value}})} className="sgc-input" required/></div>
                                 <div className="space-y-1.5"><Label className="sgc-label">DNI Visitante *</Label><Input value={editingData?.data.dniVisitante || ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, dniVisitante: e.target.value}})} className="sgc-input" required/></div>
@@ -1273,7 +1505,7 @@ const ConvictosPanel: React.FC = () => {
                             </div>
                             <div className="space-y-1.5"><Label className="sgc-label">Parentesco *</Label><Input value={editingData?.data.parentesco || ""} onChange={e => setEditingData({...editingData!, data: {...editingData!.data, parentesco: e.target.value}})} className="sgc-input" required/></div>
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => setEditingData(null)} disabled={isEditingSubmitting}>Cancelar</Button>
+                                <Button type="button" variant="outline" className="sgc-btn-secondary flex-1" onClick={() => { setEditingData(null); setBusquedaConvicto(""); }} disabled={isEditingSubmitting}>Cancelar</Button>
                                 <Button type="submit" className="sgc-btn-primary flex-1" disabled={isEditingSubmitting}>{isEditingSubmitting ? "Guardando..." : "Actualizar"}</Button>
                             </div>
                         </form>
@@ -1287,10 +1519,9 @@ const ConvictosPanel: React.FC = () => {
                             <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
                             {/* Mensaje dinámico */}
                             {deleteConfirm?.type === "convicto" ? (
-                                <p className="text-muted-foreground">Al eliminar un convicto se eliminarán
-                                    automáticamente todos sus datos
-                                    incluidos en movimientos, conducta y visitas.</p>) : (
-                                <p className="text-muted-foreground">El registro se eliminará permanentemente.</p>)}
+                                <p className="text-muted-foreground text-[15px]">Al eliminar un convicto se eliminarán
+                                    automáticamente todos sus datos incluidos en movimientos, conducta y visitas.</p>) : (
+                                <p className="text-muted-foreground text-[15px]">El registro se eliminará permanentemente.</p>)}
                         </AlertDialogHeader>
                         <div className="flex gap-4 p-1 mt-4">
                             <Button className="flex-1 border-2 hover:bg-blue-400" variant="outline"
@@ -1307,4 +1538,4 @@ const ConvictosPanel: React.FC = () => {
     )
 }
 
-export default ConvictosPanel
+export default ConvictosPanel   

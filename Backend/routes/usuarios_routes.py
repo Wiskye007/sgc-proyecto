@@ -159,11 +159,11 @@ def cambiar_contrasena():
 def obtener_configuracion():
     try:
         usuario_id = g.usuario.get('id')
-        nivelAcceso = g.usuario.get('rol') or g.usuario.get('nivelacceso') or g.usuario.get('Nivelacceso') or ''
+        nivelAcceso = g.usuario.get('nivelAcceso') or g.usuario.get('rol') or g.usuario.get('nivelacceso') or ''
         es_admin = nivelAcceso.lower() in ['administrador', 'admin']
         
         query = """
-            SELECT id, tema, notificaciones_email, notificaciones_sistema, 
+            SELECT id, notificaciones_email, notificaciones_sistema, 
                 privacidad_perfil, autenticacion_dos_factores,
                 cierre_inactividad, densidad_tablas, pantalla_inicio, tamano_fuente
             FROM configuracion_usuarios
@@ -173,7 +173,7 @@ def obtener_configuracion():
         
         if not result:
             config_default = {
-                'idUsuario': usuario_id, 'tema': 'oscuro', 'notificacionesEmail': True,
+                'idUsuario': usuario_id, 'notificacionesEmail': True,
                 'notificacionesSistema': True, 'privacidadPerfil': 'privado',
                 'autenticacionDosFactores': False, 'esAdmin': es_admin,
                 'cierreInactividad': '30', 'densidadTablas': 'normal',
@@ -184,8 +184,7 @@ def obtener_configuracion():
         
         config = result[0]
         config_respuesta = {
-            'idUsuario': usuario_id,
-            'tema': config.get('tema') or 'oscuro',
+            'idUsuario': usuario_id,    
             'notificacionesEmail': bool(config.get('notificaciones_email')),
             'notificacionesSistema': bool(config.get('notificaciones_sistema')),
             'privacidadPerfil': config.get('privacidad_perfil') or 'privado',
@@ -211,9 +210,7 @@ def obtener_configuracion():
 def actualizar_configuracion():
     try:
         usuario_id = g.usuario.get('id')
-        data = request.get_json()
-        
-        tema = data.get('tema', 'oscuro')
+        data = request.get_json()   
         notif_email = data.get('notificacionesEmail', True)
         notif_sistema = data.get('notificacionesSistema', True)
         privacidad = data.get('privacidadPerfil', 'privado')
@@ -228,24 +225,45 @@ def actualizar_configuracion():
         if check_result:
             update_query = """
                 UPDATE configuracion_usuarios
-                SET tema = %s, notificaciones_email = %s, notificaciones_sistema = %s,
+                SET notificaciones_email = %s, notificaciones_sistema = %s,
                     privacidad_perfil = %s, cierre_inactividad = %s, densidad_tablas = %s,
                     pantalla_inicio = %s, tamano_fuente = %s, fecha_actualizacion = CURRENT_TIMESTAMP
                 WHERE id_usuario = %s
             """
-            db.execute_update(update_query, (tema, notif_email, notif_sistema, privacidad, cierre, densidad, inicio, fuente, usuario_id))
+            db.execute_update(update_query, (notif_email, notif_sistema, privacidad, cierre, densidad, inicio, fuente, usuario_id))
         else:
             insert_query = """
                 INSERT INTO configuracion_usuarios 
-                (id_usuario, tema, notificaciones_email, notificaciones_sistema, privacidad_perfil, cierre_inactividad, densidad_tablas, pantalla_inicio, tamano_fuente)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (id_usuario, notificaciones_email, notificaciones_sistema, privacidad_perfil, cierre_inactividad, densidad_tablas, pantalla_inicio, tamano_fuente)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
-            db.execute_update(insert_query, (usuario_id, tema, notif_email, notif_sistema, privacidad, cierre, densidad, inicio, fuente))
+            db.execute_update(insert_query, (usuario_id, notif_email, notif_sistema, privacidad, cierre, densidad, inicio, fuente))
         
         return jsonify({'success': True, 'mensaje': 'Configuración actualizada'}), 200
     except Exception as e:
         logger.exception(f"Error al actualizar configuración: {e}")
         return jsonify({'error': 'Error al actualizar configuración'}), 500
+
+# Función auxiliar
+def limpiar_dispositivo(ua_string):
+    if not ua_string: return "Desconocido"
+    
+    # 1. Identificar Sistema Operativo / Dispositivo
+    dispositivo = "Dispositivo Desconocido"
+    if "Windows NT 10.0" in ua_string: dispositivo = "Windows 10/11"
+    elif "iPhone" in ua_string: dispositivo = "iPhone"
+    elif "Android" in ua_string: dispositivo = "Android"
+    elif "Macintosh" in ua_string: dispositivo = "Mac"
+    elif "Linux" in ua_string: dispositivo = "Linux"
+    
+    # 2. Identificar Navegador
+    navegador = "Navegador Web"
+    if "Edg/" in ua_string: navegador = "Edge"
+    elif "Firefox/" in ua_string: navegador = "Firefox"
+    elif "Chrome/" in ua_string and "Chromium" not in ua_string: navegador = "Chrome"
+    elif "Safari/" in ua_string: navegador = "Safari"
+    
+    return f"{dispositivo} ({navegador})"
 
 # -------------------------------------------------------
 # ENDPOINT: HISTORIAL DE CONEXIONES (SEGURIDAD)
@@ -255,30 +273,29 @@ def actualizar_configuracion():
 def historial_conexiones():
     try:
         usuario_id = g.usuario.get('id')
+        # Asegúrate de usar %s o ? dependiendo de tu BD
         query = """
             SELECT fecha_hora, direccion_ip, dispositivo 
             FROM historial_conexiones 
             WHERE id_usuario = %s 
             ORDER BY fecha_hora DESC 
             LIMIT 5
-        """
-        result = db.execute_query(query, (usuario_id,))
-        
-        # Formatear datos
+        """ 
+        result = db.execute_query(query, (usuario_id,)) 
         historial = []
         for r in (result or []):
             historial.append({
-                'fecha': r.get('fecha_hora').strftime('%Y-%m-%d %H:%M:%S') if r.get('fecha_hora') else 'Desconocida',
+                # Formato DD/MM/AAAA HH:MM:SS
+                'fecha': r.get('fecha_hora').strftime('%d/%m/%Y %H:%M:%S') if r.get('fecha_hora') else 'Desconocida',
                 'ip': r.get('direccion_ip') or 'Desconocida',
-                'dispositivo': r.get('dispositivo') or 'Desconocido'
+                'dispositivo': limpiar_dispositivo(r.get('dispositivo'))
             })
             
         return jsonify({'success': True, 'historial': historial}), 200
     except Exception as e:
         logger.exception(f"Error al obtener historial: {e}")
-        return jsonify({'error': 'Error al obtener historial'}), 500
-
-
+        return jsonify({'error': 'Error al obtener historial'}), 500        
+    
 # -------------------------------------------------------
 # ENDPOINT: LISTAR USUARIOS (SOLO ADMIN)
 # -------------------------------------------------------
@@ -477,6 +494,26 @@ def reset_password(usuario_id):
         return jsonify({'success': True, 'mensaje': 'Reseteada', 'contrasenaTemp': contrasena_temporal}), 200
     except Exception as e:
         return jsonify({'error': 'Error al resetear'}), 500
+
+# -------------------------------------------------------
+# ENDPOINT: ELIMINAR USUARIO (SOLO ADMIN)
+# -------------------------------------------------------
+@bp.route('/<int:usuario_id>', methods=['DELETE'])
+@requiere_auth
+@requiere_admin
+def eliminar_usuario(usuario_id):
+    try:
+        # Medida de seguridad: Evitar que el admin se borre a sí mismo
+        if g.usuario.get('id') == usuario_id:
+            return jsonify({'error': 'No puedes eliminar tu propia cuenta'}), 400
+
+        query = "DELETE FROM usuarios WHERE id = %s"
+        db.execute_update(query, (usuario_id,))
+        
+        return jsonify({'success': True, 'mensaje': 'Usuario eliminado permanentemente'}), 200
+    except Exception as e:
+        logger.exception(f"Error al eliminar usuario: {e}")
+        return jsonify({'error': 'Error al eliminar. Puede que el usuario tenga registros asociados.'}), 500
 
 # -------------------------------------------------------
 # ENDPOINT: PING DE ACTIVIDAD (ONLINE/OFFLINE)

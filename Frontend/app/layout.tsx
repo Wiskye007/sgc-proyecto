@@ -26,11 +26,26 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
+        <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+        <head>
+            {/* Script sincrónico para aplicar el tamaño de letra */}
+            <script
+                dangerouslySetInnerHTML={{
+                    __html: `
+                        try {
+                            const fuente = localStorage.getItem('sgc_fuente');
+                            if (fuente === 'pequeno') document.documentElement.classList.add('text-sm');
+                            else if (fuente === 'grande') document.documentElement.classList.add('text-lg');
+                            else document.documentElement.classList.add('text-base');
+                        } catch (e) {}
+                    `,
+                }}
+            />
+        </head>
         <body className="antialiased">
-        {children}
-        <Toaster/>
+            {children}
+            <Toaster/>
         </body>
         </html>
     )
-}
+}   

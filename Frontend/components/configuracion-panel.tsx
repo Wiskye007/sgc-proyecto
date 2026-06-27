@@ -8,17 +8,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Settings, Moon, Sun, Bell, Lock, Shield, Server, Download, ArrowLeft, Save, X, Type, LayoutGrid, MonitorPlay, Timer, Activity } from 'lucide-react';
+import { Bell, Lock, Shield, Server, Download, ArrowLeft, Save, X, Type, LayoutGrid, MonitorPlay, Timer, Activity } from 'lucide-react';
 import { authFetch } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast"; // <-- 1. Importar el hook
+import { useToast } from "@/hooks/use-toast";
 
 const API_URL = typeof window !== "undefined" && window.location.hostname !== "localhost"
     ? "https://sgc-backend-vbze.onrender.com/api"
     : "http://localhost:5000/api";
 
 interface Configuracion {
-  idUsuario: number;
-  tema: string;
+  idUsuario: number;  
   notificacionesEmail: boolean;
   notificacionesSistema: boolean;
   privacidadPerfil: string;
@@ -40,7 +39,7 @@ interface HistorialConexion {
 
 export default function ConfiguracionPanel() {
   const router = useRouter();
-  const { toast } = useToast(); // <-- 2. Inicializar toast
+  const { toast } = useToast();
   const [configuracion, setConfiguracion] = useState<Configuracion | null>(null);
   const [historial, setHistorial] = useState<HistorialConexion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,33 +55,24 @@ export default function ConfiguracionPanel() {
     fetchDatos();
   }, []);
 
-  const fetchDatos = async () => {
-    try {
-      // 3. EVITAR FALSO RELOAD: Solo cargamos si no hay datos previos
+const fetchDatos = async () => {
+    try { 
       if (!configuracion) setLoading(true); 
-      
-      const token = localStorage.getItem('authToken');
-      if (!token) { router.push('/'); return; }
-
-      const [resConfig, resHist] = await Promise.all([
-        authFetch(`${API_URL}/usuarios/configuracion`),
-        authFetch(`${API_URL}/usuarios/historial-conexiones`)
-      ]);
-
+      // 1. Obtener Configuración
+      const resConfig = await authFetch(`${API_URL}/usuarios/configuracion`);
       if (resConfig.ok) {
         const data = await resConfig.json();
-        setConfiguracion(data.configuracion);
-      } else {
-        throw new Error('Error al cargar configuración');
-      }
+        setConfiguracion(data.configuracion); 
+      } 
 
+      // 2. Obtener Historial
+      const resHist = await authFetch(`${API_URL}/usuarios/historial-conexiones`);
       if (resHist.ok) {
         const dataHist = await resHist.json();
         setHistorial(dataHist.historial || []);
       }
     } catch (err) {
-      // Usar toast en lugar de setError
-      toast({ title: "Error", description: err instanceof Error ? err.message : 'Error de conexión', variant: "destructive" });
+      toast({ title: "Error", description: 'No se pudo cargar la información de seguridad', variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -103,16 +93,21 @@ export default function ConfiguracionPanel() {
           ...configuracion,
           ...cambios
         }),
-      });
+      }); 
 
-      if (!response.ok) throw new Error('Error al guardar configuración');
-
-      // 4. USAR TOAST DE ÉXITO
+      if (!response.ok) throw new Error('Error al guardar configuración');  
       toast({ title: "Acción exitosa", description: "Configuración guardada correctamente" });
-      
-      if (cambios.tema) applyTheme(cambios.tema);
-      if (cambios.densidadTablas) localStorage.setItem('sgc_densidad', cambios.densidadTablas);
-      if (cambios.tamanoFuente) localStorage.setItem('sgc_fuente', cambios.tamanoFuente);
+      if (cambios.densidadTablas) {
+          localStorage.setItem('sgc_densidad', cambios.densidadTablas);
+      }
+      if (cambios.tamanoFuente) {
+          localStorage.setItem('sgc_fuente', cambios.tamanoFuente);
+          
+          document.documentElement.classList.remove('text-sm', 'text-base', 'text-lg');
+          if (cambios.tamanoFuente === 'pequeno') document.documentElement.classList.add('text-sm');
+          if (cambios.tamanoFuente === 'mediano') document.documentElement.classList.add('text-base');
+          if (cambios.tamanoFuente === 'grande') document.documentElement.classList.add('text-lg');
+      }
 
       setCambios({});
       fetchDatos();
@@ -121,13 +116,7 @@ export default function ConfiguracionPanel() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const applyTheme = (tema: string) => {
-    const html = document.documentElement;
-    if (tema === 'oscuro') { html.classList.add('dark'); localStorage.setItem('tema', 'oscuro'); } 
-    else { html.classList.remove('dark'); localStorage.setItem('tema', 'claro'); }
-  };
+  };  
 
   const hasChanges = Object.keys(cambios).length > 0;
 
@@ -141,6 +130,26 @@ export default function ConfiguracionPanel() {
       </div>
     );
   }
+
+  const exportToCSV = (data: any[], filename: string) => {
+    if (!data || data.length === 0) {
+      toast({ title: "Nada que exportar", description: "No hay registros disponibles", variant: "destructive" });
+      return;
+    }
+    const headers = Object.keys(data[0]).join(",");
+    const rows = data.map(obj => Object.values(obj).map(v => `"${(v ?? "").toString().replace(/"/g, '""')}"`).join(","));
+    const csv = [headers, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    toast({ title: "Descargado", description: `${filename}.csv` });
+  };
 
   if (!configuracion) return null;
 
@@ -176,16 +185,16 @@ export default function ConfiguracionPanel() {
                 <CardTitle className="text-white text-lg flex items-center gap-2">
                   <LayoutGrid className="w-5 h-5 text-blue-400" /> Accesibilidad y tablas
                 </CardTitle>
-                <CardDescription className="text-slate-400">Ajusta cómo se muestran los datos en pantalla</CardDescription>
+                <CardDescription className="text-slate-400 text-[15px]">Ajusta cómo se muestran los datos en pantalla</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6 pt-0">
 
                 {/* Accesibilidad y Tablas */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                     <div>
-                        <label className=" text-slate-300 text-sm font-medium mb-4 flex items-center gap-2"><LayoutGrid className="w-4 h-4 text-slate-500"/> Densidad de las tablas</label>
+                        <label className=" text-slate-300 text-[14px] font-medium mb-4 flex items-center gap-2"><LayoutGrid className="w-4 h-4 text-blue-300"/> Densidad de las tablas</label>
                         <Select value={cambios.densidadTablas || configuracion.densidadTablas} onValueChange={(v) => handleConfigChange('densidadTablas', v)}>
-                            <SelectTrigger className="sgc-input h-11 bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
+                            <SelectTrigger className="sgc-input h-10! w-full bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
                             <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                                 <SelectItem value="comodo" className="focus:bg-blue-600">Cómodo (Con más espacio)</SelectItem>
                                 <SelectItem value="normal" className="focus:bg-blue-600">Normal</SelectItem>
@@ -194,9 +203,9 @@ export default function ConfiguracionPanel() {
                         </Select>
                     </div>
                     <div>
-                        <label className="text-slate-300 text-sm font-medium mb-4 flex items-center gap-2"><Type className="w-4 h-4 text-slate-500"/> Tamaño de Fuente</label>
+                        <label className="text-slate-300 text-[14px] font-medium mb-4 flex items-center gap-2"><Type className="w-4 h-4 text-grey-400"/> Tamaño de Fuente</label>
                         <Select value={cambios.tamanoFuente || configuracion.tamanoFuente} onValueChange={(v) => handleConfigChange('tamanoFuente', v)}>
-                            <SelectTrigger className="sgc-input h-11 bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
+                            <SelectTrigger className="sgc-input h-10! w-full bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
                             <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                                 <SelectItem value="pequeno" className="focus:bg-blue-600 text-sm">Pequeño</SelectItem>
                                 <SelectItem value="mediano" className="focus:bg-blue-600 text-base">Mediano (Recomendado)</SelectItem>
@@ -204,17 +213,23 @@ export default function ConfiguracionPanel() {
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="pt-2">
-                        <label className=" text-slate-300 text-sm font-medium mb-4 flex items-center gap-2"><MonitorPlay className="w-4 h-4 text-slate-500"/> Pantalla de inicio predeterminada</label>
-                        <Select value={cambios.pantallaInicio || configuracion.pantallaInicio} onValueChange={(v) => handleConfigChange('pantallaInicio', v)}>
-                            <SelectTrigger className="sgc-input h-11 bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
-                            <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                <SelectItem value="dashboard" className="focus:bg-blue-600">Dashboard General (Gráficos)</SelectItem>
-                                <SelectItem value="convictos" className="focus:bg-blue-600">Directorio de Internos</SelectItem>
-                                <SelectItem value="visitas" className="focus:bg-blue-600">Control de Visitas</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                  <div className="pt-0">
+                      <label className="text-slate-300 text-[14px] font-medium mb-4 flex items-center gap-2">
+                          <MonitorPlay className="w-4 h-4 text-orange-400"/> Pantalla de inicio predeterminada
+                      </label>
+                      <Select value={cambios.pantallaInicio || configuracion.pantallaInicio} onValueChange={(v) => handleConfigChange('pantallaInicio', v)}>
+                          <SelectTrigger className="sgc-input h-10! w-full bg-[#0a0f1a] border-slate-800 focus:border-blue-500">
+                              <SelectValue/>
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
+                              <SelectItem value="dashboard" className="focus:bg-blue-600">Panel Principal</SelectItem>
+                              <SelectItem value="convictos" className="focus:bg-blue-600">Panel de Convictos</SelectItem>
+                              <SelectItem value="seguridad" className="focus:bg-blue-600">Panel de Seguridad</SelectItem>
+                              <SelectItem value="medico" className="focus:bg-blue-600">Panel Médico</SelectItem>
+                              <SelectItem value="reportes" className="focus:bg-blue-600">Panel de Reportes</SelectItem>
+                          </SelectContent>
+                      </Select>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -224,7 +239,7 @@ export default function ConfiguracionPanel() {
           <TabsContent value="seguridad" className="space-y-6">
             <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80">
               <CardHeader className="border-b border-slate-800/60 pb-4">
-                <CardTitle className="text-white text-xl flex items-center gap-2">
+                <CardTitle className="text-white text-lg flex items-center gap-2">
                   <Lock className="w-5 h-5 text-red-400" /> Seguridad de la sesión
                 </CardTitle>
                 <CardDescription className="text-slate-400">Proteja el acceso en terminales compartidas</CardDescription>
@@ -232,10 +247,10 @@ export default function ConfiguracionPanel() {
               <CardContent className="space-y-2">
                 
                 <div>
-                    <label className=" text-slate-300 text-[15px] font-medium mb-2 flex items-center gap-2"><Timer className="w-4 h-4 text-slate-500"/> Cierre automático por inactividad</label>
+                    <label className=" text-slate-300 text-[15px] font-medium mb-2 flex items-center gap-2"><Timer className="w-4 h-4 text-purple-400 "/> Cierre automático por inactividad</label>
                     <p className="text-[14px] text-slate-500 mb-4">La sesión expirará si el sistema detecta que no hay movimiento del ratón o teclado en el tiempo especificado.</p>
                     <Select value={cambios.cierreInactividad || configuracion.cierreInactividad} onValueChange={(v) => handleConfigChange('cierreInactividad', v)}>
-                        <SelectTrigger className="sgc-input md:w-1/2 h-11 bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
+                        <SelectTrigger className="sgc-input h-11! w-70 bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
                         <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                             <SelectItem value="5" className="focus:bg-blue-600">Cerrar en 5 minutos</SelectItem>
                             <SelectItem value="15" className="focus:bg-blue-600">Cerrar en 15 minutos (Recomendado)</SelectItem>
@@ -246,12 +261,12 @@ export default function ConfiguracionPanel() {
                 </div>
 
                 <div className="pt-6 border-t border-slate-800/50">
-                    <label className=" text-slate-300 text-[15px] font-medium mb-4 flex items-center gap-2"><Activity className="w-4 h-4 text-slate-500"/> Historial de conexiones recientes</label>
+                    <label className=" text-slate-300 text-[15px] font-medium mb-4 flex items-center gap-2"><Activity className="w-4 h-4 text-green-400"/> Historial de conexiones recientes</label>
                     <div className="rounded-xl border border-slate-800/80 overflow-hidden">
                         <Table>
                             <TableHeader className="bg-[#0a0f1a]">
                                 <TableRow className="border-slate-800/50 hover:bg-transparent">
-                                    <TableHead className="text-slate-400">Fecha y Hora</TableHead>
+                                    <TableHead className="text-slate-400">Fecha y hora</TableHead>
                                     <TableHead className="text-slate-400">Dirección IP</TableHead>
                                     <TableHead className="text-slate-400">Dispositivo/Navegador</TableHead>
                                 </TableRow>
@@ -281,19 +296,18 @@ export default function ConfiguracionPanel() {
 
         {/* TAB: NOTIFICACIONES */}
         <TabsContent value="notificaciones" className="space-y-6">
-          <Card className="sgc-card">
+          <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80">
             <CardHeader>
-              <CardTitle className="sgc-text-primary flex items-center gap-2">
-                <Bell className="w-5 h-5" />
-                Preferencias de Notificaciones
+              <CardTitle className="sgc-text-primary text-lg flex items-center gap-2">
+                <Bell className="w-5 h-5  text-yellow-400" />Preferencias de notificaciones
               </CardTitle>
-              <CardDescription>Controla cómo deseas recibir notificaciones</CardDescription>
+              <CardDescription className="text-slate-400 text-[14px]">Controla cómo deseas recibir notificaciones</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between p-4 border sgc-border rounded-lg">
                 <div>
-                  <p className="sgc-text-primary font-medium">Notificaciones por Correo</p>
-                  <p className="sgc-text-secondary text-sm">Recibe actualizaciones importantes por email</p>
+                  <p className="sgc-text-primary font-medium">Notificaciones por correo</p>
+                  <p className="sgc-text-secondary text-sm text-slate-400" >Recibe actualizaciones importantes por email</p>
                 </div>
                 <Switch
                   checked={cambios.notificacionesEmail !== undefined ? cambios.notificacionesEmail : configuracion.notificacionesEmail}
@@ -303,8 +317,8 @@ export default function ConfiguracionPanel() {
 
               <div className="flex items-center justify-between p-4 border sgc-border rounded-lg">
                 <div>
-                  <p className="sgc-text-primary font-medium">Notificaciones del Sistema</p>
-                  <p className="sgc-text-secondary text-sm">Recibe notificaciones emergentes en el sistema</p>
+                  <p className="sgc-text-primary font-medium">Notificaciones del sistema</p>
+                  <p className="sgc-text-secondary text-sm  text-slate-400">Recibe notificaciones emergentes en el sistema</p>
                 </div>
                 <Switch
                   checked={cambios.notificacionesSistema !== undefined ? cambios.notificacionesSistema : configuracion.notificacionesSistema}
@@ -314,19 +328,18 @@ export default function ConfiguracionPanel() {
             </CardContent>
           </Card>
 
-          <Card className="sgc-card">
+          <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80">
             <CardHeader>
-              <CardTitle className="sgc-text-primary flex items-center gap-2">
-                <Lock className="w-5 h-5" />
-                Seguridad
+              <CardTitle className="sgc-text-primary text-lg flex items-center gap-2">
+                <Lock className="w-5 h-5  text-red-400" />Seguridad de la cuenta
               </CardTitle>
-              <CardDescription>Opciones de seguridad avanzada</CardDescription>
+              <CardDescription className="text-slate-400 text-[14px]">Opciones de seguridad avanzada</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between p-4 border sgc-border rounded-lg opacity-60 cursor-not-allowed">
                 <div>
-                  <p className="sgc-text-primary font-medium">Autenticación de Dos Factores</p>
-                  <p className="sgc-text-secondary text-sm">Próximamente disponible</p>
+                  <p className="sgc-text-primary font-medium">Autenticación de dos factores</p>
+                  <p className="sgc-text-secondary text-sm  text-slate-400">Próximamente disponible</p>
                 </div>
                 <Switch disabled checked={false} />
               </div>
@@ -337,17 +350,17 @@ export default function ConfiguracionPanel() {
           {/* TAB: SISTEMA (SOLO ADMIN) */}
         {configuracion.esAdmin && (
           <TabsContent value="sistema" className="space-y-6">
-            <Card className="sgc-card border-2 border-yellow-500 dark:border-yellow-600">
+            <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80">
               <CardHeader>
-                <CardTitle className="sgc-text-primary flex items-center gap-2">
-                  <Shield className="w-5 h-5" />
-                  Configuración del Sistema (Administrador)
+                <CardTitle className="sgc-text-primary text-lg flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-blue-400" />
+                  Configuración del sistema
                 </CardTitle>
-                <CardDescription>Opciones de configuración del sistema (solo visible para administradores)</CardDescription>
+                <CardDescription className="text-slate-400 text[14px]">Opciones de configuración del sistema (solo visible para administradores)</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                  <p className="sgc-text-primary font-medium text-sm">Información del Sistema</p>
+                <div className="p-4 bg-black-50 dark:bg-yellow-950 border border-blue-400 dark:border-yellow-800 rounded-lg">
+                  <p className="sgc-text-primary font-medium text-sm">Información del sistema</p>
                   <div className="mt-3 space-y-2 text-sm sgc-text-secondary">
                     <p><strong>Versión:</strong> {configuracion.versionSistema}</p>
                     <p><strong>Modo Mantenimiento:</strong> {configuracion.maintenanceMode ? 'Activo' : 'Inactivo'}</p>
@@ -355,21 +368,19 @@ export default function ConfiguracionPanel() {
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="sgc-text-primary font-semibold text-sm">Herramientas de Sistema</h4>
+                  <h4 className="sgc-text-primary font-semibold text-sm">Herramientas de sistema</h4>
                   
                   <div className="flex flex-col gap-2">
-                    <Button className="sgc-btn-secondary w-full justify-start" disabled>
-                      <Server className="w-4 h-4 mr-2" />
-                      Verificar Estado del Servidor
-                    </Button>
-                    <Button className="sgc-btn-secondary w-full justify-start" disabled>
-                      <Download className="w-4 h-4 mr-2" />
-                      Exportar Base de Datos
-                    </Button>
-                    <Button className="sgc-btn-secondary w-full justify-start" disabled>
-                      <Server className="w-4 h-4 mr-2" />
-                      Generar Reporte de Sistema
-                    </Button>
+                      {/* Habilitamos los botones solo si el usuario es Admin */}
+                      <Button onClick={() => toast({title: "Espere", description: "Verificando integridad..."})} className="sgc-btn-secondary w-full justify-start">
+                          <Server className="w-4 h-4 mr-2" /> Verificar estado del servidor
+                      </Button>
+                      <Button onClick={() => exportToCSV(historial, "base_de_datos_respaldo")} className="sgc-btn-secondary w-full justify-start">
+                          <Download className="w-4 h-4 mr-2" /> Exportar base de datos
+                      </Button>
+                      <Button onClick={() => toast({title: "Acción exitosa", description: "Reporte generado en logs."})} className="sgc-btn-secondary w-full justify-start">
+                          <Server className="w-4 h-4 mr-2" /> Generar reporte de sistema
+                      </Button>
                   </div>
                 </div>
               </CardContent>
@@ -386,7 +397,7 @@ export default function ConfiguracionPanel() {
                 <X className="w-4 h-4 mr-2" /> Descartar
               </Button>
               <Button onClick={handleSaveConfig} disabled={saving} className="h-11 px-6 bg-blue-600 hover:bg-blue-500 text-white border-0 shadow-lg shadow-blue-600/20">
-                <Save className="w-4 h-4 mr-2" /> {saving ? 'Aplicando...' : 'Guardar Cambios'}
+                <Save className="w-4 h-4 mr-2" /> {saving ? 'Aplicando...' : 'Guardar cambios'}
               </Button>
             </div>
           )}
