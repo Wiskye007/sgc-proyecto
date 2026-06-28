@@ -619,7 +619,7 @@ const ConvictosPanel: React.FC = () => {
                                     </div>
                                     <div className="md:w-auto flex flex-col lg:flex-row gap-6 items-end w-full">
                                         <Select value={estadoFilter} onValueChange={setEstadoFilter}>
-                                            <SelectTrigger className="sgc-input h-10! w-[180px]"><SelectValue placeholder="Estado"/></SelectTrigger>
+                                            <SelectTrigger className="sgc-input h-10! w-45"><SelectValue placeholder="Estado"/></SelectTrigger>
                                             <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                                                 <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los estados</SelectItem>
                                                 <SelectItem value="Procesado" className="focus:bg-blue-600 focus:text-white">Procesado</SelectItem>
@@ -627,7 +627,7 @@ const ConvictosPanel: React.FC = () => {
                                             </SelectContent>
                                         </Select>
                                         <Select value={nivelFilter} onValueChange={setNivelFilter}>
-                                            <SelectTrigger className="sgc-input h-10! w-[250px]"><SelectValue placeholder="Peligrosidad"/></SelectTrigger>
+                                            <SelectTrigger className="sgc-input h-10! w-62.5"><SelectValue placeholder="Peligrosidad"/></SelectTrigger>
                                             <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                                                 <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los niveles (Peligrosidad)</SelectItem>
                                                 <SelectItem value="Baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
@@ -655,17 +655,17 @@ const ConvictosPanel: React.FC = () => {
                                         <TableHeader className="bg-[#0a0f1a]/80 border-b border-slate-800/50">
                                             <TableRow className="border-0 hover:bg-transparent">
                                                 <TableHead className="min-w-20 text-slate-300 font-bold text-center">IDConv</TableHead>
-                                                <TableHead className="min-w-[260px] text-slate-300 font-bold">Nombre completo</TableHead>
-                                                <TableHead className="min-w-[90px] text-slate-300 font-bold">Alias</TableHead>
-                                                <TableHead className="min-w-[100px] text-slate-300 font-bold">DNI</TableHead>
+                                                <TableHead className="min-w-65 text-slate-300 font-bold">Nombre completo</TableHead>
+                                                <TableHead className="min-w-22.5 text-slate-300 font-bold">Alias</TableHead>
+                                                <TableHead className="min-w-25 text-slate-300 font-bold">DNI</TableHead>
                                                 <TableHead className="min-w-20 text-center text-slate-300 font-bold">Edad</TableHead>
-                                                <TableHead className="min-w-[150px] text-slate-300 font-bold">Delito</TableHead>
-                                                <TableHead className="min-w-[90px] text-center text-slate-300 font-bold">Pabellón</TableHead>
+                                                <TableHead className="min-w-37.5 text-slate-300 font-bold">Delito</TableHead>
+                                                <TableHead className="min-w-22.5 text-center text-slate-300 font-bold">Pabellón</TableHead>
                                                 <TableHead className="min-w-20 text-center text-slate-300 font-bold">Celda</TableHead>
-                                                <TableHead className="min-w-[110px] text-center text-slate-300 font-bold">Estado</TableHead>
-                                                <TableHead className="min-w-[120px] text-center text-slate-300 font-bold">Peligrosidad</TableHead>
-                                                <TableHead className="min-w-[170px] text-slate-300 font-bold">Fecha Registro</TableHead>
-                                                <TableHead className="min-w-[100px] text-center text-slate-300 font-bold">Acciones</TableHead>
+                                                <TableHead className="min-w-27.5 text-center text-slate-300 font-bold">Estado</TableHead>
+                                                <TableHead className="min-w-30 text-center text-slate-300 font-bold">Peligrosidad</TableHead>
+                                                <TableHead className="min-w-42.5 text-slate-300 font-bold">Fecha Registro</TableHead>
+                                                <TableHead className="min-w-25 text-center text-slate-300 font-bold">Acciones</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -681,7 +681,7 @@ const ConvictosPanel: React.FC = () => {
                                                         <TableCell className="text-slate-400 text-sm">{c.alias || "-"}</TableCell>
                                                         <TableCell className="font-mono text-slate-300">{c.dni}</TableCell>
                                                         <TableCell className="text-center text-slate-300">{c.edad}</TableCell>
-                                                        <TableCell className="text-slate-300 truncate max-w-[150px]">{c.delito}</TableCell>
+                                                        <TableCell className="text-slate-300 truncate max-w-37.5">{c.delito}</TableCell>
                                                         <TableCell className="text-center font-bold text-slate-200">{c.pabellon}</TableCell>
                                                         <TableCell className="text-center font-mono text-slate-300">{c.celda}</TableCell>
                                                         <TableCell className="text-center"><Badge className={getEstadoColor(c.estado)}>{c.estado}</Badge></TableCell>
@@ -759,7 +759,7 @@ const ConvictosPanel: React.FC = () => {
                                                         <TableCell className="font-medium text-slate-200">{m.nombre}</TableCell>
                                                         <TableCell><Badge className="bg-red-500/10 text-red-400 border-red-500/20">{m.origen}</Badge></TableCell>
                                                         <TableCell><Badge className="bg-green-500/10 text-green-400 border-green-500/20">{m.destino}</Badge></TableCell>
-                                                        <TableCell className="text-slate-400 text-sm truncate max-w-[150px]">{m.motivo}</TableCell>
+                                                        <TableCell className="text-slate-400 text-sm truncate max-w-37.5">{m.motivo}</TableCell>
                                                         <TableCell className="flex justify-center gap-2">
                                                             <Button 
                                                                 size="icon" 
@@ -792,7 +792,7 @@ const ConvictosPanel: React.FC = () => {
                                     </div>
                                     {/*SELECT DE TIPO DE CONDUCTA */}
                                     <Select value={tipoConductaFilter} onValueChange={setTipoConductaFilter}>
-                                        <SelectTrigger className="sgc-input h-10! w-full md:w-[180px]">
+                                        <SelectTrigger className="sgc-input h-10! w-full md:w-45">
                                             <SelectValue placeholder="Tipo de falta"/>
                                         </SelectTrigger>
                                         <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
@@ -842,7 +842,7 @@ const ConvictosPanel: React.FC = () => {
                                                         <TableCell className="text-center font-mono text-blue-400">C{c.convictoId}</TableCell>
                                                         <TableCell className="font-medium text-slate-200">{c.nombre}</TableCell>
                                                         <TableCell className="text-center"><Badge className={getTipoConductaColor(c.tipo)}>{c.tipo}</Badge></TableCell>
-                                                        <TableCell className="text-slate-300 text-sm truncate max-w-[250px]">{c.descripcion}</TableCell>
+                                                        <TableCell className="text-slate-300 text-sm truncate max-w-62.5">{c.descripcion}</TableCell>
                                                         <TableCell className="text-slate-400 text-sm">{c.sancion}</TableCell>
                                                         <TableCell className="flex justify-center gap-2">
                                                             <Button 
@@ -876,7 +876,7 @@ const ConvictosPanel: React.FC = () => {
                                     </div>
                                     {/*SELECT DE ESTADO DE VISITA */}
                                     <Select value={estadoVisitaFilter} onValueChange={setEstadoVisitaFilter}>
-                                        <SelectTrigger className="sgc-input h-10! w-full md:w-[180px]">
+                                        <SelectTrigger className="sgc-input h-10! w-full md:w-45">
                                             <SelectValue placeholder="Estado"/>
                                         </SelectTrigger>
                                         <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
@@ -907,8 +907,8 @@ const ConvictosPanel: React.FC = () => {
                                                 <TableHead className="text-slate-300 font-bold">Fecha</TableHead>
                                                 <TableHead className="text-slate-300 font-bold">Hora</TableHead>
                                                 <TableHead className="text-center text-slate-300 font-bold">IDConv</TableHead>
-                                                <TableHead className="min-w-[200px] text-slate-300 font-bold">Interno</TableHead>
-                                                <TableHead className="min-w-[150px] text-slate-300 font-bold">Visitante</TableHead>
+                                                <TableHead className="min-w-50 text-slate-300 font-bold">Interno</TableHead>
+                                                <TableHead className="min-w-37.5 text-slate-300 font-bold">Visitante</TableHead>
                                                 <TableHead className="text-slate-300 font-bold">DNI Visitante</TableHead>
                                                 <TableHead className="text-slate-300 font-bold">Parentesco</TableHead>
                                                 <TableHead className="text-center text-slate-300 font-bold">Estado</TableHead>
@@ -1005,7 +1005,7 @@ const ConvictosPanel: React.FC = () => {
                                 <div className="space-y-1.5">
                                     <Label className="sgc-label">Nivel de peligrosidad *</Label>
                                     <Select value={convictoForm.nivel} onValueChange={v => setConvictoForm({...convictoForm, nivel: v})}>
-                                        <SelectTrigger className="sgc-input w-[180px] flex items-center justify-between px-3 text-sm text-slate-200"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
+                                        <SelectTrigger className="sgc-input w-45 flex items-center justify-between px-3 text-sm text-slate-200"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
                                         <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                                             <SelectItem value="Baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
                                             <SelectItem value="Media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>

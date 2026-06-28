@@ -379,7 +379,7 @@ export default function ReportesPanel() {
                                             </RechartsBarChart>
                                         </ResponsiveContainer>
                                     ) : (
-                                        <div className="h-[280px] flex items-center justify-center text-slate-500">
+                                        <div className="h-70 flex items-center justify-center text-slate-500">
                                             <p className="text-sm">Sin datos disponibles</p>
                                         </div>
                                     )}
@@ -391,7 +391,7 @@ export default function ReportesPanel() {
                                         <Activity className="h-4 w-4 text-purple-400"/> Indicador de Capacidad
                                     </h3>
                                     {datoPoblacionPabellones.length > 0 ? (
-                                        <div className="space-y-6 px-2 h-[280px] flex flex-col justify-center">
+                                        <div className="space-y-6 px-2 h-70 flex flex-col justify-center">
                                             {datoPoblacionPabellones.map((pab, idx) => {
                                                 const porcentaje = Math.round((pab.internos / pab.capacidad) * 100)
                                                 const colorBar = porcentaje >= 90 ? "bg-red-500" : porcentaje >= 75 ? "bg-yellow-500" : "bg-green-500"
@@ -409,7 +409,7 @@ export default function ReportesPanel() {
                                             })}
                                         </div>
                                     ) : (
-                                        <div className="h-[280px] flex items-center justify-center text-slate-500">
+                                        <div className="h-70 flex items-center justify-center text-slate-500">
                                             <p className="text-sm">Sin datos disponibles</p>
                                         </div>
                                     )}
@@ -445,7 +445,7 @@ export default function ReportesPanel() {
                                             </PieChart>
                                         </ResponsiveContainer>
                                     ) : (
-                                        <div className="h-[280px] flex items-center justify-center text-slate-500">
+                                        <div className="h-70 flex items-center justify-center text-slate-500">
                                             <p className="text-sm">Sin datos disponibles</p>
                                         </div>
                                     )}
@@ -487,7 +487,7 @@ export default function ReportesPanel() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="h-[280px] flex items-center justify-center text-slate-500">
+                                        <div className="h-70 flex items-center justify-center text-slate-500">
                                             <p className="text-sm">Sin datos disponibles</p>
                                         </div>
                                     )}

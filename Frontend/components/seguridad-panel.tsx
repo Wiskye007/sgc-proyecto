@@ -409,7 +409,7 @@ export default function SeguridadPanel() {
                             
                             {/* Select del filtro */}
                             <Select value={filtroIncidentes} onValueChange={setFiltroIncidentes}>
-                                <SelectTrigger className="w-[180px] h-9 sgc-input text-sm border-slate-700 bg-slate-900/50">
+                                <SelectTrigger className="w-45 h-9 sgc-input text-sm border-slate-700 bg-slate-900/50">
                                     <SelectValue placeholder="Filtrar" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 text-xs">
@@ -421,7 +421,7 @@ export default function SeguridadPanel() {
                             </Select>
                         </CardHeader>
 
-                        <CardContent className="pt-4 flex-1 flex flex-col min-h-[330px]">
+                        <CardContent className="pt-4 flex-1 flex flex-col min-h-82.5">
                             {incidentesLoading ? (
                                 <div className="flex-1 flex flex-col items-center justify-center py-4">
                                     <div className="text-center space-y-2">
@@ -432,7 +432,7 @@ export default function SeguridadPanel() {
                                     </div>
                                 </div>
                             ) : incidentes.length > 0 ? (
-                                <div className="space-y-3 max-h-[330px] overflow-y-auto pr-2 pb-2">
+                                <div className="space-y-3 max-h-82.5 overflow-y-auto pr-2 pb-2">
                                     {incidentes.map((incidente) => (
                                         <div
                                             key={incidente.id}
