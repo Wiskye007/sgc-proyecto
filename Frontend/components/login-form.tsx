@@ -163,7 +163,8 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
             toast({
             title: "Usuario creado exitosamente",
             description: `El usuario ${nuevoUsuario.usuario} ha sido registrado.`,
-            })
+            });
+            window.dispatchEvent(new CustomEvent('usuario-creado'));
             setNuevoUsuario({
             nombreCompleto: "",
             dni: "",
@@ -320,7 +321,7 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
         {/* ---------- DIALOG: Registro de nuevo usuario ---------- */}
 
         <Dialog open={dialogRegistroOpen} onOpenChange={setDialogRegistroOpen}>
-            <DialogContent className="sgc-card border border-blue-500/40 rounded-2xl max-w-[760px]">
+            <DialogContent className="sgc-card border border-blue-500/40 rounded-2xl max-w-190">
             <DialogHeader>
                 <DialogTitle className="text-white">Registro de nuevo usuario</DialogTitle>
                 <DialogDescription className="text-blue-200/70">Complete los datos para crear un nuevo usuario en el sistema</DialogDescription>
@@ -417,10 +418,10 @@ const handleRegistroUsuario = async (e: React.FormEvent) => {
                     <SelectValue placeholder="Seleccione" />
                     </SelectTrigger>
                     <SelectContent>
-                    <SelectItem value="administrador">Administrador</SelectItem>
-                    <SelectItem value="supervisor">Supervisor</SelectItem>
-                    <SelectItem value="guardia">Guardia de seguridad</SelectItem>
-                    <SelectItem value="medico">Personal médico</SelectItem>
+                        <SelectItem value="Administrador">Administrador</SelectItem>
+                        <SelectItem value="Supervisor">Supervisor</SelectItem>
+                        <SelectItem value="Guardia de seguridad">Guardia de seguridad</SelectItem>
+                        <SelectItem value="Personal médico">Personal médico</SelectItem>
                     </SelectContent>
                 </Select>
                 </div>

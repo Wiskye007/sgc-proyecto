@@ -33,11 +33,11 @@ def obtener_convictos():
         if resultados:
             for r in resultados:
                 from datetime import datetime
-                fechaingreso = r["fecha_ingreso"]
+                fechaingreso = r.get("fechaingreso")
                 if isinstance(fechaingreso, datetime):
                     fecha_str = fechaingreso.strftime("%d/%m/%Y %H:%M:%S")
                 else:
-                    fecha_str = str(fechaingreso)
+                    fecha_str = str(fechaingreso) if fechaingreso else "Sin fecha"
 
                 convictos.append({
                     'id': r['IDConv'],
@@ -69,7 +69,7 @@ def crear_convicto():
 
         # --- VALIDACIÓN DE DNI DUPLICADO ---
         if dni:
-            check_query = "SELECT 1 FROM tblConvictos WHERE DNI = ?"
+            check_query = "SELECT 1 FROM tblConvictos WHERE DNI = %s"
             existe = db.execute_query(check_query, (dni,))
             if existe:
                 return jsonify({'error': f'El DNI "{dni}" ya se encuentra registrado en el sistema.'}), 409
@@ -89,7 +89,7 @@ def crear_convicto():
         query = """
                 INSERT INTO tblConvictos (NombreCompleto, Alias, DNI, Edad, Delito, Pabellon, Celda, Estado, Nivel,
                 Contacto, Observaciones, FechaIngreso)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) \
                 """
         params = (
             data.get('nombre'), data.get('alias'), dni,
@@ -113,25 +113,25 @@ def actualizar_convicto(id):
 
         # --- VALIDACIÓN DE DNI ---
         if dni:
-            check_query = "SELECT 1 FROM tblConvictos WHERE DNI = ? AND IDConv != ?"
+            check_query = "SELECT 1 FROM tblConvictos WHERE DNI = ? AND IDConv != %s"
             existe = db.execute_query(check_query, (dni, id))
             if existe:
                 return jsonify({'error': f'El DNI {dni} ya pertenece a otro convicto.'}), 409
 
         query = """
                 UPDATE tblConvictos
-                SET NombreCompleto=?,
-                    Alias=?,
-                    DNI=?,
-                    Edad=?,
-                    Delito=?,
-                    Pabellon=?,
-                    Celda=?,
-                    Estado=?,
-                    Nivel=?,
-                    Contacto=?,
-                    Observaciones=?
-                WHERE IDConv = ? \
+                SET NombreCompleto=%s,
+                    Alias=%s,
+                    DNI=%s,
+                    Edad=%s,
+                    Delito=%s,
+                    Pabellon=%s,
+                    Celda=%s,
+                    Estado=%s,
+                    Nivel=%s,
+                    Contacto=%s,
+                    Observaciones=%s
+                WHERE IDConv = %s \
                 """
         params = (
             data.get('nombre'), data.get('alias'), dni,
@@ -151,12 +151,12 @@ def actualizar_convicto(id):
 def eliminar_convicto(id):
     try:
         # Primero borramos registros relacionados para mantener integridad referencial
-        db.execute_update("DELETE FROM tblMovimientos WHERE IDConv = ?", (id,))
-        db.execute_update("DELETE FROM tblConducta WHERE IDConv = ?", (id,))
-        db.execute_update("DELETE FROM tblVisitas WHERE IDConv = ?", (id,))
+        db.execute_update("DELETE FROM tblMovimientos WHERE IDConv = %s", (id,))
+        db.execute_update("DELETE FROM tblConducta WHERE IDConv = %s", (id,))
+        db.execute_update("DELETE FROM tblVisitas WHERE IDConv = %s", (id,))
 
         # Luego borramos al convicto
-        query = "DELETE FROM tblConvictos WHERE IDConv = ?"
+        query = "DELETE FROM tblConvictos WHERE IDConv = %s"
         db.execute_update(query, (id,))
         return jsonify({'success': True, 'message': 'Registro de convicto eliminado'}), 200
     except Exception as e:
@@ -242,7 +242,7 @@ def crear_movimiento():
 
         query = """
                 INSERT INTO tblMovimientos (Fecha, Hora, IDConv, Origen, Destino, Motivo, AutorizadoPor)
-                VALUES (?, ?, ?, ?, ?, ?, ?) \
+                VALUES (%s, %s, %s, %s, %s, %s, %s) \
                 """
 
         params = (
@@ -273,14 +273,14 @@ def actualizar_movimiento(id):
 
         query = """
                 UPDATE tblMovimientos
-                SET Fecha=?,
-                    Hora=?,
-                    IDConv=?,
-                    Origen=?,
-                    Destino=?,
-                    Motivo=?,
-                    AutorizadoPor=?
-                WHERE IDMov = ? \
+                SET Fecha=%s,
+                    Hora=%s,
+                    IDConv=%s,
+                    Origen=%s,
+                    Destino=%s,
+                    Motivo=%s,
+                    AutorizadoPor=%s
+                WHERE IDMov = %s \
                 """
         params = (
             fecha_final,
@@ -304,7 +304,7 @@ def actualizar_movimiento(id):
 @bp.route('/movimientos/<int:id>', methods=['DELETE'])
 def eliminar_movimiento(id):
     try:
-        db.execute_update("DELETE FROM tblMovimientos WHERE IDMov = ?", (id,))
+        db.execute_update("DELETE FROM tblMovimientos WHERE IDMov = %s", (id,))
         return jsonify({'success': True, 'message': 'Movimiento eliminado'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -379,7 +379,7 @@ def crear_conducta():
         # -------- INSERTAR --------
         query = """
                 INSERT INTO tblConducta (IDConv, Fecha, Tipo, Descripcion, Sancion, RegistradoPor)
-                VALUES (?, ?, ?, ?, ?, ?) \
+                VALUES (%s, %s, %s, %s, %s, %s) \
                 """
         params = (
             data.get('convictoId'),
@@ -415,13 +415,13 @@ def actualizar_conducta(id):
         # -------- UPDATE --------
         query = """
                 UPDATE tblConducta
-                SET IDConv=?,
-                    Fecha=?,
-                    Tipo=?,
-                    Descripcion=?,
-                    Sancion=?,
-                    RegistradoPor=?
-                WHERE IDConducta = ? \
+                SET IDConv=%s,
+                    Fecha=%s,
+                    Tipo=%s,
+                    Descripcion=%s,
+                    Sancion=%s,
+                    RegistradoPor=%s
+                WHERE IDConducta = %s \
                 """
 
         params = (
@@ -449,7 +449,7 @@ def actualizar_conducta(id):
 @bp.route('/conducta/<int:id>', methods=['DELETE'])
 def eliminar_conducta(id):
     try:
-        db.execute_update("DELETE FROM tblConducta WHERE IDConducta = ?", (id,))
+        db.execute_update("DELETE FROM tblConducta WHERE IDConducta = %s", (id,))
         return jsonify({'success': True}), 200
     except Exception as e:
         logger.error(f"Error eliminando conducta: {e}")
@@ -527,7 +527,7 @@ def crear_visita():
 
         query = """
                 INSERT INTO tblVisitas (Fecha, Hora, IDConv, Visitante, DNIVisitante, Parentesco, Estado, Observaciones)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?) \
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s) \
                 """
         params = (
             fecha_final, 
@@ -568,15 +568,15 @@ def actualizar_visita(id):
         # -------- ACTUALIZACIÓN --------
         query = """
                 UPDATE tblVisitas
-                SET Fecha=?,
-                    Hora=?,
-                    IDConv=?,
-                    Visitante=?,
-                    DNIVisitante=?,
-                    Parentesco=?,
-                    Estado=?,
-                    Observaciones=?
-                WHERE IDVisita = ? \
+                SET Fecha=  %s,
+                    Hora=   %s,
+                    IDConv= %s,
+                    Visitante= %s,
+                    DNIVisitante= %s,
+                    Parentesco= %s,
+                    Estado= %s,
+                    Observaciones= %s
+                WHERE IDVisita = %s \
                 """
 
         params = (
@@ -606,7 +606,7 @@ def actualizar_visita(id):
 @bp.route('/visitas/<int:id>', methods=['DELETE'])
 def eliminar_visita(id):
     try:
-        db.execute_update("DELETE FROM tblVisitas WHERE IDVisita = ?", (id,))
+        db.execute_update("DELETE FROM tblVisitas WHERE IDVisita = %s", (id,))
         return jsonify({'success': True}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -84,4 +84,8 @@ def server_error(error):
 
 if __name__ == '__main__':
     port = int(os.getenv('FLASK_PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=app.config['ENV'] == 'development')    
+    app.run(host='0.0.0.0', port=port, debug=app.config['ENV'] == 'development')
+
+@app.before_request
+def log_request_info():
+    logger.info(f"Petición recibida: {request.method} {request.path}")

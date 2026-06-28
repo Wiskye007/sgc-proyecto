@@ -155,14 +155,14 @@ export default function DashboardModules() {
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className={`w-full h-11 rounded-lg flex items-center justify-center gap-2 font-semibold transition-all duration-300
+                                    <div className={`w-full h-11 rounded-lg flex items-center justify-center text-center gap-2 font-semibold transition-all duration-300
                                         ${isLocked 
                                             ? 'bg-slate-800/30 text-slate-500 border border-slate-800/50' 
                                             : 'bg-blue-500/5 text-blue-400 border border-blue-500/10 group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent'
                                         }`}>
                                         {isLocked ? (
                                             <>
-                                                <Lock className="w-4 h-4 mr-1" />Requiere permisos de administrador
+                                                <Lock className="w-4 h-4 ml-1" />Requiere permisos de administrador
                                             </>
                                         ) : (
                                             'Acceder al módulo'

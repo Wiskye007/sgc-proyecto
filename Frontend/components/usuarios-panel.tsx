@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,6 +45,9 @@ export default function UsuariosPanel() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
+  // NUEVO: Identificador para saber cuál es la petición más reciente y evitar cruces
+  const currentFetchIdRef = useRef<number>(0);
+
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [nivelFilter, setNivelFilter] = useState('');
@@ -55,12 +58,17 @@ export default function UsuariosPanel() {
 
   // Modales
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<Usuario | null>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [usuarioAEliminar, setUsuarioAEliminar] = useState<Usuario | null>(null); 
+  const [showEditModal, setShowEditModal] = useState(false);  
   const [formData, setFormData] = useState({
     nombreCompleto: '', correo: '', dni: '', cargo: '', nivelAcceso: '', estado: '',
   });
 
+  // Estado unificado para las acciones de confirmación
+  const [confirmacionAction, setConfirmacionAction] = useState<{
+    type: 'reset' | 'estado' | 'delete' | null;
+    usuario: Usuario | null;
+  }>({ type: null, usuario: null });
+  
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
     if (!storedUser) return router.push('/');
@@ -70,52 +78,58 @@ export default function UsuariosPanel() {
     setUsuario(userData);
   }, [router]);
 
+  // EFECTO DE CARGA Y AUTO-ACTUALIZACIÓN
   useEffect(() => {
-    const enviarPing = async () => { try { await authFetch(`${API_URL}/usuarios/ping`, { method: 'POST' }); } catch (e) { } };
-    enviarPing(); 
-    const interval = setInterval(enviarPing, 2 * 60 * 1000); 
-    return () => clearInterval(interval);
-  }, []);
+      if (usuario?.id) {
+        fetchUsuarios(false, false);
+        const autoRefresh = setInterval(() => {
+          fetchUsuarios(false, true); 
+        }, 15 * 1000);
+        
+        return () => clearInterval(autoRefresh);
+      }
+    }, [page, searchTerm, nivelFilter, estadoFilter, sesionFilter, usuario?.id]);
 
-  useEffect(() => {
-    if (usuario) fetchUsuarios();
-  }, [page, searchTerm, nivelFilter, estadoFilter, sesionFilter, usuario]);
+  const fetchUsuarios = async (isManualClick = false, isSilent = false) => {
+      currentFetchIdRef.current += 1;
+      const fetchId = currentFetchIdRef.current;
 
-  const fetchUsuarios = async (isManualClick = false) => {
-  try {
-    if (usuarios.length === 0) {
-      setLoading(true);
-    }
-    
-    // Si fue un clic manual en el botón, activamos su animación dedicada
-    if (isManualClick) {
-      setIsRefreshing(true);
-    }
+      try {
+        if (!isSilent) setLoading(true);
+        if (isManualClick) setIsRefreshing(true);
 
-    const params = new URLSearchParams({ page: page.toString(), limit: '10' });
-    if (searchTerm) params.append('search', searchTerm);
-    if (nivelFilter && nivelFilter !== 'todos') params.append('nivel', nivelFilter);
-    if (estadoFilter && estadoFilter !== 'todos') params.append('estado', estadoFilter);
-    if (sesionFilter && sesionFilter !== 'todos') params.append('sesion', sesionFilter);
+        const params = new URLSearchParams({ page: page.toString(), limit: '10' });
+        if (searchTerm) params.append('search', searchTerm);
+        if (nivelFilter && nivelFilter !== 'todos') params.append('nivel', nivelFilter);
+        if (estadoFilter && estadoFilter !== 'todos') params.append('estado', estadoFilter);
+        if (sesionFilter && sesionFilter !== 'todos') params.append('sesion', sesionFilter);
+        params.append('_t', Date.now().toString());
 
-    const response = await authFetch(`${API_URL}/usuarios?${params.toString()}`);
+        const response = await authFetch(`${API_URL}/usuarios?${params.toString()}`);
+        if (!response.ok) throw new Error('Error al cargar');
 
-    if (!response.ok) throw new Error('Error al cargar usuarios');
+        const data = await response.json();
 
-    const data = await response.json();
-    setUsuarios(data.usuarios || []);
-    setPaginacion(data.paginacion);
-  } catch (err) {
-    toast({ title: "Error", description: "No se pudieron cargar los usuarios", variant: "destructive" });
-  } finally {
-    setLoading(false);
-    setIsRefreshing(false); // Apaga la animación del botón pase lo que pase
-  }
-};
-
-//Función para el botón "Actualizar registros"
+        if (currentFetchIdRef.current === fetchId) {
+          setUsuarios(data.usuarios || []);
+          if (data.paginacion) {
+            setPaginacion(data.paginacion);
+          }
+        }
+      } catch (err) {
+        if (currentFetchIdRef.current === fetchId && !isSilent) {
+          toast({ title: "Error", description: "No se pudieron cargar los usuarios", variant: "destructive" });
+        }
+      } finally {
+        if (currentFetchIdRef.current === fetchId) {
+          setLoading(false);
+          setIsRefreshing(false);
+        }
+      }
+    };
+  
   const handleManualRefresh = () => {
-    fetchUsuarios(true); // Pasamos true para avisarle que fue manual
+    fetchUsuarios(true, true);
   };
 
   const handleEditUsuario = (usr: Usuario) => {
@@ -133,69 +147,55 @@ export default function UsuariosPanel() {
 
   const handleSaveUsuario = async () => {
     try {
-      if (!usuarioSeleccionado) return;
-
+      if (!usuarioSeleccionado) return; 
       const response = await authFetch(`${API_URL}/usuarios/${usuarioSeleccionado.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData),
-      });
-
+      }); 
       if (!response.ok) throw new Error((await response.json()).error || 'Error al actualizar usuario');
 
       toast({ title: "Acción exitosa", description: "Usuario actualizado correctamente" });
       setShowEditModal(false);
       setUsuarioSeleccionado(null);
-      fetchUsuarios();
+      fetchUsuarios(false, true); 
     } catch (err) {
       toast({ title: "Error", description: err instanceof Error ? err.message : 'Error al actualizar', variant: "destructive" });
     }
   };
 
-  const handleToggleEstado = async (usuarioId: number, estadoActual: string) => {
+  const handleToggleEstado = (usr: Usuario) => setConfirmacionAction({ type: 'estado', usuario: usr });
+  const handleResetPassword = (usr: Usuario) => setConfirmacionAction({ type: 'reset', usuario: usr });
+  const handleDeleteUsuario = (usr: Usuario) => setConfirmacionAction({ type: 'delete', usuario: usr });
+
+  const ejecutarAccionConfirmada = async () => {
+    if (!confirmacionAction.usuario) return;
+    const { type, usuario } = confirmacionAction;
+
     try {
-      const nuevoEstado = estadoActual === 'activo' ? 'inactivo' : 'activo';
-      const response = await authFetch(`${API_URL}/usuarios/${usuarioId}/estado`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ estado: nuevoEstado }),
-      });
+      if (type === 'reset') {
+        const response = await authFetch(`${API_URL}/usuarios/${usuario.id}/reset-password`, { method: 'POST' });
+        if (!response.ok) throw new Error((await response.json()).error || 'Error al resetear contraseña');
+        const data = await response.json();
+        toast({ title: "Contraseña reseteada", description: `Nueva clave temporal: ${data.contrasenaTemp}` });
+      } 
+      else if (type === 'estado') {
+        const nuevoEstado = usuario.estado === 'activo' ? 'inactivo' : 'activo';
+        const response = await authFetch(`${API_URL}/usuarios/${usuario.id}/estado`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ estado: nuevoEstado }),
+        });
+        if (!response.ok) throw new Error((await response.json()).error || 'Error al cambiar estado');
+        toast({ title: "Estado modificado", description: `Usuario marcado como ${nuevoEstado.toUpperCase()}` });
+      } 
+      else if (type === 'delete') {
+        const response = await authFetch(`${API_URL}/usuarios/${usuario.id}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Error al eliminar usuario');
+        toast({ title: "Usuario eliminado", description: data.mensaje });
+      }
 
-      if (!response.ok) throw new Error((await response.json()).error || 'Error al cambiar estado');
-
-      toast({ title: "Estado modificado", description: `Usuario marcado como ${nuevoEstado.toUpperCase()}` });
-      fetchUsuarios();
+      setConfirmacionAction({ type: null, usuario: null });
+      fetchUsuarios(false, true); 
     } catch (err) {
-      toast({ title: "Error", description: err instanceof Error ? err.message : 'Error al cambiar estado', variant: "destructive" });
-    }
-  };
-
-  const handleResetPassword = async (usuarioId: number) => {
-    try {
-      if (!confirm('¿Está seguro de reiniciar la contraseña a un valor por defecto?')) return;
-      const response = await authFetch(`${API_URL}/usuarios/${usuarioId}/reset-password`, { method: 'POST' });
-      if (!response.ok) throw new Error((await response.json()).error || 'Error al resetear contraseña');
-
-      const data = await response.json();
-      toast({ title: "Contraseña reseteada", description: `Nueva clave temporal: ${data.contrasenaTemp}` });
-    } catch (err) {
-      toast({ title: "Error", description: err instanceof Error ? err.message : 'Error al resetear', variant: "destructive" });
-    }
-  };
-
-  const handleDeleteUsuario = (usr: Usuario) => {
-    setUsuarioAEliminar(usr);
-  };
-
-  const confirmDeleteUsuario = async () => {
-    try {
-      if (!usuarioAEliminar) return;
-      const response = await authFetch(`${API_URL}/usuarios/${usuarioAEliminar.id}`, { method: 'DELETE' });
-      const data = await response.json();
-
-      if (!response.ok) throw new Error(data.error || 'Error al eliminar usuario');
-
-      toast({ title: "Usuario eliminado", description: data.mensaje });
-      setUsuarioAEliminar(null); 
-      fetchUsuarios();
-    } catch (err) {
-      toast({ title: "Error", description: err instanceof Error ? err.message : 'Error al eliminar', variant: "destructive" });
+      toast({ title: "Error", description: err instanceof Error ? err.message : 'Error en la acción', variant: "destructive" });
     }
   };
 
@@ -233,7 +233,7 @@ export default function UsuariosPanel() {
               <Input placeholder="Nombre, correo o DNI " value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="sgc-input bg-[#0a0f1a] border-slate-800 w-full"/>
             </div>  
             <div className="flex flex-col sm:flex-row gap-6 w-full lg:w-auto lg:ml-auto"> 
-              <div className="w-full sm:min-w-[180px]">
+              <div className="w-full sm:min-w-180px">
                 <label className="block text-slate-400 text-[14px] font-bold uppercase tracking-widest mb-2 mt-6">Acceso</label>
                 <Select value={nivelFilter} onValueChange={(v) => { setNivelFilter(v); setPage(1); }}>
                   <SelectTrigger className="sgc-input bg-[#0a0f1a] border-slate-800 w-40">
@@ -248,7 +248,7 @@ export default function UsuariosPanel() {
                   </SelectContent>
                 </Select>
               </div>  
-              <div className="w-full sm:min-w-[180px]">
+              <div className="w-full sm:min-w-180px">
                 <label className="block text-slate-400 text-[14px] font-bold uppercase tracking-widest mb-2 mt-6">Estado (cuenta)</label>
                 <Select value={estadoFilter} onValueChange={(v) => { setEstadoFilter(v); setPage(1); }}>
                   <SelectTrigger className="sgc-input bg-[#0a0f1a] border-slate-800 w-40"><SelectValue placeholder="Todos" /></SelectTrigger>
@@ -259,7 +259,7 @@ export default function UsuariosPanel() {
                   </SelectContent>
                 </Select>
               </div>  
-              <div className="w-full sm:min-w-[180px]">
+              <div className="w-full sm:min-w-180px">
                 <label className="block text-slate-400 text-[14px] font-bold uppercase tracking-widest mb-2 mt-6">Conexión</label>
                 <Select value={sesionFilter} onValueChange={(v) => { setSesionFilter(v); setPage(1); }}>
                   <SelectTrigger className="sgc-input bg-[#0a0f1a] border-slate-800 w-40"><SelectValue placeholder="Todos" /></SelectTrigger>
@@ -310,31 +310,41 @@ export default function UsuariosPanel() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-[#0a0f1a]/80 border-b border-slate-800/50">
+                  <thead className="bg-[#040408] border-b border-slate-800/50">
                     <tr>
-                      <th className="text-left py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Usuario</th>
-                      <th className="text-left py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">DNI</th>
-                      <th className="text-left py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Correo</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Cargo</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Nivel</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Estado/Conexión</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs min-w-[180px]">Fecha creación</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs min-w-[180px]">Última actualización<noscript></noscript></th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs min-w-[180px]">Última actividad</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-xs">Acciones</th>
+                      <th className="text-left py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-35!">Usuario</th>
+                      <th className="text center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-25">DNI</th>
+                      <th className="text-left py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px]">Correo</th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px]">Cargo</th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px]">Nivel</th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[13.7px] min-w-30">Estado de cuenta</th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-40">Fecha creación</th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-40">Última actualización<noscript></noscript></th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-40">Última conexión</th>
+                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px]">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/50">
-                    {usuarios.map((usr) => {
-                      const isCurrentUser = usuario?.id === usr.id;
-                      
+                      {usuarios
+                      .filter(usr => {
+                          if (!sesionFilter || sesionFilter === 'todos') return true;
+                          if (usuario?.id === usr.id) return true; 
+                          return sesionFilter === 'online' ? usr.enLinea : !usr.enLinea;
+                        })
+                        .sort((a, b) => {
+                          if (a.id === usuario?.id) return -1;
+                          if (b.id === usuario?.id) return 1;
+                          return 0;
+                        })
+                        .map((usr) => {
+                          const isCurrentUser = usuario?.id === usr.id;
                       return (
-                      <tr key={usr.id} className={`transition-colors ${isCurrentUser ? 'bg-blue-500/5' : 'hover:bg-blue-500/5'}`}>
-                        <td className="py-4 px-6">
+                      <tr key={usr.id} className={`transition-colors ${isCurrentUser ? 'bg-blue-500/7' : 'hover:bg-blue-500/7'}`}>
+                        <td className="py-4 px-6 h-16!">
                           <div className="flex items-center gap-2"> 
                             <span className="text-slate-200 font-bold">{usr.nombreCompleto}</span>
                               {isCurrentUser && (
-                                <span className="px-2 py-0.5 rounded-md bg-orange-600/20 text-orange-400 text-[9px] font-black uppercase tracking-widest border border-orange-500/30">
+                                <span className="px-1 py-0.5 rounded-md bg-orange-600/20 text-orange-400 text-[10px] font-black uppercase tracking-widest border border-orange-500/30">
                                     Tú
                                 </span>
                             )}
@@ -350,36 +360,38 @@ export default function UsuariosPanel() {
                         <td className="py-4 px-6 text-center">
                           <div className="flex flex-col items-center gap-2">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border ${
-                                usr.estado === 'activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
-                              }`}>{usr.estado}</span>
-                                
-                              {usr.enLinea ? (
-                                <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" /> En línea
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                                    <div className="w-2 h-2 rounded-full bg-slate-600" /> Offline
-                                </div>
-                              )}
+                                usr.estado === 'activo' ? 'bg-green-500/10 text-center text-[12px] text-green-500 border-green-500/20' : 'bg-red-500/10 text-center text-[12px] text-red-500 border-red-500/20'
+                              }`}>{usr.estado}</span> 
                           </div>
                         </td>
                         <td className="py-4 px-6 text-center text-slate-400 font-mono text-[14px]">{usr.fechaCreacion || 'Sin registros'}</td>
                         <td className="py-4 px-6 text-center text-slate-400 font-mono text-[14px]">{usr.fechaActualizacion || 'Sin registros'}</td>
-                        <td className="py-4 px-6 text-center text-slate-400 font-mono text-[14px]">
-                          {usr.ultimaActividad !== 'Sin actividad' ? usr.ultimaActividad : (
-                            <span className="italic text-slate-600">Nunca</span>
-                          )}
+                        <td className="py-4 px-6 text-center">
+                            {usr.enLinea ? (
+                                <div className="flex items-center justify-center gap-1.5 text-[15px] text-emerald-400 font-medium">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" /> 
+                                    En línea
+                                </div>
+                            ) : usr.ultimaActividad && usr.ultimaActividad !== 'Sin actividad' ? (
+                                <div className="flex flex-col items-center gap-0.5">
+                                    <span className="text-slate-300 font-mono text-[14px]">{usr.ultimaActividad}</span>
+                                    <div className="flex items-center gap-1.5 text-[12px] text-slate-500 font-medium">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-600" /> Offline
+                                    </div>
+                                </div>
+                            ) : (
+                                <span className="italic text-slate-600 text-[14px]">Nunca ha ingresado</span>
+                            )}
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex gap-2 justify-center">
-                            <Button size="icon" variant="outline" onClick={() => handleEditUsuario(usr)} className="h-8 w-8 bg-[#0a0f1a] border-slate-700 hover:bg-blue-600 hover:border-blue-500 text-slate-300 hover:text-white" title="Editar"><Edit3 className="w-4 h-4" /></Button>
+                            <Button size="icon" variant="outline" onClick={() => handleEditUsuario(usr)} className="h-8 w-8 bg-[#1b2d52] border-slate-700 hover:bg-blue-600 hover:border-blue-500 text-slate-300 hover:text-white" title="Editar"><Edit3 className="w-4 h-4" /></Button>
                             
-                            <Button size="icon" variant="outline" onClick={() => handleToggleEstado(usr.id, usr.estado)} disabled={isCurrentUser} className={`h-8 w-8 bg-[#0a0f1a] border-slate-700 ${isCurrentUser ? 'opacity-30 cursor-not-allowed' : usr.estado === 'activo' ? 'hover:bg-red-600 hover:border-red-500 text-slate-300 hover:text-white' : 'hover:bg-green-600 hover:border-green-500 text-slate-300 hover:text-white'}`} title={isCurrentUser ? "No puedes desactivar tu propia cuenta" : usr.estado === 'activo' ? 'Desactivar' : 'Activar'}><Power className="w-4 h-4" /></Button>
+                            <Button size="icon" variant="outline" onClick={() => handleToggleEstado(usr)} disabled={isCurrentUser} className={`h-8 w-8 bg-[#0a0f1a] border-slate-700 ${isCurrentUser ? 'opacity-30 cursor-not-allowed' : usr.estado === 'activo' ? 'hover:bg-red-600 hover:border-red-500 text-slate-300 hover:text-white' : 'hover:bg-green-600 hover:border-green-500 text-slate-300 hover:text-white'}`} title={isCurrentUser ? "No puedes desactivar tu propia cuenta" : usr.estado === 'activo' ? 'Desactivar' : 'Activar'}><Power className="w-4 h-4" /></Button>
                             
-                            <Button size="icon" variant="outline" onClick={() => handleResetPassword(usr.id)} className="h-8 w-8 bg-[#0a0f1a] border-slate-700 hover:bg-yellow-600 hover:border-yellow-500 text-slate-300 hover:text-white" title="Resetear contraseña"><RotateCcw className="w-4 h-4" /></Button>
+                            <Button size="icon" variant="outline" onClick={() => handleResetPassword(usr)} className="h-8 w-8 bg-[#5d5026] border-slate-700 hover:bg-yellow-600 hover:border-yellow-500 text-slate-300 hover:text-white" title="Resetear contraseña"><RotateCcw className="w-4 h-4" /></Button>
 
-                            <Button size="icon" variant="outline" onClick={() => handleDeleteUsuario(usr)} disabled={isCurrentUser} className={`h-8 w-8 bg-[#0a0f1a] border-slate-700 ${isCurrentUser ? 'opacity-30 cursor-not-allowed' : 'hover:bg-red-600 hover:border-red-500 text-slate-300 hover:text-white'}`} title={isCurrentUser ? "No puedes eliminar tu propia cuenta" : "Eliminar usuario permanentemente"}>
+                            <Button size="icon" variant="outline" onClick={() => handleDeleteUsuario(usr)} disabled={isCurrentUser} className={`h-8 w-8 bg-[#431111] border-slate-700 ${isCurrentUser ? 'opacity-30 cursor-not-allowed' : 'hover:bg-red-600 hover:border-red-500 text-slate-300 hover:text-white'}`} title={isCurrentUser ? "No puedes eliminar tu propia cuenta" : "Eliminar usuario permanentemente"}>
                                 <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -404,15 +416,15 @@ export default function UsuariosPanel() {
           )}
         </Card>
 
-        {/* Modal de Edición */}
+        {/* Modal de edición */}
         {showEditModal && usuarioSeleccionado && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <Card className="sgc-card border-slate-700 w-full max-w-md bg-[#0a0f1a] shadow-2xl">
-              <CardHeader className="border-b border-slate-800 pb-4">
+              <CardHeader className="border-b border-slate-800 pb-4!">
                 <CardTitle className="text-white text-xl">Editar permisos</CardTitle>
                 <CardDescription className="text-slate-400">Actualiza los datos y acceso del usuario</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 pt-6">
+              <CardContent className="space-y-4 pt-0">
                 <div>
                   <label className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Nombre completo</label>
                   <Input name="nombreCompleto" value={formData.nombreCompleto} onChange={(e) => setFormData(p => ({...p, nombreCompleto: e.target.value}))} className="sgc-input bg-[#060a12] border-slate-800" />
@@ -442,8 +454,7 @@ export default function UsuariosPanel() {
                   </div>
                   <div>
                     <label className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Nivel de Acceso</label>
-                    <Select value={formData.nivelAcceso} onValueChange={(v) => setFormData(p => ({ ...p, nivelAcceso: v }))}>
-                      {/* Añadimos w-full para arreglar el tamaño y placeholder en SelectValue */}
+                    <Select value={formData.nivelAcceso} onValueChange={(v) => setFormData(p => ({ ...p, nivelAcceso: v }))}> 
                       <SelectTrigger className="sgc-input bg-[#060a12] border-slate-800 w-full text-left">
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
@@ -465,26 +476,32 @@ export default function UsuariosPanel() {
           </div>
         )}
 
-        {/* Confirmación de eliminación */}
-        {usuarioAEliminar && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-60 flex items-center justify-center p-4">
-            <Card className="sgc-card border-red-900/50 w-full max-w-md bg-[#0a0f1a] shadow-2xl">
-              <CardHeader className="border-b border-slate-800 pb-4">
-                <CardTitle className="text-red-400 text-xl flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5" /> Confirmar Eliminación
+        {/* Modal de confirmación (Eliminar, Resetear, Estado) */}
+        {confirmacionAction.type && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-60 flex items-center justify-center p-0">
+            <Card className={`sgc-card w-full max-w-md bg-[#0a0f1a] shadow-2xl ${confirmacionAction.type === 'delete' ? 'border-red-900/50' : 'border-slate-700'}`}>
+              <CardHeader className="border-b border-slate-800">
+                <CardTitle className={`text-xl flex items-center gap-2 ${confirmacionAction.type === 'delete' ? 'text-red-400' : 'text-yellow-400'}`}>
+                  <AlertTriangle className="w-6 h-6" /> Confirmar acción
                 </CardTitle>
-                <CardDescription className="text-slate-400">Esta acción no se puede deshacer.</CardDescription>
+                <CardDescription className="text-slate-400 text-[15px]">
+                  {confirmacionAction.type === 'delete' && "Esta acción no se puede deshacer"}
+                  {confirmacionAction.type === 'reset' && "Se generará una nueva contraseña temporal"}
+                  {confirmacionAction.type === 'estado' && "El acceso del usuario al sistema será modificado"}
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-slate-300 text-sm">
-                  ¿Estás seguro de que deseas eliminar permanentemente al usuario <strong className="text-white">{usuarioAEliminar.nombreCompleto}</strong>?
+              <CardContent className="space-y-0 pt-0">
+                <p className="text-slate-300 text-[16px]">
+                  {confirmacionAction.type === 'delete' && <>¿Estás seguro de que deseas eliminar permanentemente al usuario <strong className="text-white">{confirmacionAction.usuario?.nombreCompleto}</strong>?</>}
+                  {confirmacionAction.type === 'reset' && <>¿Estás seguro de que deseas reiniciar la contraseña de <strong className="text-white">{confirmacionAction.usuario?.nombreCompleto}</strong>?</>}
+                  {confirmacionAction.type === 'estado' && <>¿Estás seguro de que deseas cambiar el estado de la cuenta de <strong className="text-white">{confirmacionAction.usuario?.nombreCompleto}</strong> a <strong className={confirmacionAction.usuario?.estado === 'activo' ? 'text-red-400' : 'text-green-400'}>{confirmacionAction.usuario?.estado === 'activo' ? 'INACTIVO' : 'ACTIVO'}</strong>?</>}
                 </p>
-                <div className="flex gap-3 pt-2 border-t border-slate-800/50 mt-2">
-                  <Button onClick={() => setUsuarioAEliminar(null)} variant="outline" className="flex-1 bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
+                <div className="flex gap-3 pt-4 border-t border-slate-800/50 mt-2">
+                  <Button onClick={() => setConfirmacionAction({ type: null, usuario: null })} variant="outline" className="flex-1 bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
                     Cancelar
                   </Button>
-                  <Button onClick={confirmDeleteUsuario} className="flex-1 bg-red-600 hover:bg-red-500 text-white border-0">
-                    Sí, eliminar
+                  <Button onClick={ejecutarAccionConfirmada} className={`flex-1 border-0 text-white ${confirmacionAction.type === 'delete' ? 'bg-red-600 hover:bg-red-500' : 'sgc-btn-primary'}`}>
+                    {confirmacionAction.type === 'delete' ? 'Sí, eliminar' : 'Sí, confirmar'}
                   </Button>
                 </div>
               </CardContent>

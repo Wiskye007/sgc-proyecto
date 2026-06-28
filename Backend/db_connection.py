@@ -17,7 +17,7 @@ class DatabaseConnection:
 
     @contextmanager
     def get_connection(self):
-        """Context manager para obtener conexión a Supabase de forma segura"""
+        """Context manager para obtener conexión a la BD de forma segura"""
         conn = None
         try:
             conn = psycopg2.connect(self.connection_string)
@@ -30,124 +30,93 @@ class DatabaseConnection:
                 conn.close()
 
     def execute_query(self, query, params=None):
-        """Ejecutar una consulta SELECT (Login y Lecturas)"""
+        """Ejecutar una consulta SELECT de forma segura y aislada"""
         try:
             with self.get_connection() as conn:
-                cursor = conn.cursor(cursor_factory=RealDictCursor)
-                
-                if query and "?" in query:
-                    query = query.replace("?", "%s")
-                
-                if query and "Usuarios" in query:
-                    query = query.replace("Usuarios", "usuarios")
-
-                if params:
-                    cursor.execute(query, params)
-                else:
-                    cursor.execute(query)
-
-                result = cursor.fetchall()
-                cursor.close()
-
-                MAPEO_EXCEPCIONES = {
-                    'contrasenahash': 'ContrasenaHash', 'idusuario': 'IdUsuario',
-                    'nombreusuario': 'NombreUsuario', 'nombrecompleto': 'NombreCompleto',
-                    'fecha_ingreso': 'FechaIngreso', 'fechaingreso': 'FechaIngreso',
-                    'idconducta': 'IDConducta', 'idvisita': 'IDVisita',
-                    'dnivisitante': 'DNIVisitante', 'dni_visitante': 'DNIVisitante',
-                    'fechainicio': 'FechaInicio', 'fechafin': 'FechaFin',
-                    'medicoresponsable': 'MedicoResponsable', 'idhistorial': 'IDHistorial',
-                    'proximarevision': 'ProximaRevision'
-                }
-
-                resultados_normalizados = []
-                for row in result:
-                    row_normalizada = {**row}
+                # Cada consulta abre y cierra su propio cursor de forma aislada
+                with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                    # Ejecutamos directamente. Los %s en la query deben coincidir con params
+                    cursor.execute(query, params if params else [])
+                    result = cursor.fetchall()
                     
-                    for k, v in row.items():
-                        row_normalizada[k.capitalize()] = v
+                    # Normalización de resultados (Tu lógica original permanece intacta)
+                    MAPEO_EXCEPCIONES = {
+                        'contrasenahash': 'ContrasenaHash', 'idusuario': 'IdUsuario',
+                        'nombreusuario': 'NombreUsuario', 'nombrecompleto': 'NombreCompleto',
+                        'fecha_ingreso': 'FechaIngreso', 'fechaingreso': 'FechaIngreso',
+                        'idconducta': 'IDConducta', 'idvisita': 'IDVisita',
+                        'dnivisitante': 'DNIVisitante', 'dni_visitante': 'DNIVisitante',
+                        'fechainicio': 'FechaInicio', 'fechafin': 'FechaFin',
+                        'medicoresponsable': 'MedicoResponsable', 'idhistorial': 'IDHistorial',
+                        'proximarevision': 'ProximaRevision'
+                    }
 
-                    for k, v in row.items():
-                        key_lower = k.lower()
+                    resultados_normalizados = []
+                    for row in result:
+                        row_normalizada = {**row}
                         
-                        if key_lower in MAPEO_EXCEPCIONES:
-                            row_normalizada[MAPEO_EXCEPCIONES[key_lower]] = v
-                        
-                        if 'conv' in key_lower or key_lower == 'id':
-                            row_normalizada['IDConv'] = v
-                            row_normalizada['IDConvicto'] = v
-                            row_normalizada['idconv'] = v
-                        
-                        if key_lower.startswith('id') and len(key_lower) > 2:
-                            palabra_limpia = k[2:] if k.lower().startswith('id') else k
-                            key_camel_id = f"ID{palabra_limpia.capitalize()}"
-                            row_normalizada[key_camel_id] = v
+                        for k, v in row.items():
+                            row_normalizada[k.capitalize()] = v
 
-                        if key_lower == 'idmovimiento' or key_lower == 'idmov' or 'mov' in key_lower:
-                            row_normalizada['IDMov'] = v
-                            row_normalizada['IDMovimiento'] = v
-                        
-                        if 'autorizado' in key_lower: row_normalizada['AutorizadoPor'] = v
-                        if 'registrado' in key_lower: row_normalizada['RegistradoPor'] = v
-                        
-                        if key_lower == 'dni': row_normalizada['DNI'] = v
+                        for k, v in row.items():
+                            key_lower = k.lower()
+                            if key_lower in MAPEO_EXCEPCIONES:
+                                row_normalizada[MAPEO_EXCEPCIONES[key_lower]] = v
+                            
+                            if 'conv' in key_lower or key_lower == 'id':
+                                row_normalizada['IDConv'] = v
+                                row_normalizada['IDConvicto'] = v
+                                row_normalizada['idconv'] = v
+                            
+                            if key_lower.startswith('id') and len(key_lower) > 2:
+                                palabra_limpia = k[2:] if k.lower().startswith('id') else k
+                                key_camel_id = f"ID{palabra_limpia.capitalize()}"
+                                row_normalizada[key_camel_id] = v
 
-                    if 'dni_visitante' in row:
-                        row_normalizada['DNIVisitante'] = row['dni_visitante']
-                    elif 'dnivisitante' in row:
-                        row_normalizada['DNIVisitante'] = row['dnivisitante']
-                    else:
-                        row_normalizada['DNIVisitante'] = row.get('dni', '00000000')
+                            if key_lower == 'idmovimiento' or key_lower == 'idmov' or 'mov' in key_lower:
+                                row_normalizada['IDMov'] = v
+                                row_normalizada['IDMovimiento'] = v
+                            
+                            if 'autorizado' in key_lower: row_normalizada['AutorizadoPor'] = v
+                            if 'registrado' in key_lower: row_normalizada['RegistradoPor'] = v
+                            if key_lower == 'dni': row_normalizada['DNI'] = v
 
-                    if 'nombre_visitante' in row:
-                        row_normalizada['Visitante'] = row['nombre_visitante']
-                    elif 'visitante' in row:
-                        row_normalizada['Visitante'] = row['visitante']
+                        if 'dni_visitante' in row:
+                            row_normalizada['DNIVisitante'] = row['dni_visitante']
+                        elif 'dnivisitante' in row:
+                            row_normalizada['DNIVisitante'] = row['dnivisitante']
+                        else:
+                            row_normalizada['DNIVisitante'] = row.get('dni', '00000000')
 
-                    if 'fecha_ingreso' in row or 'fechaingreso' in row:
-                        valor_fecha = row.get('fecha_ingreso', row.get('fechaingreso'))
-                        row_normalizada['fecha_ingreso'] = valor_fecha
+                        if 'nombre_visitante' in row:
+                            row_normalizada['Visitante'] = row['nombre_visitante']
+                        elif 'visitante' in row:
+                            row_normalizada['Visitante'] = row['visitante']
 
-                    for campo_fecha in ['Fecha', 'fecha', 'FechaIngreso', 'fecha_ingreso', 'FechaInicio', 'fechainicio', 'FechaFin', 'fechafin', 'ProximaRevision', 'proximarevision']:
-                        if campo_fecha in row_normalizada and row_normalizada[campo_fecha]:
-                            fecha_str = str(row_normalizada[campo_fecha])
-                            if '/' in fecha_str and len(fecha_str.split('/')) == 3:
-                                partes = fecha_str.split('/')
-                                row_normalizada[campo_fecha] = f"{partes[2]}-{partes[1]}-{partes[0]}"
+                        for campo_fecha in ['Fecha', 'fecha', 'FechaIngreso', 'fecha_ingreso', 'FechaInicio', 'fechainicio', 'FechaFin', 'fechafin', 'ProximaRevision', 'proximarevision']:
+                            if campo_fecha in row_normalizada and row_normalizada[campo_fecha]:
+                                fecha_str = str(row_normalizada[campo_fecha])
+                                if '/' in fecha_str and len(fecha_str.split('/')) == 3:
+                                    partes = fecha_str.split('/')
+                                    row_normalizada[campo_fecha] = f"{partes[2]}-{partes[1]}-{partes[0]}"
 
-                    resultados_normalizados.append(row_normalizada)
-                return resultados_normalizados
-    
+                        resultados_normalizados.append(row_normalizada)
+                    return resultados_normalizados
         except psycopg2.Error as e:
-            logger.error(f"Error ejecutando consulta a la BD: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"Error en la normalización o query: {e}")
+            logger.error(f"Error de base de datos en execute_query: {e}")
             raise
 
     def execute_update(self, query, params=None):
-        """Ejecutar una consulta INSERT, UPDATE o DELETE (Registro)"""
+        """Ejecutar una consulta INSERT, UPDATE o DELETE de forma aislada"""
         try:
             with self.get_connection() as conn:
-                cursor = conn.cursor()
-                
-                if query and "?" in query:
-                    query = query.replace("?", "%s")
-                
-                if query and "Usuarios" in query:
-                    query = query.replace("Usuarios", "usuarios")
-
-                if params:
-                    cursor.execute(query, params)
-                else:
-                    cursor.execute(query)
-
-                conn.commit()
-                rows_affected = cursor.rowcount
-                cursor.close()
-                return {'success': True, 'rows_affected': rows_affected}
+                with conn.cursor() as cursor:
+                    # Ejecución directa y segura
+                    cursor.execute(query, params if params else [])
+                    conn.commit()
+                    return {'success': True, 'rows_affected': cursor.rowcount}
         except psycopg2.Error as e:
-            logger.error(f"Error ejecutando update en la BD: {e}")
+            logger.error(f"Error de base de datos en execute_update: {e}")
             raise
 
 # Instancia global

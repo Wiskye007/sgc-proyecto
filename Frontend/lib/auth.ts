@@ -17,21 +17,28 @@ export function authHeaders(extra: Record<string, string> = {}): Record<string, 
     return token ? { ...extra, Authorization: `Bearer ${token}` } : { ...extra }
 }
 
-// Wrapper de fetch que adjunta el token y, si la sesión expiró (401 con token
-// presente), la limpia y redirige al login.
-export async function authFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
-    const token = getAuthToken()    
-    const headers = new Headers(init.headers || {})
-    if (init.body && !headers.has("Content-Type")) {
-        headers.set("Content-Type", "application/json")
-    }
-    if (token) headers.set("Authorization", `Bearer ${token}`)
+export const authFetch = async (input: RequestInfo, init?: RequestInit) => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 10000); 
 
-    const response = await fetch(input, { ...init, headers })
+    const token = localStorage.getItem("authToken");
+    const headers = new Headers(init?.headers || {});
+    
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    headers.set("Content-Type", "application/json");
 
-    if (response.status === 401 && token) {
-        clearSession()
-        if (typeof window !== "undefined") window.location.href = "/"
+    try {
+        const response = await fetch(input, { ...init, headers, signal: controller.signal });
+        clearTimeout(id);
+        
+        if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = "/";
+        }
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        console.warn("Error en la petición:", error);
+        return new Response(JSON.stringify({ error: "Network Error" }), { status: 503 });
     }
-    return response
-}   
+}

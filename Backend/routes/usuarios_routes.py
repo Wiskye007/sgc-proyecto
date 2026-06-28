@@ -4,7 +4,8 @@ import logging
 from werkzeug.security import generate_password_hash, check_password_hash
 from auth_utils import requiere_auth
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
+
 
 bp = Blueprint('usuarios', __name__, url_prefix='/api/usuarios')
 logger = logging.getLogger(__name__)
@@ -221,7 +222,7 @@ def actualizar_configuracion():
                 UPDATE configuracion_usuarios
                 SET notificaciones_email = %s, notificaciones_sistema = %s,
                     privacidad_perfil = %s, cierre_inactividad = %s, densidad_tablas = %s,
-                    pantalla_inicio = %s, tamano_fuente = %s, fecha_actualizacion = CURRENT_TIMESTAMP
+                    pantalla_inicio = %s, tamano_fuente = %s, fecha_actualizacion = (NOW() - INTERVAL '5 hours')
                 WHERE id_usuario = %s
             """
             db.execute_update(update_query, (notif_email, notif_sistema, privacidad, cierre, densidad, inicio, fuente, usuario_id))
@@ -297,6 +298,8 @@ def historial_conexiones():
 @requiere_admin
 def listar_usuarios():
     """Listar todos los usuarios del sistema (solo administradores)"""
+    # 1. Calculamos el tiempo límite en Python
+    tiempo_limite = (datetime.utcnow() - timedelta(hours=5, minutes=1)).strftime('%Y-%m-%d %H:%M:%S')
     try:
         page = int(request.args.get('page', 1))
         limit = int(request.args.get('limit', 10))
@@ -317,11 +320,7 @@ def listar_usuarios():
             where_clauses.append("(LOWER(nombrecompleto) LIKE LOWER(%s) OR LOWER(correo) LIKE LOWER(%s) OR LOWER(dni) LIKE LOWER(%s))")
             search_param = f"%{search}%"
             params.extend([search_param, search_param, search_param])
-        
-        if cargo_filter:
-            where_clauses.append("LOWER(cargo) = LOWER(%s)")
-            params.append(cargo_filter)
-        
+
         if nivel_filter:
             where_clauses.append("LOWER(nivelacceso) = LOWER(%s)")
             params.append(nivel_filter)
@@ -332,9 +331,12 @@ def listar_usuarios():
             
         # --- FILTRADO POR SESIÓN ---
         if sesion_filter == 'online':
-            where_clauses.append("ultima_actividad >= (NOW() - INTERVAL '5 hours') - INTERVAL '5 minutes'")
+            where_clauses.append("sesion_activa = TRUE AND ultima_actividad >= %s")
+            params.append(tiempo_limite)
+            
         elif sesion_filter == 'offline':
-            where_clauses.append("(ultima_actividad < (NOW() - INTERVAL '5 hours') - INTERVAL '5 minutes' OR ultima_actividad IS NULL)")
+            where_clauses.append("(sesion_activa = FALSE OR ultima_actividad < %s OR ultima_actividad IS NULL)")
+            params.append(tiempo_limite)
         # -------------------------------------------
 
         where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
@@ -344,18 +346,21 @@ def listar_usuarios():
         count_result = db.execute_query(count_query, params)
         total = count_result[0].get('total') if count_result else 0
         
-        # Obtener usuarios
-        query = f"""
+
+        query_base = """
             SELECT id, nombreusuario, nombrecompleto, dni, correo, cargo, nivelacceso,
                 estado, fechacreacion, fecha_actualizacion, ultima_actividad,
-                CASE WHEN ultima_actividad >= (NOW() - INTERVAL '5 hours') - INTERVAL '5 minutes' THEN true ELSE false END as en_linea
+                CASE 
+                    WHEN sesion_activa = TRUE AND ultima_actividad >= %s THEN true 
+                    ELSE false 
+                END as en_linea
             FROM usuarios
-            {where_sql}
-            ORDER BY id DESC
-            LIMIT %s OFFSET %s
         """
-        params.extend([limit, offset])
-        result = db.execute_query(query, params)
+        
+        query = query_base + (f" WHERE {' AND '.join(where_clauses)}" if where_clauses else "")
+        query += " ORDER BY id DESC LIMIT %s OFFSET %s"
+        params_finales = [tiempo_limite] + params + [limit, offset]
+        result = db.execute_query(query, params_finales)
         
         usuarios = []
         for user in result:
@@ -371,7 +376,7 @@ def listar_usuarios():
                 'enLinea': user.get('en_linea') or False, 
                 'fechaCreacion': str(user.get('fechacreacion') or '')[:19],
                 'fechaActualizacion': str(user.get('fecha_actualizacion') or '')[:19],
-                'ultimaActividad': str(user.get('ultima_actividad') or 'Sin actividad')[:19] # <--- NUEVO
+                'ultimaActividad': str(user.get('ultima_actividad') or 'Sin actividad')[:19]
             })
         
         return jsonify({
@@ -440,7 +445,7 @@ def actualizar_usuario(usuario_id):
         if estado: campos.append("estado = %s"); params.append(estado)
         
         if campos:
-            campos.append("fecha_actualizacion = CURRENT_TIMESTAMP")
+            campos.append("fecha_actualizacion = (NOW() - INTERVAL '5 hours')")
             params.append(usuario_id)
             query = f"UPDATE usuarios SET {', '.join(campos)} WHERE id = %s"
             db.execute_update(query, params)
@@ -464,7 +469,7 @@ def cambiar_estado_usuario(usuario_id):
         if estado not in ['activo', 'inactivo']:
             return jsonify({'error': 'Estado no válido'}), 400
         
-        query = "UPDATE usuarios SET estado = %s, fecha_actualizacion = CURRENT_TIMESTAMP WHERE id = %s"
+        query = "UPDATE usuarios SET estado = %s, fecha_actualizacion = (NOW() - INTERVAL '5 hours') WHERE id = %s"
         db.execute_update(query, (estado, usuario_id))
         return jsonify({'success': True, 'mensaje': f'Usuario {estado}'}), 200
     except Exception as e:
@@ -479,10 +484,10 @@ def cambiar_estado_usuario(usuario_id):
 @requiere_admin
 def reset_password(usuario_id):
     try:
-        contrasena_temporal = f"Temporal#{usuario_id}2026"
+        contrasena_temporal = f"T#{usuario_id}2026"
         hash_nuevo = generate_password_hash(contrasena_temporal)
         
-        query = "UPDATE usuarios SET contrasenahash = %s, fecha_actualizacion = CURRENT_TIMESTAMP WHERE id = %s"
+        query = "UPDATE usuarios SET contrasenahash = %s, fecha_actualizacion = (NOW() - INTERVAL '5 hours') WHERE id = %s"
         db.execute_update(query, (hash_nuevo, usuario_id))
         
         return jsonify({'success': True, 'mensaje': 'Reseteada', 'contrasenaTemp': contrasena_temporal}), 200
@@ -514,11 +519,15 @@ def eliminar_usuario(usuario_id):
 # -------------------------------------------------------
 @bp.route('/ping', methods=['POST'])
 @requiere_auth
-def ping_usuario(): 
+def ping_usuario():
     try:
         usuario_id = g.usuario.get('id')
-        # CORRECCIÓN: Registra la última actividad en hora local
-        db.execute_update("UPDATE usuarios SET ultima_actividad = (NOW() - INTERVAL '5 hours') WHERE id = %s", (usuario_id,))
+        hora_actual = (datetime.utcnow() - timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
+        
+        db.execute_update(
+            "UPDATE usuarios SET ultima_actividad = %s, sesion_activa = TRUE WHERE id = %s", 
+            (hora_actual, usuario_id)
+        )
         return jsonify({'success': True}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500  

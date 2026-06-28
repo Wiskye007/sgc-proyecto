@@ -15,8 +15,7 @@ def get_incidentes():
         
         where_clause = ""
         hoy = datetime.now()
-        
-        # Calculamos la fecha límite en Python para evitar conflictos de tipos en PostgreSQL
+            
         if filtro == '24h':
             limite = (hoy - timedelta(days=1)).strftime('%Y-%m-%d')
             where_clause = f"WHERE c.fecha >= '{limite}'"
@@ -29,11 +28,11 @@ def get_incidentes():
 
         query = f"""
                 SELECT c.idconducta as id, 
-                       c.idconv as convicto_id, 
-                       c.fecha, 
-                       c.tipo as tipo_incidente, 
-                       c.descripcion,
-                       int.nombrecompleto as interno_nombre
+                        c.idconv as convicto_id, 
+                        c.fecha, 
+                        c.tipo as tipo_incidente, 
+                        c.descripcion,
+                        int.nombrecompleto as interno_nombre
                 FROM tblconducta c
                 LEFT JOIN tblconvictos int ON int.idconv = c.idconv
                 {where_clause}

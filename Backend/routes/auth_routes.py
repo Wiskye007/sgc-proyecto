@@ -1,8 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
+from datetime import datetime, timedelta
 from db_connection import db
 import logging
 from werkzeug.security import generate_password_hash, check_password_hash
-from auth_utils import generar_token
+from auth_utils import generar_token, requiere_auth
 import secrets
 import smtplib
 import os
@@ -53,23 +54,27 @@ def login():
             return jsonify({'error': 'Tu cuenta ha sido desactivada. Contacte a un administrador.'}), 403
 
         # --- REGISTRAMOS LA CONEXIÓN EXITOSA ---
-        # Obtenemos la IP real (incluso si está detrás de un proxy)
+        # Obtenemos la IP
         xff_header = request.headers.get("X-Forwarded-For")
-        if xff_header:
-            # Dividimos por la coma y nos quedamos con el primer elemento [0] limpiando espacios (.strip())
+        if xff_header:  
             ip_usuario = xff_header.split(',')[0].strip()
-        else:
-            ip_usuario = request.remote_addr
-            
+        else:   
+            ip_usuario = request.remote_addr    
         dispositivo = request.headers.get('User-Agent')
 
         try:
+            # 1. Guardar en el historial
             db.execute_update(
                 "INSERT INTO historial_conexiones (id_usuario, fecha_hora, direccion_ip, dispositivo) VALUES (%s, (NOW() - INTERVAL '5 hours'), %s, %s)",
                 (user.get('id'), ip_usuario, dispositivo)
             )
+            # 2. Marcamos sesión activa = True y la hora exacta de entrada
+            db.execute_update(
+                "UPDATE usuarios SET sesion_activa = TRUE, ultima_actividad = (NOW() - INTERVAL '5 hours') WHERE id = %s",
+                (user.get('id'),)
+            )
         except Exception as e:
-            logger.error(f"No se pudo registrar la conexión en el historial: {e}")
+            logger.error(f"No se pudo registrar la conexión: {e}")
 
         # 5. Si todo está correcto, generar el Token de acceso
         usuario_payload = {
@@ -128,11 +133,17 @@ def login():
 # LOGOUT
 # -------------------------------------------------------
 @bp.route('/logout', methods=['POST'])
+@requiere_auth
 def logout():
     try:
+        usuario_id = g.usuario.get('id')
+        # SISTEMA PROFESIONAL: Apagamos la sesión y guardamos la HORA EXACTA sin trucos
+        db.execute_update(
+            "UPDATE usuarios SET sesion_activa = FALSE, ultima_actividad = (NOW() - INTERVAL '5 hours') WHERE id = %s",
+            (usuario_id,)
+        )
         return jsonify({'success': True, 'message': 'Sesión cerrada con éxito'}), 200
-    except Exception as e:
-        logger.error(f"Error al cerrar sesión: {e}")
+    except Exception as e:  
         return jsonify({'error': 'Error al cerrar sesión'}), 500
 
 
@@ -182,11 +193,16 @@ def registro():
             return jsonify({'error': 'El correo ya está en uso'}), 400
 
         # Insertar nuevo usuario
+        ahora_lima = (datetime.utcnow() - timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
         query = """
-                INSERT INTO Usuarios
-                (NombreCompleto, DNI, Cargo, NivelAcceso, NombreUsuario, ContrasenaHash, Correo)
-                VALUES (?, ?, ?, ?, ?, ?, ?) \
-                """
+            INSERT INTO usuarios (
+                nombrecompleto, dni, cargo, nivelacceso, nombreusuario, contrasenahash, 
+                correo, fechacreacion, fecha_actualizacion, ultima_actividad
+            ) 
+            VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL
+            )
+        """
         params = (
             data.get('nombreCompleto'),
             dni_frontend,
@@ -194,14 +210,16 @@ def registro():
             data.get('nivelAcceso'),
             nombre_usuario_frontend,
             generate_password_hash(contrasena_frontend),
-            correo_frontend
+            correo_frontend,
+            ahora_lima,
+            ahora_lima
         )
         db.execute_update(query, params)
+
         return jsonify({'success': True, 'message': 'Usuario creado'}), 201
     except Exception as e:
         logger.error(f"Error en registro: {e}")
-        return jsonify({'error': str(e)}), 500
-
+        return jsonify({'error': str(e)}), 500  
 
 # -------------------------------------------------------
 # RECUPERAR CONTRASEÑA
