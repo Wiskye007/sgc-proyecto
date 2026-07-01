@@ -573,19 +573,19 @@ const ConvictosPanel: React.FC = () => {
             <div className="container mx-auto max-w-7xl relative z-10">
                 
                 {/* --- HEADER --- */}
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0a0f1a]/80 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl mb-6">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-card/80 p-6 rounded-2xl border border-border/80 backdrop-blur-xl shadow-2xl mb-6">
                     <div className="flex items-center gap-4">
                         <Button 
                             aria-label="Botón de regreso al menú principal" 
-                            className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" 
+                            className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-primary/10 border border-primary/20 hover:bg-primary hover:border-primary transition-colors group" 
                             onClick={() => (window.location.href = "/dashboard")}>
-                            <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
+                            <ArrowLeft className="h-5 w-5 text-primary group-hover:text-background transition-colors" />
                         </Button>
                         <div className="flex items-center gap-4">
-                            <Users className="h-14 w-14 text-blue-400 shrink-0" />
+                            <Users className="h-14 w-14 text-primary shrink-0" />
                             <div>
-                                <h1 className="text-3xl font-black tracking-wide text-white">Panel de Convictos</h1>
-                                <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Gestión integral de internos</p>
+                                <h1 className="text-3xl font-black tracking-wide text-foreground">Panel de Convictos</h1>
+                                <p className="text-primary text-xs font-bold uppercase tracking-widest mt-1">Gestión integral de internos</p>
                             </div>
                         </div>
                     </div>
@@ -593,19 +593,19 @@ const ConvictosPanel: React.FC = () => {
 
                 <Tabs defaultValue="datos" className="w-full">
                     {/* --- NAVEGACIÓN DE TABS --- */}
-                    <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6 bg-[#060a12]/80 border border-slate-800/80 rounded-xl p-1 gap-1">
-                        <TabsTrigger value="datos" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Datos Generales</TabsTrigger>
-                        <TabsTrigger value="movimientos" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Traslados</TabsTrigger>
-                        <TabsTrigger value="conducta" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Conducta</TabsTrigger>
-                        <TabsTrigger value="visitas" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Visitas</TabsTrigger>
+                    <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6 bg-card/80 border border-border/80 rounded-xl p-1 gap-1">
+                        <TabsTrigger value="datos" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg text-muted-foreground hover:text-foreground transition-all font-semibold tracking-wide">Datos Generales</TabsTrigger>
+                        <TabsTrigger value="movimientos" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg text-muted-foreground hover:text-foreground transition-all font-semibold tracking-wide">Traslados</TabsTrigger>
+                        <TabsTrigger value="conducta" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg text-muted-foreground hover:text-foreground transition-all font-semibold tracking-wide">Conducta</TabsTrigger>
+                        <TabsTrigger value="visitas" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg text-muted-foreground hover:text-foreground transition-all font-semibold tracking-wide">Visitas</TabsTrigger>
                     </TabsList>
 
                     {/* ========== CONVICTOS-DATOS GENERALES ========== */}
                     <TabsContent value="datos" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
-                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
-                                <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de internos</CardTitle>
-                                <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${convictosData.length > 800 ? "border-red-500 text-red-400 bg-red-500/10" : convictosData.length > 400 ? "border-yellow-500 text-yellow-400 bg-yellow-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
+                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-border/50">
+                                <CardTitle className="text-xl text-foreground font-bold tracking-wide">Directorio de internos</CardTitle>
+                                <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${convictosData.length > 800 ? "border-destructive text-destructive bg-destructive/10" : convictosData.length > 400 ? "border-accent text-accent bg-accent/10" : "border-accent text-accent bg-accent/10"}`}>
                                     Registros totales: {convictosData.length}
                                 </Badge>
                             </CardHeader>

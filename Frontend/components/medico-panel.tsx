@@ -158,7 +158,7 @@ export default function MedicoPanel() {
             case "alta": return "bg-orange-500/10 text-orange-400 border-orange-500/20"
             case "media": return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
             case "baja": return "bg-green-500/10 text-green-400 border-green-500/20"
-            default: return "bg-slate-500/10 text-slate-400 border-slate-500/20"
+            default: return "bg-slate-500/10 text-foreground border-slate-500/20"
         }
     }
 
@@ -167,7 +167,7 @@ export default function MedicoPanel() {
             case "pendiente": return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
             case "realizada": return "bg-green-500/10 text-green-400 border-green-500/20"
             case "rechazada": return "bg-red-500/10 text-red-400 border-red-500/20"
-            default: return "bg-slate-500/10 text-slate-400 border-slate-500/20"
+            default: return "bg-slate-500/10 text-foreground border-slate-500/20"
         }
     }
 
@@ -393,24 +393,24 @@ export default function MedicoPanel() {
     )
 
     return (
-        <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-slate-200">
+        <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-foreground">
             <div className="container mx-auto max-w-7xl relative z-10 space-y-8">
                 
                 {/* --- HEADER --- */}
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0a0f1a]/80 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-card/80 p-6 rounded-2xl border border-border/80 backdrop-blur-xl shadow-2xl">
                     <div className="flex items-center gap-5">
                         <Button 
                             aria-label="Volver al menú principal" 
-                            className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" 
+                            className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-primary hover:border-blue-500 transition-colors group" 
                             onClick={() => router.push("/dashboard")}
                         >
-                            <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
+                            <ArrowLeft className="h-5 w-5 text-primary group-hover:text-foreground transition-colors" />
                         </Button>
                         <div className="flex items-center gap-4">
                             <Stethoscope className="h-14 w-14 text-green-500 shrink-0" />
                                 <div>
-                                    <h1 className="text-3xl font-black tracking-wide text-white">Panel Médico</h1>
-                                    <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Gestión de revisiones y tratamientos</p>
+                                    <h1 className="text-3xl font-black tracking-wide text-foreground">Panel Médico</h1>
+                                    <p className="text-primary text-xs font-bold uppercase tracking-widest mt-1">Gestión de revisiones y tratamientos</p>
                                 </div>
                         </div>
                     </div>
@@ -420,52 +420,52 @@ export default function MedicoPanel() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6" aria-hidden={loading ? "true" : "false"}>
                     <Card className="sgc-card border-0 hover:-translate-y-1 transition-transform">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-bold tracking-widest text-slate-300 uppercase">Revisiones pendientes</CardTitle>
-                            <Calendar className="h-6 w-6 text-blue-400"/>
+                            <CardTitle className="text-sm font-bold tracking-widest text-foreground uppercase">Revisiones pendientes</CardTitle>
+                            <Calendar className="h-6 w-6 text-primary"/>
                         </CardHeader>
                         <CardContent>
-                            <h2 className="text-5xl font-black text-blue-400">{revisionesData.length}</h2>
-                            <p className="text-xs text-slate-500 mt-1 uppercase font-semibold tracking-wider">Esta semana</p>
+                            <h2 className="text-5xl font-black text-primary">{revisionesData.length}</h2>
+                            <p className="text-xs text-foreground mt-1 uppercase font-semibold tracking-wider">Esta semana</p>
                         </CardContent>
                     </Card>
 
                     <Card className="sgc-card border-0 hover:-translate-y-1 transition-transform">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-bold tracking-widest text-slate-300 uppercase">Casos urgentes</CardTitle>
+                            <CardTitle className="text-sm font-bold tracking-widest text-foreground uppercase">Casos urgentes</CardTitle>
                             <AlertCircle className="h-6 w-6 text-red-400"/>
                         </CardHeader>
                         <CardContent>
                             <h2 className="text-5xl font-black text-red-400">{revisionesData.filter(r => (r.prioridad || "").toLowerCase() === "urgente").length}</h2>
-                            <p className="text-xs text-slate-500 mt-1 uppercase font-semibold tracking-wider">Atención inmediata</p>
+                            <p className="text-xs text-foreground mt-1 uppercase font-semibold tracking-wider">Atención inmediata</p>
                         </CardContent>
                     </Card>
 
                     <Card className="sgc-card border-0 hover:-translate-y-1 transition-transform">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-bold tracking-widest text-slate-300 uppercase">En tratamiento</CardTitle>
+                            <CardTitle className="text-sm font-bold tracking-widest text-foreground uppercase">En tratamiento</CardTitle>
                             <Pill className="h-6 w-6 text-green-400"/>
                         </CardHeader>
                         <CardContent>
                             <h2 className="text-5xl font-black text-green-400">{tratamientosDataState.length}</h2>
-                            <p className="text-xs text-slate-500 mt-1 uppercase font-semibold tracking-wider">Tratamientos activos</p>
+                            <p className="text-xs text-foreground mt-1 uppercase font-semibold tracking-wider">Tratamientos activos</p>
                         </CardContent>
                     </Card>
                 </div>
 
                 {/* --- PESTAÑAS CON TIP DE UX (onValueChange) --- */}
                 <Tabs defaultValue="revisiones" className="w-full mt-2" onValueChange={() => { setSearchTerm(""); setPrioridadFilter("todos"); setEstadoDerivacionFilter("todos"); }}>    
-                        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6 bg-[#060a12]/80 border border-slate-800/80 rounded-xl p-1 gap-1">
-                            <TabsTrigger value="revisiones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Revisiones</TabsTrigger>
-                            <TabsTrigger value="tratamientos" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Tratamientos</TabsTrigger>
-                            <TabsTrigger value="derivaciones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Derivaciones</TabsTrigger>
-                            <TabsTrigger value="historial" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Historial</TabsTrigger>
+                        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6 bg-card/80 border border-border/80 rounded-xl p-1 gap-1">
+                            <TabsTrigger value="revisiones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-foreground transition-all">Revisiones</TabsTrigger>
+                            <TabsTrigger value="tratamientos" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-foreground transition-all">Tratamientos</TabsTrigger>
+                            <TabsTrigger value="derivaciones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-foreground transition-all">Derivaciones</TabsTrigger>
+                            <TabsTrigger value="historial" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-foreground transition-all">Historial</TabsTrigger>
                         </TabsList>
 
                         {/* ======================= REVISIONES ======================= */}
                         <TabsContent value="revisiones" className="space-y-6">
                             <Card className="sgc-card border-0 mb-4">
-                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
-                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de Revisiones</CardTitle>
+                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-border/50">
+                                    <CardTitle className="text-xl text-foreground font-bold tracking-wide">Directorio de Revisiones</CardTitle>
                                     <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${filteredRevisiones.length > 50 ? "border-red-500 text-red-400 bg-red-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
                                         Registros totales: {filteredRevisiones.length}
                                     </Badge>
@@ -479,12 +479,12 @@ export default function MedicoPanel() {
                                         <div className="md:w-auto flex flex-col lg:flex-row gap-4 items-end w-full">
                                             <Select value={prioridadFilter} onValueChange={setPrioridadFilter}>
                                                 <SelectTrigger className="sgc-input h-10! w-full md:w-[200px]"><SelectValue placeholder="Prioridad"/></SelectTrigger>
-                                                <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                                    <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todas las prioridades</SelectItem>
-                                                    <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-white">Urgente</SelectItem>
-                                                    <SelectItem value="alta" className="focus:bg-blue-600 focus:text-white">Alta</SelectItem>
-                                                    <SelectItem value="media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>
-                                                    <SelectItem value="baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
+                                                <SelectContent className="bg-[#0f172a] border-border text-foreground">
+                                                    <SelectItem value="todos" className="focus:bg-blue-600 focus:text-foreground">Todas las prioridades</SelectItem>
+                                                    <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-foreground">Urgente</SelectItem>
+                                                    <SelectItem value="alta" className="focus:bg-blue-600 focus:text-foreground">Alta</SelectItem>
+                                                    <SelectItem value="media" className="focus:bg-blue-600 focus:text-foreground">Media</SelectItem>
+                                                    <SelectItem value="baja" className="focus:bg-blue-600 focus:text-foreground">Baja</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -501,16 +501,16 @@ export default function MedicoPanel() {
                                             <DialogTrigger asChild>
                                                 <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva revisión</Button>
                                             </DialogTrigger>
-                                            <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                                            <DialogContent className="sgc-card border-border text-foreground sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                                 <DialogHeader>
-                                                    <DialogTitle className="text-xl font-bold text-white">Nueva revisión médica</DialogTitle>
-                                                    <DialogDescription className="text-slate-400 text-[15px]">Registre una evaluación para un interno.</DialogDescription>
+                                                    <DialogTitle className="text-xl font-bold text-foreground">Nueva revisión médica</DialogTitle>
+                                                    <DialogDescription className="text-foreground text-[15px]">Registre una evaluación para un interno.</DialogDescription>
                                                 </DialogHeader>
                                                 <form onSubmit={handleNuevaRevision} className="space-y-4 pt-3">
                                                     
                                                     {/* FILTRO Y SELECTOR DE PACIENTE */}
-                                                    <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
-                                                        <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
+                                                    <div className="space-y-2 p-3 rounded-lg border border-border/80 bg-card/50">
+                                                        <Label className="sgc-label text-primary font-bold tracking-wider">Selección de paciente *</Label>
                                                         <Input
                                                             placeholder="Buscar por DNI, Nombre o ID..."
                                                             value={busquedaPaciente}
@@ -532,15 +532,15 @@ export default function MedicoPanel() {
                                                                     }
                                                                 }
                                                             }}
-                                                            className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                                            className="sgc-input h-10 border-slate-700 bg-card"
                                                         />
                                                         <Select value={revision.convictoId} onValueChange={(v) => setRevision({...revision, convictoId: v})}>
                                                             <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
-                                                            <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                                            <SelectContent className="bg-[#111827] border border-border text-foreground max-h-60">
                                                                 {convictosFiltrados.length > 0 ? (
-                                                                    convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                                    convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-foreground">{getConvictoLabel(c)}</SelectItem>))
                                                                 ) : (
-                                                                    <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                                    <div className="p-2 text-sm text-foreground text-center">Sin resultados para "{busquedaPaciente}"</div>
                                                                 )}
                                                             </SelectContent>
                                                         </Select>
@@ -564,11 +564,11 @@ export default function MedicoPanel() {
                                                             <Label className="sgc-label">Prioridad</Label>
                                                             <Select value={revision.prioridad} onValueChange={v => setRevision({...revision, prioridad: v})}>
                                                                 <SelectTrigger className="sgc-input h-11! w-full"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                                <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                                    <SelectItem value="baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
-                                                                    <SelectItem value="media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>
-                                                                    <SelectItem value="alta" className="focus:bg-blue-600 focus:text-white">Alta</SelectItem>
-                                                                    <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-white">Urgente</SelectItem>
+                                                                <SelectContent className="bg-[#111827] border border-border text-foreground">
+                                                                    <SelectItem value="baja" className="focus:bg-blue-600 focus:text-foreground">Baja</SelectItem>
+                                                                    <SelectItem value="media" className="focus:bg-blue-600 focus:text-foreground">Media</SelectItem>
+                                                                    <SelectItem value="alta" className="focus:bg-blue-600 focus:text-foreground">Alta</SelectItem>
+                                                                    <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-foreground">Urgente</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
                                                         </div>
@@ -593,40 +593,40 @@ export default function MedicoPanel() {
                                 </CardContent>
                             </Card>
 
-                            <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
+                            <div className="overflow-x-auto rounded-xl border border-border/80 bg-card/50 shadow-inner">
                                 <Table>
                                     <TableHeader>
-                                        <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400">ID</TableHead>
-                                            <TableHead className="text-slate-300">Fecha</TableHead>
-                                            <TableHead className="text-slate-300">Hora</TableHead>
-                                            <TableHead className="text-slate-300">Prioridad</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[270px]">Diagnóstico</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Tratamiento</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Médico</TableHead>
-                                            <TableHead className="text-center text-slate-300">Acciones</TableHead>
+                                        <TableRow className="bg-blue-500/10 border-b border-border hover:bg-transparent">
+                                            <TableHead className="font-bold text-primary">ID</TableHead>
+                                            <TableHead className="text-foreground">Fecha</TableHead>
+                                            <TableHead className="text-foreground">Hora</TableHead>
+                                            <TableHead className="text-foreground">Prioridad</TableHead>
+                                            <TableHead className="text-foreground min-w-[200px]">Paciente</TableHead>
+                                            <TableHead className="text-foreground min-w-[270px]">Diagnóstico</TableHead>
+                                            <TableHead className="text-foreground min-w-[200px]">Tratamiento</TableHead>
+                                            <TableHead className="text-foreground min-w-[200px]">Médico</TableHead>
+                                            <TableHead className="text-center text-foreground">Acciones</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredRevisiones.map((rev) => (
-                                            <TableRow key={rev.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                                <TableCell className="font-bold text-blue-400">R-{rev.id}</TableCell>
-                                                <TableCell className="text-slate-300">{rev.fecha}</TableCell>
-                                                <TableCell className="text-slate-300">{rev.hora}</TableCell>
+                                            <TableRow key={rev.id} className="border-b border-border/50 hover:bg-slate-800/30 transition-colors">
+                                                <TableCell className="font-bold text-primary">R-{rev.id}</TableCell>
+                                                <TableCell className="text-foreground">{rev.fecha}</TableCell>
+                                                <TableCell className="text-foreground">{rev.hora}</TableCell>
                                                 <TableCell><Badge variant="outline" className={getPrioridadColor(rev.prioridad)}>{(rev.prioridad || "").toString().toUpperCase()}</Badge></TableCell>   
-                                                <TableCell className="font-medium text-white">{rev.nombre ?? convictoIdToName(rev.convictoId)}</TableCell>  
-                                                <TableCell className="text-slate-300">{rev.diagnostico}</TableCell>
-                                                <TableCell className="text-slate-300">{rev.tratamiento}</TableCell>
-                                                <TableCell className="text-slate-300 font-medium">{rev.medico}</TableCell>
+                                                <TableCell className="font-medium text-foreground">{rev.nombre ?? convictoIdToName(rev.convictoId)}</TableCell>  
+                                                <TableCell className="text-foreground">{rev.diagnostico}</TableCell>
+                                                <TableCell className="text-foreground">{rev.tratamiento}</TableCell>
+                                                <TableCell className="text-foreground font-medium">{rev.medico}</TableCell>
                                                 <TableCell className="flex justify-center gap-2">
-                                                    <Button size="icon" className="h-8 w-8 bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group"
+                                                    <Button size="icon" className="h-8 w-8 bg-blue-500/10 border border-blue-500/20 hover:bg-primary hover:border-blue-500 transition-colors group"
                                                         onClick={() => handleStartEdit("revision", rev.id, rev)}>
-                                                        <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors"/>
+                                                        <Edit2 className="h-3.5 w-3.5 text-primary group-hover:text-foreground transition-colors"/>
                                                     </Button>
                                                     <Button size="icon" className="h-8 w-8 bg-red-500/10 border border-red-500/20 hover:bg-red-600 hover:border-red-500 transition-colors group"
                                                         onClick={() => setDeleteConfirm({ type: "revision", id: rev.id })}>
-                                                        <Trash2 className="h-3.5 w-3.5 text-red-400 group-hover:text-white transition-colors"/>
+                                                        <Trash2 className="h-3.5 w-3.5 text-red-400 group-hover:text-foreground transition-colors"/>
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>
@@ -639,8 +639,8 @@ export default function MedicoPanel() {
                         {/* ======================= TRATAMIENTOS ======================= */}
                         <TabsContent value="tratamientos" className="space-y-6">
                             <Card className="sgc-card border-0 mb-4">
-                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
-                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de Tratamientos</CardTitle>
+                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-border/50">
+                                    <CardTitle className="text-xl text-foreground font-bold tracking-wide">Directorio de Tratamientos</CardTitle>
                                     <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${filteredTratamientos.length > 50 ? "border-red-500 text-red-400 bg-red-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
                                         Registros totales: {filteredTratamientos.length}
                                     </Badge>
@@ -648,7 +648,7 @@ export default function MedicoPanel() {
                                 <CardContent className="pt-4">
                                     <div className="flex flex-col md:flex-row md:items-center justify-start gap-4">
                                         <div className="relative md:w-1/3 h-10!">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500"/>
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground"/>
                                             <Input aria-label="Búsqueda" placeholder="Buscar por ID, Paciente o Medicamento..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10!"/>
                                         </div>
                                     </div>
@@ -664,16 +664,16 @@ export default function MedicoPanel() {
                                             <DialogTrigger asChild>
                                                 <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/>Nuevo tratamiento</Button>
                                             </DialogTrigger>
-                                            <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                                            <DialogContent className="sgc-card border-border text-foreground sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                                 <DialogHeader>
-                                                    <DialogTitle className="text-xl font-bold text-white">Registrar tratamiento</DialogTitle>
-                                                    <DialogDescription className="text-slate-400 text-[15px]">Asigne medicamentos y dosis a un interno.</DialogDescription>
+                                                    <DialogTitle className="text-xl font-bold text-foreground">Registrar tratamiento</DialogTitle>
+                                                    <DialogDescription className="text-foreground text-[15px]">Asigne medicamentos y dosis a un interno.</DialogDescription>
                                                 </DialogHeader>
                                                 <form onSubmit={handleRegistrarTratamiento} className="space-y-4 pt-3">
                                                     
                                                     {/* FILTRO Y SELECTOR DE PACIENTE */}
-                                                    <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
-                                                        <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
+                                                    <div className="space-y-2 p-3 rounded-lg border border-border/80 bg-card/50">
+                                                        <Label className="sgc-label text-primary font-bold tracking-wider">Selección de paciente *</Label>
                                                         <Input
                                                             placeholder="Buscar por DNI, Nombre o ID..."
                                                             value={busquedaPaciente}
@@ -695,15 +695,15 @@ export default function MedicoPanel() {
                                                                     }
                                                                 }
                                                             }}
-                                                            className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                                            className="sgc-input h-10 border-slate-700 bg-card"
                                                         />
                                                         <Select value={tratamiento.convictoId} onValueChange={(v) => setTratamiento({...tratamiento, convictoId: v})}>
                                                             <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
-                                                            <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                                            <SelectContent className="bg-[#111827] border border-border text-foreground max-h-60">
                                                                 {convictosFiltrados.length > 0 ? (
-                                                                    convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                                    convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-foreground">{getConvictoLabel(c)}</SelectItem>))
                                                                 ) : (
-                                                                    <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                                    <div className="p-2 text-sm text-foreground text-center">Sin resultados para "{busquedaPaciente}"</div>
                                                                 )}
                                                             </SelectContent>
                                                         </Select>
@@ -734,38 +734,38 @@ export default function MedicoPanel() {
                                 </CardContent>
                             </Card>
 
-                            <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
+                            <div className="overflow-x-auto rounded-xl border border-border/80 bg-card/50 shadow-inner">
                                 <Table>
                                     <TableHeader>
-                                        <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400 min-w-[60px]">ID</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[250px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[180px]">Medicamento</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[170px]">Dosis</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[180px]">Frecuencia</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[150px]">Duración</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[120px]">Inicio</TableHead>
-                                            <TableHead className="text-center text-slate-300">Acciones</TableHead>
+                                        <TableRow className="bg-blue-500/10 border-b border-border hover:bg-transparent">
+                                            <TableHead className="font-bold text-primary min-w-[60px]">ID</TableHead>
+                                            <TableHead className="text-foreground min-w-[250px]">Paciente</TableHead>
+                                            <TableHead className="text-foreground min-w-[180px]">Medicamento</TableHead>
+                                            <TableHead className="text-foreground min-w-[170px]">Dosis</TableHead>
+                                            <TableHead className="text-foreground min-w-[180px]">Frecuencia</TableHead>
+                                            <TableHead className="text-foreground min-w-[150px]">Duración</TableHead>
+                                            <TableHead className="text-foreground min-w-[120px]">Inicio</TableHead>
+                                            <TableHead className="text-center text-foreground">Acciones</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredTratamientos.map(tr => (
-                                            <TableRow key={tr.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                                <TableCell className="font-bold text-blue-400">T-{tr.id}</TableCell>    
-                                                <TableCell className="font-medium text-white">{tr.nombre ?? convictoIdToName(tr.convictoId)}</TableCell>    
-                                                <TableCell className="text-slate-300">{tr.medicamento}</TableCell>
-                                                <TableCell className="text-slate-300">{tr.dosis}</TableCell>
-                                                <TableCell className="text-slate-300">{tr.frecuencia}</TableCell>
-                                                <TableCell className="text-slate-300">{tr.duracion}</TableCell>
-                                                <TableCell className="text-slate-300">{tr.fechaInicio}</TableCell>
+                                            <TableRow key={tr.id} className="border-b border-border/50 hover:bg-slate-800/30 transition-colors">
+                                                <TableCell className="font-bold text-primary">T-{tr.id}</TableCell>    
+                                                <TableCell className="font-medium text-foreground">{tr.nombre ?? convictoIdToName(tr.convictoId)}</TableCell>    
+                                                <TableCell className="text-foreground">{tr.medicamento}</TableCell>
+                                                <TableCell className="text-foreground">{tr.dosis}</TableCell>
+                                                <TableCell className="text-foreground">{tr.frecuencia}</TableCell>
+                                                <TableCell className="text-foreground">{tr.duracion}</TableCell>
+                                                <TableCell className="text-foreground">{tr.fechaInicio}</TableCell>
                                                 <TableCell className="flex justify-center gap-2">
-                                                    <Button size="icon" className="h-8 w-8 bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group"
+                                                    <Button size="icon" className="h-8 w-8 bg-blue-500/10 border border-blue-500/20 hover:bg-primary hover:border-blue-500 transition-colors group"
                                                         onClick={() => handleStartEdit("tratamiento", tr.id, tr)}>
-                                                        <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors"/>
+                                                        <Edit2 className="h-3.5 w-3.5 text-primary group-hover:text-foreground transition-colors"/>
                                                     </Button>
                                                     <Button size="icon" className="h-8 w-8 bg-red-500/10 border border-red-500/20 hover:bg-red-600 hover:border-red-500 transition-colors group"
                                                         onClick={() => setDeleteConfirm({ type: "tratamiento", id: tr.id })}>
-                                                        <Trash2 className="h-3.5 w-3.5 text-red-400 group-hover:text-white transition-colors"/>
+                                                        <Trash2 className="h-3.5 w-3.5 text-red-400 group-hover:text-foreground transition-colors"/>
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>
@@ -778,8 +778,8 @@ export default function MedicoPanel() {
                         {/* ======================= DERIVACIONES ======================= */}
                         <TabsContent value="derivaciones" className="space-y-6">
                             <Card className="sgc-card border-0 mb-4">
-                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
-                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de Derivaciones</CardTitle>
+                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-border/50">
+                                    <CardTitle className="text-xl text-foreground font-bold tracking-wide">Directorio de Derivaciones</CardTitle>
                                     <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${filteredDerivaciones.length > 50 ? "border-red-500 text-red-400 bg-red-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
                                         Registros totales: {filteredDerivaciones.length}
                                     </Badge>
@@ -787,17 +787,17 @@ export default function MedicoPanel() {
                                 <CardContent className="pt-4">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                         <div className="relative md:w-1/3 h-10!">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500"/>
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground"/>
                                             <Input aria-label="Búsqueda" placeholder="Buscar por ID, Paciente o Especialidad..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10!"/>
                                         </div>
                                         <div className="md:w-auto flex flex-col lg:flex-row gap-4 items-end w-full">
                                             <Select value={estadoDerivacionFilter} onValueChange={setEstadoDerivacionFilter}>
                                                 <SelectTrigger className="sgc-input h-10! w-full md:w-[200px]"><SelectValue placeholder="Estado"/></SelectTrigger>
-                                                <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                                    <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los estados</SelectItem>
-                                                    <SelectItem value="pendiente" className="focus:bg-blue-600 focus:text-white">Pendiente</SelectItem>
-                                                    <SelectItem value="realizada" className="focus:bg-blue-600 focus:text-white">Realizada</SelectItem>
-                                                    <SelectItem value="rechazada" className="focus:bg-blue-600 focus:text-white">Rechazada</SelectItem>
+                                                <SelectContent className="bg-[#0f172a] border-border text-foreground">
+                                                    <SelectItem value="todos" className="focus:bg-blue-600 focus:text-foreground">Todos los estados</SelectItem>
+                                                    <SelectItem value="pendiente" className="focus:bg-blue-600 focus:text-foreground">Pendiente</SelectItem>
+                                                    <SelectItem value="realizada" className="focus:bg-blue-600 focus:text-foreground">Realizada</SelectItem>
+                                                    <SelectItem value="rechazada" className="focus:bg-blue-600 focus:text-foreground">Rechazada</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -814,16 +814,16 @@ export default function MedicoPanel() {
                                             <DialogTrigger asChild>
                                                 <Button className="sgc-btn-primary h-10 px-5"><Plus className="h-4 w-4 mr-2"/> Nueva derivación</Button>
                                             </DialogTrigger>
-                                            <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                                            <DialogContent className="sgc-card border-border text-foreground sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                                                 <DialogHeader>
-                                                    <DialogTitle className="text-xl font-bold text-white">Registrar derivación</DialogTitle>
-                                                    <DialogDescription className="text-slate-400 text-[15px]">Derive a un paciente a un centro de salud externo.</DialogDescription>
+                                                    <DialogTitle className="text-xl font-bold text-foreground">Registrar derivación</DialogTitle>
+                                                    <DialogDescription className="text-foreground text-[15px]">Derive a un paciente a un centro de salud externo.</DialogDescription>
                                                 </DialogHeader>
                                                 <form onSubmit={handleRegistrarDerivacion} className="space-y-4 pt-3">
                                                     
                                                     {/* FILTRO Y SELECTOR DE PACIENTE */}
-                                                    <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
-                                                        <Label className="sgc-label text-blue-400 font-bold tracking-wider">Selección de paciente *</Label>
+                                                    <div className="space-y-2 p-3 rounded-lg border border-border/80 bg-card/50">
+                                                        <Label className="sgc-label text-primary font-bold tracking-wider">Selección de paciente *</Label>
                                                         <Input
                                                             placeholder="Buscar por DNI, Nombre o ID..."
                                                             value={busquedaPaciente}
@@ -845,15 +845,15 @@ export default function MedicoPanel() {
                                                                     }
                                                                 }
                                                             }}
-                                                            className="sgc-input h-10 border-slate-700 bg-[#060a12]"
+                                                            className="sgc-input h-10 border-slate-700 bg-card"
                                                         />
                                                         <Select value={derivacion.convictoId} onValueChange={(v) => setDerivacion({...derivacion, convictoId: v})}>
                                                             <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccione un paciente de la lista"/></SelectTrigger>
-                                                            <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 max-h-60">
+                                                            <SelectContent className="bg-[#111827] border border-border text-foreground max-h-60">
                                                                 {convictosFiltrados.length > 0 ? (
-                                                                    convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                                    convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-foreground">{getConvictoLabel(c)}</SelectItem>))
                                                                 ) : (
-                                                                    <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                                    <div className="p-2 text-sm text-foreground text-center">Sin resultados para "{busquedaPaciente}"</div>
                                                                 )}
                                                             </SelectContent>
                                                         </Select>
@@ -863,12 +863,12 @@ export default function MedicoPanel() {
                                                         <Label className="sgc-label">Especialidad *</Label>
                                                         <Select value={derivacion.especialidad} onValueChange={v => setDerivacion({...derivacion, especialidad: v})}>
                                                             <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                            <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                                <SelectItem value="Cardiología" className="focus:bg-blue-600 focus:text-white">Cardiología</SelectItem>
-                                                                <SelectItem value="Traumatología" className="focus:bg-blue-600 focus:text-white">Traumatología</SelectItem>
-                                                                <SelectItem value="Psiquiatría" className="focus:bg-blue-600 focus:text-white">Psiquiatría</SelectItem>
-                                                                <SelectItem value="Odontología" className="focus:bg-blue-600 focus:text-white">Odontología</SelectItem>
-                                                                <SelectItem value="Otra" className="focus:bg-blue-600 focus:text-white">Otra</SelectItem>
+                                                            <SelectContent className="bg-[#111827] border border-border text-foreground">
+                                                                <SelectItem value="Cardiología" className="focus:bg-blue-600 focus:text-foreground">Cardiología</SelectItem>
+                                                                <SelectItem value="Traumatología" className="focus:bg-blue-600 focus:text-foreground">Traumatología</SelectItem>
+                                                                <SelectItem value="Psiquiatría" className="focus:bg-blue-600 focus:text-foreground">Psiquiatría</SelectItem>
+                                                                <SelectItem value="Odontología" className="focus:bg-blue-600 focus:text-foreground">Odontología</SelectItem>
+                                                                <SelectItem value="Otra" className="focus:bg-blue-600 focus:text-foreground">Otra</SelectItem>
                                                             </SelectContent>
                                                         </Select>
                                                     </div>
@@ -878,10 +878,10 @@ export default function MedicoPanel() {
                                                             <Label className="sgc-label">Urgencia</Label>
                                                             <Select value={derivacion.urgencia} onValueChange={v => setDerivacion({...derivacion, urgencia: v})}>
                                                                 <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                                <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                                    <SelectItem value="normal" className="focus:bg-blue-600 focus:text-white">Normal</SelectItem>
-                                                                    <SelectItem value="preferente" className="focus:bg-blue-600 focus:text-white">Preferente</SelectItem>
-                                                                    <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-white">Urgente</SelectItem>
+                                                                <SelectContent className="bg-[#111827] border border-border text-foreground">
+                                                                    <SelectItem value="normal" className="focus:bg-blue-600 focus:text-foreground">Normal</SelectItem>
+                                                                    <SelectItem value="preferente" className="focus:bg-blue-600 focus:text-foreground">Preferente</SelectItem>
+                                                                    <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-foreground">Urgente</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
                                                         </div>
@@ -906,36 +906,36 @@ export default function MedicoPanel() {
                                 </CardContent>
                             </Card>
 
-                            <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
+                            <div className="overflow-x-auto rounded-xl border border-border/80 bg-card/50 shadow-inner">
                                 <Table>
                                     <TableHeader>
-                                        <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400">ID</TableHead>
-                                            <TableHead className="text-slate-300">Estado</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300">Especialidad</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Motivo</TableHead>
-                                            <TableHead className="text-slate-300">Institución</TableHead>
-                                            <TableHead className="text-center text-slate-300">Acciones</TableHead>
+                                        <TableRow className="bg-blue-500/10 border-b border-border hover:bg-transparent">
+                                            <TableHead className="font-bold text-primary">ID</TableHead>
+                                            <TableHead className="text-foreground">Estado</TableHead>
+                                            <TableHead className="text-foreground min-w-[200px]">Paciente</TableHead>
+                                            <TableHead className="text-foreground">Especialidad</TableHead>
+                                            <TableHead className="text-foreground min-w-[200px]">Motivo</TableHead>
+                                            <TableHead className="text-foreground">Institución</TableHead>
+                                            <TableHead className="text-center text-foreground">Acciones</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredDerivaciones.map(d => (
-                                            <TableRow key={d.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                                <TableCell className="font-bold text-blue-400">D-{d.id}</TableCell>
+                                            <TableRow key={d.id} className="border-b border-border/50 hover:bg-slate-800/30 transition-colors">
+                                                <TableCell className="font-bold text-primary">D-{d.id}</TableCell>
                                                 <TableCell><Badge variant="outline" className={getEstadoColor(d.estado)}>{(d.estado || "").toUpperCase()}</Badge></TableCell>
-                                                <TableCell className="font-medium text-white">{d.nombre ?? convictoIdToName(d.convictoId)}</TableCell>
-                                                <TableCell className="text-slate-300">{d.especialidad}</TableCell>
-                                                <TableCell className="text-slate-300">{d.motivo}</TableCell>
-                                                <TableCell className="text-slate-300">{d.institucion}</TableCell>
+                                                <TableCell className="font-medium text-foreground">{d.nombre ?? convictoIdToName(d.convictoId)}</TableCell>
+                                                <TableCell className="text-foreground">{d.especialidad}</TableCell>
+                                                <TableCell className="text-foreground">{d.motivo}</TableCell>
+                                                <TableCell className="text-foreground">{d.institucion}</TableCell>
                                                 <TableCell className="flex justify-center gap-2">
-                                                    <Button size="icon" className="h-8 w-8 bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group"
+                                                    <Button size="icon" className="h-8 w-8 bg-blue-500/10 border border-blue-500/20 hover:bg-primary hover:border-blue-500 transition-colors group"
                                                         onClick={() => handleStartEdit("derivacion", d.id, d)}>
-                                                        <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors"/>
+                                                        <Edit2 className="h-3.5 w-3.5 text-primary group-hover:text-foreground transition-colors"/>
                                                     </Button>
                                                     <Button size="icon" className="h-8 w-8 bg-red-500/10 border border-red-500/20 hover:bg-red-600 hover:border-red-500 transition-colors group"
                                                         onClick={() => setDeleteConfirm({ type: "derivacion", id: d.id })}>
-                                                        <Trash2 className="h-3.5 w-3.5 text-red-400 group-hover:text-white transition-colors"/>
+                                                        <Trash2 className="h-3.5 w-3.5 text-red-400 group-hover:text-foreground transition-colors"/>
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>
@@ -948,8 +948,8 @@ export default function MedicoPanel() {
                         {/* ======================= HISTORIAL ======================= */}
                         <TabsContent value="historial" className="space-y-6">
                             <Card className="sgc-card border-0 mb-4">
-                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
-                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Historial Médico Completo</CardTitle>
+                                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-border/50">
+                                    <CardTitle className="text-xl text-foreground font-bold tracking-wide">Historial Médico Completo</CardTitle>
                                     <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 border-green-500 text-green-400 bg-green-500/10`}>
                                         Registros totales: {filteredHistorial.length}
                                     </Badge>
@@ -957,7 +957,7 @@ export default function MedicoPanel() {
                                 <CardContent className="pt-4">
                                     <div className="flex flex-col md:flex-row md:items-center justify-start gap-4">
                                         <div className="relative md:w-1/3 h-10!">
-                                            <Search className=" absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500"/>
+                                            <Search className=" absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground"/>
                                             <Input aria-label="Búsqueda" placeholder="Buscar por ID, Paciente o Diagnóstico..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="sgc-input pl-10!"/>
                                         </div>
                                     </div>
@@ -968,31 +968,31 @@ export default function MedicoPanel() {
                                 </CardContent>
                             </Card>
 
-                            <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
+                            <div className="overflow-x-auto rounded-xl border border-border/80 bg-card/50 shadow-inner">
                                 <Table>
                                     <TableHeader>
-                                        <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400 min-w-[60px]">ID</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[110px]">Fecha</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[250px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[120px]">DNI</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[120px]">Tipo</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[230px]">Diagnóstico</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[250px]">Observaciones</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[180px]">Médico</TableHead>
+                                        <TableRow className="bg-blue-500/10 border-b border-border hover:bg-transparent">
+                                            <TableHead className="font-bold text-primary min-w-[60px]">ID</TableHead>
+                                            <TableHead className="text-foreground min-w-[110px]">Fecha</TableHead>
+                                            <TableHead className="text-foreground min-w-[250px]">Paciente</TableHead>
+                                            <TableHead className="text-foreground min-w-[120px]">DNI</TableHead>
+                                            <TableHead className="text-foreground min-w-[120px]">Tipo</TableHead>
+                                            <TableHead className="text-foreground min-w-[230px]">Diagnóstico</TableHead>
+                                            <TableHead className="text-foreground min-w-[250px]">Observaciones</TableHead>
+                                            <TableHead className="text-foreground min-w-[180px]">Médico</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredHistorial.map(h => (
-                                            <TableRow key={h.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                                <TableCell className="font-bold text-blue-400">H-{h.id}</TableCell>
-                                                <TableCell className="text-slate-300">{h.fecha}</TableCell>
-                                                <TableCell className="font-medium text-white">{h.nombre ?? convictoIdToName(h.convictoId)}</TableCell>
-                                                <TableCell className="text-slate-400 font-mono">{convictoIdToDni(h.convictoId)}</TableCell>
-                                                <TableCell><Badge variant="outline" className="bg-slate-800 text-slate-300 border-slate-700">{h.tipo}</Badge></TableCell>
-                                                <TableCell className="text-slate-300">{h.diagnostico}</TableCell>
-                                                <TableCell className="text-slate-400 max-w-[250px] truncate">{h.observaciones}</TableCell>
-                                                <TableCell className="text-slate-300 font-medium">{h.medico}</TableCell>
+                                            <TableRow key={h.id} className="border-b border-border/50 hover:bg-slate-800/30 transition-colors">
+                                                <TableCell className="font-bold text-primary">H-{h.id}</TableCell>
+                                                <TableCell className="text-foreground">{h.fecha}</TableCell>
+                                                <TableCell className="font-medium text-foreground">{h.nombre ?? convictoIdToName(h.convictoId)}</TableCell>
+                                                <TableCell className="text-foreground font-mono">{convictoIdToDni(h.convictoId)}</TableCell>
+                                                <TableCell><Badge variant="outline" className="bg-slate-800 text-foreground border-slate-700">{h.tipo}</Badge></TableCell>
+                                                <TableCell className="text-foreground">{h.diagnostico}</TableCell>
+                                                <TableCell className="text-foreground max-w-[250px] truncate">{h.observaciones}</TableCell>
+                                                <TableCell className="text-foreground font-medium">{h.medico}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -1004,17 +1004,17 @@ export default function MedicoPanel() {
                 {/* --- DIALOG DE EDICIÓN GENÉRICO --- */}
                 {editingId && editingData && (
                     <Dialog open={true} onOpenChange={(open) => { if (!open) { setEditingId(null); setEditingData(null); setBusquedaPaciente(""); } }}>
-                        <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogContent className="sgc-card border-border text-foreground sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                                <DialogTitle className="text-xl font-bold text-white uppercase tracking-wider">
+                                <DialogTitle className="text-xl font-bold text-foreground uppercase tracking-wider">
                                     Editar {editingData.type} {editingData.type.charAt(0).toUpperCase()}-{editingId}
                                 </DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4 pt-3">
                                 
                                 {/* FILTRO Y SELECTOR EN MODAL DE EDICIÓN */}
-                                <div className="space-y-2 p-3 rounded-lg border border-slate-800/80 bg-[#0a0f1a]/50">
-                                    <Label className="sgc-label text-blue-400 font-bold tracking-wider">Cambiar paciente asignado</Label>
+                                <div className="space-y-2 p-3 rounded-lg border border-border/80 bg-card/50">
+                                    <Label className="sgc-label text-primary font-bold tracking-wider">Cambiar paciente asignado</Label>
                                     <Input
                                         placeholder="Buscar por DNI, Nombre o ID..."
                                         value={busquedaPaciente}
@@ -1036,14 +1036,14 @@ export default function MedicoPanel() {
                                                 }
                                             }
                                         }}
-                                        className="sgc-input h-10 border-slate-700 bg-[#060a12]"/>
+                                        className="sgc-input h-10 border-slate-700 bg-card"/>
                                     <Select value={String(editingData.data.convictoId)} onValueChange={(v) => setEditingData({...editingData, data: {...editingData.data, convictoId: v}})}>
                                         <SelectTrigger className="sgc-input h-11 w-full"><SelectValue placeholder="Seleccionar paciente"/></SelectTrigger>
-                                        <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
+                                        <SelectContent className="bg-[#111827] border border-border text-foreground">
                                             {convictosFiltrados.length > 0 ? (
-                                                convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-white">{getConvictoLabel(c)}</SelectItem>))
+                                                convictosFiltrados.map((c) => (<SelectItem key={c.id} value={String(c.id)} className="focus:bg-blue-600 focus:text-foreground">{getConvictoLabel(c)}</SelectItem>))
                                             ) : (
-                                                <div className="p-2 text-sm text-slate-400 text-center">Sin resultados para "{busquedaPaciente}"</div>
+                                                <div className="p-2 text-sm text-foreground text-center">Sin resultados para "{busquedaPaciente}"</div>
                                             )}
                                         </SelectContent>
                                     </Select>
@@ -1085,10 +1085,10 @@ export default function MedicoPanel() {
                                                 <Label className="sgc-label">Estado</Label>
                                                 <Select value={editingData.data.estado} onValueChange={(v) => setEditingData({...editingData, data: {...editingData.data, estado: v}})}>
                                                     <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Estado"/></SelectTrigger>
-                                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                        <SelectItem value="pendiente" className="focus:bg-blue-600 focus:text-white">Pendiente</SelectItem>
-                                                        <SelectItem value="realizada" className="focus:bg-blue-600 focus:text-white">Realizada</SelectItem>
-                                                        <SelectItem value="rechazada" className="focus:bg-blue-600 focus:text-white">Rechazada</SelectItem>
+                                                    <SelectContent className="bg-[#111827] border border-border text-foreground">
+                                                        <SelectItem value="pendiente" className="focus:bg-blue-600 focus:text-foreground">Pendiente</SelectItem>
+                                                        <SelectItem value="realizada" className="focus:bg-blue-600 focus:text-foreground">Realizada</SelectItem>
+                                                        <SelectItem value="rechazada" className="focus:bg-blue-600 focus:text-foreground">Rechazada</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -1098,7 +1098,7 @@ export default function MedicoPanel() {
                                     </>
                                 )}
 
-                                <div className="flex gap-3 pt-4 border-t border-slate-800/80">
+                                <div className="flex gap-3 pt-4 border-t border-border/80">
                                     <Button variant="outline" className="sgc-btn-secondary flex-1 h-11" onClick={() => { setEditingId(null); setEditingData(null); setBusquedaPaciente(""); }}>Cancelar</Button>
                                     <Button className="sgc-btn-primary flex-1 h-11" onClick={handleSaveEdit}>Guardar cambios</Button>
                                 </div>
@@ -1109,14 +1109,14 @@ export default function MedicoPanel() {
 
                 {/* --- DIALOG DE ELIMINAR (ALERT) --- */}
                 <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
-                    <AlertDialogContent className="sgc-card border-red-500/30 text-slate-100 shadow-[0_0_40px_rgba(239,68,68,0.15)]">
+                    <AlertDialogContent className="sgc-card border-red-500/30 text-foreground shadow-[0_0_40px_rgba(239,68,68,0.15)]">
                         <AlertDialogHeader>
-                            <AlertDialogTitle className="text-xl font-bold text-white flex items-center gap-2"><AlertCircle className="text-red-400 h-6 w-6"/> Eliminar registro</AlertDialogTitle>
-                            <AlertDialogDescription className="text-slate-400 text-[14px]">Esta acción es irreversible ¿Está seguro de que desea eliminar este registro médico?</AlertDialogDescription>
+                            <AlertDialogTitle className="text-xl font-bold text-foreground flex items-center gap-2"><AlertCircle className="text-red-400 h-6 w-6"/> Eliminar registro</AlertDialogTitle>
+                            <AlertDialogDescription className="text-foreground text-[14px]">Esta acción es irreversible ¿Está seguro de que desea eliminar este registro médico?</AlertDialogDescription>
                         </AlertDialogHeader>
                         <div className="flex gap-3 mt-4">
                             <AlertDialogCancel className="sgc-btn-secondary flex-1 border-slate-700 m-0">Cancelar</AlertDialogCancel>
-                            <AlertDialogAction className="flex-1 bg-red-600 text-white hover:bg-red-700 m-0 border-0 shadow-lg shadow-red-900/20" onClick={() => deleteConfirm && handleDelete(deleteConfirm.type, deleteConfirm.id)}>Eliminar permanentemente</AlertDialogAction>
+                            <AlertDialogAction className="flex-1 bg-red-600 text-foreground hover:bg-red-700 m-0 border-0 shadow-lg shadow-red-900/20" onClick={() => deleteConfirm && handleDelete(deleteConfirm.type, deleteConfirm.id)}>Eliminar permanentemente</AlertDialogAction>
                         </div>
                     </AlertDialogContent>
                 </AlertDialog>

@@ -191,7 +191,7 @@ export default function SeguridadPanel() {
         }
 
         // Por defecto (Baja / Positiva)
-        return <CheckCircle className="h-5 w-5 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]"/>;
+        return <CheckCircle className="h-5 w-5 text-primary drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]"/>;
     };
 
 
@@ -319,23 +319,23 @@ export default function SeguridadPanel() {
     }
 
     return (
-        <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-slate-200 ">
+        <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-foreground ">
             <div className="container mx-auto max-w-7xl relative z-10 space-y-8">
                 
                 {/* --- HEADER DEL PANEL DE SEGURIDAD --- */}
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0a0f1a]/80 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-card/80 p-6 rounded-2xl border border-border/80 backdrop-blur-xl shadow-2xl">
                     <div className="flex items-center gap-5">
                         <Button 
                             aria-label="Volver al menú principal" 
-                            className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" 
+                            className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-primary hover:border-blue-500 transition-colors group" 
                             onClick={() => router.push("/dashboard")}>
-                            <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
+                            <ArrowLeft className="h-5 w-5 text-primary group-hover:text-foreground transition-colors" />
                         </Button>
                         <div className="flex items-center gap-4">
                             <Lock className="h-14 w-14 text-red-400 shrink-0" />
                             <div>
-                                <h1 className="text-3xl font-black tracking-wide text-white">Panel de Seguridad</h1>
-                                <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Control Táctico de Pabellones y Accesos</p>
+                                <h1 className="text-3xl font-black tracking-wide text-foreground">Panel de Seguridad</h1>
+                                <p className="text-primary text-xs font-bold uppercase tracking-widest mt-1">Control Táctico de Pabellones y Accesos</p>
                             </div>
                         </div>
                     </div>
@@ -349,26 +349,26 @@ export default function SeguridadPanel() {
                                 <div className="inline-block">
                                     <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"/>
                                 </div>
-                                <p className="text-slate-400 text-sm">Cargando datos de pabellones...</p>
+                                <p className="text-foreground text-sm">Cargando datos de pabellones...</p>
                             </div>
                         </div>
                     ) : pabellones.length > 0 ? pabellones.map((pabellon) => {
                         const porcentaje = Math.round((pabellon.ocupacion / pabellon.capacidad) * 100)
                         return (
                             <Card key={pabellon.id} className="sgc-card border-0 hover:-translate-y-1 transition-transform">
-                                <CardHeader className="pb-3 border-b border-slate-800/50">
-                                    <CardTitle className="text-xl text-white">{pabellon.nombre}</CardTitle>
-                                    <CardDescription className="text-slate-400 font-mono text-xs uppercase tracking-wider">Nivel: {pabellon.nivel}</CardDescription>
+                                <CardHeader className="pb-3 border-b border-border/50">
+                                    <CardTitle className="text-xl text-foreground">{pabellon.nombre}</CardTitle>
+                                    <CardDescription className="text-foreground font-mono text-xs uppercase tracking-wider">Nivel: {pabellon.nivel}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="pt-4">
                                     <div className="space-y-4">
                                         <div className="flex justify-between text-sm items-center">
-                                            <span className="text-slate-400 uppercase text-[13px] font-bold tracking-widest">Ocupación</span>
-                                            <span className="font-bold text-white text-[20px]">
-                                                {pabellon.ocupacion} <span className="text-slate-500 text-[20px]">/ {pabellon.capacidad}</span>
+                                            <span className="text-foreground uppercase text-[13px] font-bold tracking-widest">Ocupación</span>
+                                            <span className="font-bold text-foreground text-[20px]">
+                                                {pabellon.ocupacion} <span className="text-foreground text-[20px]">/ {pabellon.capacidad}</span>
                                             </span>
                                         </div>
-                                        <div className="w-full bg-[#060a12] rounded-full h-2.5 border border-slate-800/80 overflow-hidden">
+                                        <div className="w-full bg-card rounded-full h-2.5 border border-border/80 overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full transition-all duration-1000${getOcupacionColor(pabellon.ocupacion, pabellon.capacidad)}`}
                                                 style={{width: `${porcentaje}%`}}
@@ -385,7 +385,7 @@ export default function SeguridadPanel() {
                         )
                     }) : (
                         <div className="col-span-full flex items-center justify-center py-8">
-                            <p className="text-slate-400 text-sm">No hay datos de pabellones disponibles</p>
+                            <p className="text-foreground text-sm">No hay datos de pabellones disponibles</p>
                         </div>
                     )}
                 </div>
@@ -394,12 +394,12 @@ export default function SeguridadPanel() {
                 
                 {/* --- ALERTAS E INCIDENTES --- */}
                     <Card className="sgc-card border-0 shadow-2xl flex flex-col">
-                        <CardHeader className="border-b border-slate-800/60 pb-4 flex flex-row items-start justify-between gap-4">
+                        <CardHeader className="border-b border-border/60 pb-4 flex flex-row items-start justify-between gap-4">
                             <div>
-                                <CardTitle className="text-xl text-white flex items-center gap-2">
+                                <CardTitle className="text-xl text-foreground flex items-center gap-2">
                                     <AlertTriangle className="h-6 w-6 text-red-400"/> Alertas e Incidentes
                                 </CardTitle>
-                                <CardDescription className="text-slate-400 text-[15px] mt-1">
+                                <CardDescription className="text-foreground text-[15px] mt-1">
                                     {filtroIncidentes === '24h' ? "Registro de las últimas 24 horas" :
                                     filtroIncidentes === 'mes' ? "Registro del último mes" :
                                     filtroIncidentes === 'anio' ? "Registro del último año" :
@@ -412,11 +412,11 @@ export default function SeguridadPanel() {
                                 <SelectTrigger className="w-45 h-9 sgc-input text-sm border-slate-700 bg-slate-900/50">
                                     <SelectValue placeholder="Filtrar" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 text-xs">
-                                    <SelectItem value="24h" className="focus:bg-blue-600 focus:text-white">Últimas 24h</SelectItem>
-                                    <SelectItem value="mes" className="focus:bg-blue-600 focus:text-white">Último mes</SelectItem>
-                                    <SelectItem value="anio" className="focus:bg-blue-600 focus:text-white">Último año</SelectItem>
-                                    <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los registros</SelectItem>
+                                <SelectContent className="bg-[#111827] border border-border text-foreground text-xs">
+                                    <SelectItem value="24h" className="focus:bg-blue-600 focus:text-foreground">Últimas 24h</SelectItem>
+                                    <SelectItem value="mes" className="focus:bg-blue-600 focus:text-foreground">Último mes</SelectItem>
+                                    <SelectItem value="anio" className="focus:bg-blue-600 focus:text-foreground">Último año</SelectItem>
+                                    <SelectItem value="todos" className="focus:bg-blue-600 focus:text-foreground">Todos los registros</SelectItem>
                                 </SelectContent>
                             </Select>
                         </CardHeader>
@@ -428,7 +428,7 @@ export default function SeguridadPanel() {
                                         <div className="inline-block">
                                             <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"/>
                                         </div>
-                                        <p className="text-slate-400 text-sm">Actualizando registros...</p>
+                                        <p className="text-foreground text-sm">Actualizando registros...</p>
                                     </div>
                                 </div>
                             ) : incidentes.length > 0 ? (
@@ -436,29 +436,29 @@ export default function SeguridadPanel() {
                                     {incidentes.map((incidente) => (
                                         <div
                                             key={incidente.id}
-                                            className="flex items-start gap-4 p-4 rounded-xl bg-[#060a12]/60 border border-slate-800/80 shadow-inner hover:border-slate-700 transition-colors"
+                                            className="flex items-start gap-4 p-4 rounded-xl bg-card/60 border border-border/80 shadow-inner hover:border-slate-700 transition-colors"
                                         >
-                                            <div className="mt-1 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
+                                            <div className="mt-1 bg-slate-900/50 p-2 rounded-lg border border-border">
                                                 {getPrioridadIcon(incidente.prioridad, incidente.tipo)}
                                             </div>
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between mb-1.5">
-                                                    <span className="font-bold text-sm text-slate-200 uppercase tracking-wide">{incidente.tipo}</span>
-                                                    <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700">
+                                                    <span className="font-bold text-sm text-foreground uppercase tracking-wide">{incidente.tipo}</span>
+                                                    <span className="text-[10px] font-medium text-foreground uppercase tracking-wider bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700">
                                                         {incidente.fecha}
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-blue-400 font-semibold mb-1">
-                                                    Interno: <span className="text-slate-300 font-normal">{incidente.interno_nombre}</span>
+                                                <p className="text-xs text-primary font-semibold mb-1">
+                                                    Interno: <span className="text-foreground font-normal">{incidente.interno_nombre}</span>
                                                 </p>
-                                                <p className="text-sm text-slate-400 leading-snug">{incidente.descripcion}</p>
+                                                <p className="text-sm text-foreground leading-snug">{incidente.descripcion}</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
                                 <div className="flex items-center justify-center py-8">
-                                    <p className="text-slate-400 text-sm">No hay incidentes para este período</p>
+                                    <p className="text-foreground text-sm">No hay incidentes para este período</p>
                                 </div>
                             )}
                         </CardContent>
@@ -466,23 +466,23 @@ export default function SeguridadPanel() {
 
                 {/* --- ACCIONES RÁPIDAS --- */}
                     <Card className="sgc-card border-0 shadow-2xl flex flex-col">
-                        <CardHeader className="border-b border-slate-800/60 pb-4">
-                            <CardTitle className="text-xl text-white">Terminal de Acciones Rápidas</CardTitle>
-                            <CardDescription className="text-slate-400 text-[15px]">Gestión táctica de seguridad</CardDescription>
+                        <CardHeader className="border-b border-border/60 pb-4">
+                            <CardTitle className="text-xl text-foreground">Terminal de Acciones Rápidas</CardTitle>
+                            <CardDescription className="text-foreground text-[15px]">Gestión táctica de seguridad</CardDescription>
                         </CardHeader>
                         <CardContent className="pt-2 flex-1 flex flex-col justify-center gap-5 py-8">
                             
                             {/* Dialog: Movimiento */}
                             <Dialog open={movimientoDialog} onOpenChange={setMovimientoDialog}>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full justify-start h-14 bg-[#060a12]/80 border border-slate-800 hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
-                                        <MoveRight className="mr-3 h-5 w-5 text-blue-400 group-hover:text-white transition-colors" /> Registrar movimiento de recluso
+                                    <Button className="w-full justify-start h-14 bg-card/80 border border-border hover:bg-primary hover:border-blue-500 hover:text-foreground transition-all text-foreground group shadow-inner text-base">
+                                        <MoveRight className="mr-3 h-5 w-5 text-primary group-hover:text-foreground transition-colors" /> Registrar movimiento de recluso
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-xl">
-                                    <DialogHeader className="border-b border-slate-800/80 pb-4">
-                                        <DialogTitle className="text-xl font-bold text-white flex items-center gap-2"><MoveRight className="text-blue-400 h-5 w-5"/> Registrar Movimiento</DialogTitle>
-                                        <DialogDescription className="text-slate-400 text-[15px]">Complete los datos del traslado del interno.</DialogDescription>
+                                <DialogContent className="sgc-card border-border text-foreground sm:max-w-xl">
+                                    <DialogHeader className="border-b border-border/80 pb-4">
+                                        <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2"><MoveRight className="text-primary h-5 w-5"/> Registrar Movimiento</DialogTitle>
+                                        <DialogDescription className="text-foreground text-[15px]">Complete los datos del traslado del interno.</DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleRegistrarMovimiento} className="space-y-4 pt-2">
                                         <div className="space-y-1.5">
@@ -507,7 +507,7 @@ export default function SeguridadPanel() {
                                             <Label htmlFor="escolta" className="sgc-label">Personal de escolta *</Label>
                                             <Input id="escolta" className="sgc-input h-11" placeholder="Nombre del oficial" value={movimiento.escolta} onChange={(e) => setMovimiento({...movimiento, escolta: e.target.value})} required/>
                                         </div>
-                                        <div className="flex gap-3 pt-4 border-t border-slate-800/80">
+                                        <div className="flex gap-3 pt-4 border-t border-border/80">
                                             <Button type="button" onClick={() => setMovimientoDialog(false)} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
                                             <Button type="submit" className="sgc-btn-primary flex-1 h-11">Autorizar Traslado</Button>
                                         </div>
@@ -518,14 +518,14 @@ export default function SeguridadPanel() {
                             {/* Dialog: Incidente */}
                             <Dialog open={incidenteDialog} onOpenChange={setIncidenteDialog}>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full justify-start h-14 bg-[#060a12]/80 border border-slate-800 hover:bg-red-600 hover:border-red-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
-                                        <AlertOctagon className="mr-3 h-5 w-5 text-red-400 group-hover:text-white transition-colors" /> Reportar incidente
+                                    <Button className="w-full justify-start h-14 bg-card/80 border border-border hover:bg-red-600 hover:border-red-500 hover:text-foreground transition-all text-foreground group shadow-inner text-base">
+                                        <AlertOctagon className="mr-3 h-5 w-5 text-red-400 group-hover:text-foreground transition-colors" /> Reportar incidente
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="sgc-card border-red-900/50 text-slate-100 sm:max-w-xl">
-                                    <DialogHeader className="border-b border-slate-800/80 pb-4">
-                                        <DialogTitle className="text-xl font-bold text-white flex items-center gap-2"><AlertOctagon className="text-red-400 h-5 w-5"/> Reportar Incidente de Seguridad</DialogTitle>
-                                        <DialogDescription className="text-slate-400 text-[15px]">Registre los detalles para notificar al personal.</DialogDescription>
+                                <DialogContent className="sgc-card border-red-900/50 text-foreground sm:max-w-xl">
+                                    <DialogHeader className="border-b border-border/80 pb-4">
+                                        <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2"><AlertOctagon className="text-red-400 h-5 w-5"/> Reportar Incidente de Seguridad</DialogTitle>
+                                        <DialogDescription className="text-foreground text-[15px]">Registre los detalles para notificar al personal.</DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleReportarIncidente} className="space-y-4 pt-2">
                                         <div className="grid grid-cols-2 gap-4">
@@ -533,12 +533,12 @@ export default function SeguridadPanel() {
                                                 <Label htmlFor="tipo-inc" className="sgc-label">Tipo de incidente *</Label>
                                                 <Select value={incidente.tipo} onValueChange={(v) => setIncidente({...incidente, tipo: v})}>
                                                     <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                        <SelectItem value="altercado" className="focus:bg-blue-600 focus:text-white">Altercado</SelectItem>
-                                                        <SelectItem value="fuga" className="focus:bg-blue-600 focus:text-white">Intento de fuga</SelectItem>
-                                                        <SelectItem value="contrabando" className="focus:bg-blue-600 focus:text-white">Contrabando</SelectItem>
-                                                        <SelectItem value="agresion" className="focus:bg-blue-600 focus:text-white">Agresión</SelectItem>
-                                                        <SelectItem value="otro" className="focus:bg-blue-600 focus:text-white">Otro</SelectItem>
+                                                    <SelectContent className="bg-[#111827] border border-border text-foreground">
+                                                        <SelectItem value="altercado" className="focus:bg-blue-600 focus:text-foreground">Altercado</SelectItem>
+                                                        <SelectItem value="fuga" className="focus:bg-blue-600 focus:text-foreground">Intento de fuga</SelectItem>
+                                                        <SelectItem value="contrabando" className="focus:bg-blue-600 focus:text-foreground">Contrabando</SelectItem>
+                                                        <SelectItem value="agresion" className="focus:bg-blue-600 focus:text-foreground">Agresión</SelectItem>
+                                                        <SelectItem value="otro" className="focus:bg-blue-600 focus:text-foreground">Otro</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -546,11 +546,11 @@ export default function SeguridadPanel() {
                                                 <Label htmlFor="gravedad" className="sgc-label">Gravedad *</Label>
                                                 <Select value={incidente.gravedad} onValueChange={(v) => setIncidente({...incidente, gravedad: v})}>
                                                     <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                        <SelectItem value="baja" className="focus:bg-blue-600 focus:text-white">Baja</SelectItem>
-                                                        <SelectItem value="media" className="focus:bg-blue-600 focus:text-white">Media</SelectItem>
-                                                        <SelectItem value="alta" className="focus:bg-blue-600 focus:text-white">Alta</SelectItem>
-                                                        <SelectItem value="critica" className="focus:bg-blue-600 focus:text-white">Crítica</SelectItem>
+                                                    <SelectContent className="bg-[#111827] border border-border text-foreground">
+                                                        <SelectItem value="baja" className="focus:bg-blue-600 focus:text-foreground">Baja</SelectItem>
+                                                        <SelectItem value="media" className="focus:bg-blue-600 focus:text-foreground">Media</SelectItem>
+                                                        <SelectItem value="alta" className="focus:bg-blue-600 focus:text-foreground">Alta</SelectItem>
+                                                        <SelectItem value="critica" className="focus:bg-blue-600 focus:text-foreground">Crítica</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -567,9 +567,9 @@ export default function SeguridadPanel() {
                                             <Label htmlFor="involucrados" className="sgc-label">Internos Involucrados</Label>
                                             <Input id="involucrados" className="sgc-input h-11" placeholder="Nombres o DNIs separados por comas" value={incidente.involucrados} onChange={(e) => setIncidente({...incidente, involucrados: e.target.value})}/>
                                         </div>
-                                        <div className="flex gap-3 pt-4 border-t border-slate-800/80">
+                                        <div className="flex gap-3 pt-4 border-t border-border/80">
                                             <Button type="button" onClick={() => setIncidenteDialog(false)} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
-                                            <Button type="submit" className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold h-11 shadow-lg shadow-red-900/40 border-0">Emitir alerta</Button>
+                                            <Button type="submit" className="flex-1 bg-red-600 hover:bg-red-500 text-foreground font-bold h-11 shadow-lg shadow-red-900/40 border-0">Emitir alerta</Button>
                                         </div>
                                     </form>
                                 </DialogContent>
@@ -578,14 +578,14 @@ export default function SeguridadPanel() {
                             {/* Dialog: Accesos */}
                             <Dialog open={accesoDialog} onOpenChange={setAccesoDialog}>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full justify-start h-14 bg-[#060a12]/80 border border-slate-800 hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
-                                        <KeyRound className="mr-3 h-5 w-5 text-blue-400 group-hover:text-white transition-colors" /> Control de accesos
+                                    <Button className="w-full justify-start h-14 bg-card/80 border border-border hover:bg-primary hover:border-blue-500 hover:text-foreground transition-all text-foreground group shadow-inner text-base">
+                                        <KeyRound className="mr-3 h-5 w-5 text-primary group-hover:text-foreground transition-colors" /> Control de accesos
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-xl">
-                                    <DialogHeader className="border-b border-slate-800/80 pb-4">
-                                        <DialogTitle className="text-xl font-bold text-white flex items-center gap-2"><KeyRound className="text-blue-400 h-5 w-5"/> Registrar Acceso a Instalaciones</DialogTitle>
-                                        <DialogDescription className="text-slate-400 text-[15px]">Registre el ingreso de personal autorizado o externos.</DialogDescription>
+                                <DialogContent className="sgc-card border-border text-foreground sm:max-w-xl">
+                                    <DialogHeader className="border-b border-border/80 pb-4">
+                                        <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2"><KeyRound className="text-primary h-5 w-5"/> Registrar Acceso a Instalaciones</DialogTitle>
+                                        <DialogDescription className="text-foreground text-[15px]">Registre el ingreso de personal autorizado o externos.</DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleRegistrarAcceso} className="space-y-4 pt-2">
                                         <div className="grid grid-cols-2 gap-4">
@@ -603,12 +603,12 @@ export default function SeguridadPanel() {
                                                 <Label htmlFor="tipo-acc" className="sgc-label">Clasificación *</Label>
                                                 <Select value={acceso.tipo} onValueChange={(v) => setAcceso({...acceso, tipo: v})}>
                                                     <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                        <SelectItem value="personal" className="focus:bg-blue-600 focus:text-white">Personal Interno</SelectItem>
-                                                        <SelectItem value="visitante" className="focus:bg-blue-600 focus:text-white">Visitante</SelectItem>
-                                                        <SelectItem value="proveedor" className="focus:bg-blue-600 focus:text-white">Proveedor</SelectItem>
-                                                        <SelectItem value="autoridad" className="focus:bg-blue-600 focus:text-white">Autoridad / Perito</SelectItem>
-                                                        <SelectItem value="abogado" className="focus:bg-blue-600 focus:text-white">Defensa Legal</SelectItem>
+                                                    <SelectContent className="bg-[#111827] border border-border text-foreground">
+                                                        <SelectItem value="personal" className="focus:bg-blue-600 focus:text-foreground">Personal Interno</SelectItem>
+                                                        <SelectItem value="visitante" className="focus:bg-blue-600 focus:text-foreground">Visitante</SelectItem>
+                                                        <SelectItem value="proveedor" className="focus:bg-blue-600 focus:text-foreground">Proveedor</SelectItem>
+                                                        <SelectItem value="autoridad" className="focus:bg-blue-600 focus:text-foreground">Autoridad / Perito</SelectItem>
+                                                        <SelectItem value="abogado" className="focus:bg-blue-600 focus:text-foreground">Defensa Legal</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -621,7 +621,7 @@ export default function SeguridadPanel() {
                                             <Label htmlFor="motivo-acc" className="sgc-label">Motivo de Ingreso *</Label>
                                             <Textarea id="motivo-acc" className="sgc-input" rows={2} value={acceso.motivo} onChange={(e) => setAcceso({...acceso, motivo: e.target.value})} required/>
                                         </div>
-                                        <div className="flex gap-3 pt-4 border-t border-slate-800/80">
+                                        <div className="flex gap-3 pt-4 border-t border-border/80">
                                             <Button type="button" onClick={() => setAccesoDialog(false)} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
                                             <Button type="submit" className="sgc-btn-primary flex-1 h-11">Autorizar Acceso</Button>
                                         </div>
@@ -632,14 +632,14 @@ export default function SeguridadPanel() {
                             {/* Dialog: Visitas */}
                             <Dialog open={visitaDialog} onOpenChange={setVisitaDialog}>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full justify-start h-14 bg-[#060a12]/80 border border-slate-800 hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
-                                        <Users className="mr-3 h-5 w-5 text-blue-400 group-hover:text-white transition-colors" /> Registro de visitas
+                                    <Button className="w-full justify-start h-14 bg-card/80 border border-border hover:bg-primary hover:border-blue-500 hover:text-foreground transition-all text-foreground group shadow-inner text-base">
+                                        <Users className="mr-3 h-5 w-5 text-primary group-hover:text-foreground transition-colors" /> Registro de visitas
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="sgc-card border-slate-800 text-slate-100 sm:max-w-xl">
-                                    <DialogHeader className="border-b border-slate-800/80 pb-4">
-                                        <DialogTitle className="text-xl font-bold text-white flex items-center gap-2"><Users className="text-blue-400 h-5 w-5"/> Programar Visita a Interno</DialogTitle>
-                                        <DialogDescription className="text-slate-400 text-[15px]">Verifique la relación y registre la fecha de encuentro.</DialogDescription>
+                                <DialogContent className="sgc-card border-border text-foreground sm:max-w-xl">
+                                    <DialogHeader className="border-b border-border/80 pb-4">
+                                        <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2"><Users className="text-primary h-5 w-5"/> Programar Visita a Interno</DialogTitle>
+                                        <DialogDescription className="text-foreground text-[15px]">Verifique la relación y registre la fecha de encuentro.</DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleRegistrarVisita} className="space-y-4 pt-2">
                                         <div className="grid grid-cols-2 gap-4">
@@ -661,11 +661,11 @@ export default function SeguridadPanel() {
                                                 <Label htmlFor="parentesco-seg" className="sgc-label">Parentesco/Relación *</Label>
                                                 <Select value={visita.parentesco} onValueChange={(v) => setVisita({...visita, parentesco: v})}>
                                                     <SelectTrigger className="sgc-input h-11"><SelectValue placeholder="Seleccionar"/></SelectTrigger>
-                                                    <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200">
-                                                        <SelectItem value="familiar" className="focus:bg-blue-600 focus:text-white">Familiar directo</SelectItem>
-                                                        <SelectItem value="conyuge" className="focus:bg-blue-600 focus:text-white">Cónyuge</SelectItem>
-                                                        <SelectItem value="abogado" className="focus:bg-blue-600 focus:text-white">Defensa Legal</SelectItem>
-                                                        <SelectItem value="otro" className="focus:bg-blue-600 focus:text-white">Otro vínculo</SelectItem>
+                                                    <SelectContent className="bg-[#111827] border border-border text-foreground">
+                                                        <SelectItem value="familiar" className="focus:bg-blue-600 focus:text-foreground">Familiar directo</SelectItem>
+                                                        <SelectItem value="conyuge" className="focus:bg-blue-600 focus:text-foreground">Cónyuge</SelectItem>
+                                                        <SelectItem value="abogado" className="focus:bg-blue-600 focus:text-foreground">Defensa Legal</SelectItem>
+                                                        <SelectItem value="otro" className="focus:bg-blue-600 focus:text-foreground">Otro vínculo</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -674,7 +674,7 @@ export default function SeguridadPanel() {
                                                 <Input id="fecha-vis-seg" type="datetime-local" className="sgc-input h-11" value={visita.fecha} onChange={(e) => setVisita({...visita, fecha: e.target.value})} required/>
                                             </div>
                                         </div>
-                                        <div className="flex gap-3 pt-4 border-t border-slate-800/80">
+                                        <div className="flex gap-3 pt-4 border-t border-border/80">
                                             <Button type="button" onClick={() => setVisitaDialog(false)} className="sgc-btn-secondary flex-1 h-11">Cancelar</Button>
                                             <Button type="submit" className="sgc-btn-primary flex-1 h-11">Programar Visita</Button>
                                         </div>

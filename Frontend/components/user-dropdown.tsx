@@ -104,13 +104,13 @@ return (
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 md:gap-3 p-1 pr-2 md:pr-4 rounded-full bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 transition-all shadow-[0_0_15px_rgba(168,85,247,0.1)] group">
                 {/* Avatar circular con iniciales */}
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-linear-to-br from-purple-500 to-blue-500 flex items-center justify-center font-bold text-white text-xs md:text-sm">
+                <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-linear-to-br from-purple-500 to-blue-500 flex items-center justify-center font-bold text-foreground text-xs md:text-sm">
                     {initials}
                 </div>
 
                 {/* Nombre y cargo - RESPONSIVO */}
                 <div className="hidden sm:flex flex-col items-start max-w-[90px] md:max-w-[150px]">
-                    <span className="text-xs md:text-sm font-semibold text-white leading-tight truncate w-full text-left">
+                    <span className="text-xs md:text-sm font-semibold text-foreground leading-tight truncate w-full text-left">
                         {nombre}
                     </span>
                     <span className="text-[9px] md:text-xs text-purple-300 leading-tight truncate w-full text-left">
@@ -122,10 +122,10 @@ return (
 
             {/* Dropdown menu */}
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-[#0f172a] border border-slate-800/80 rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-[#0f172a] border border-border/80 rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
                     {/* Sección "Mi cuenta" */}
-                    <div className="px-4 py-2.5 border-b border-slate-800/50">
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Mi cuenta</p>
+                    <div className="px-4 py-2.5 border-b border-border/50">
+                        <p className="text-[10px] uppercase font-bold text-foreground tracking-widest">Mi cuenta</p>
                     </div>
 
                     {/* Opciones del menú */}   
@@ -135,7 +135,7 @@ return (
                                 router.push("/dashboard/perfil")
                                 setIsOpen(false)
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/50 hover:text-white transition-colors">
+                            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-foreground hover:bg-slate-800/50 hover:text-foreground transition-colors">
                             <User className="w-4 h-4" />
                             <span className="text-sm">Perfil</span>
                         </button>
@@ -145,7 +145,7 @@ return (
                                 router.push("/dashboard/configuracion")
                                 setIsOpen(false)
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/50 hover:text-white transition-colors">
+                            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-foreground hover:bg-slate-800/50 hover:text-foreground transition-colors">
                             <Settings className="w-4 h-4" />
                             <span className="text-sm">Configuración</span>
                         </button>
