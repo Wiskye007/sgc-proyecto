@@ -205,68 +205,68 @@ export default function UsuariosPanel() {
     </div>);
   
   return (
-    <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-slate-200">
+    <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-foreground">
       <div className="container mx-auto max-w-7xl relative z-10 space-y-6">
         
         {/* --- HEADER --- */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0a0f1a]/80 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-card/80 p-6 rounded-2xl border border-border/80 backdrop-blur-xl shadow-2xl">
             <div className="flex items-center gap-4">
-                <Button aria-label="Volver" className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" onClick={() => router.back()}>
-                    <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
+                <Button aria-label="Volver" className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-primary/10 border border-primary/20 hover:bg-primary hover:border-primary transition-colors group" onClick={() => router.back()}>
+                    <ArrowLeft className="h-5 w-5 text-primary group-hover:text-background transition-colors" />
                 </Button>
                 <div className="flex items-center gap-4">
-                  <Users className="h-13 w-13 text-yellow-400 shrink-0" />
+                  <Users className="h-13 w-13 text-accent shrink-0" />
                     <div>
-                        <h1 className="text-3xl font-black tracking-wide text-white">Gestión de Usuarios</h1>
-                        <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Panel exclusivo de Administración</p>
+                        <h1 className="text-3xl font-black tracking-wide text-foreground">Gestión de Usuarios</h1>
+                        <p className="text-primary text-xs font-bold uppercase tracking-widest mt-1">Panel exclusivo de Administración</p>
                     </div>
                 </div>
             </div>  
         </div>
 
         {/* Filtros */}
-        <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80">
+        <Card className="sgc-card border-0 bg-card/60 shadow-xl border-border/80">
           <CardContent className="pt-0">
           <div className="flex flex-col lg:flex-row gap-6 items-end w-full">  
             <div className="w-full max-w-md">
-              <label className="block text-slate-400 text-[14px] font-bold uppercase tracking-widest mb-2">Búsqueda</label>
-              <Input placeholder="Nombre, correo o DNI " value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="sgc-input bg-[#0a0f1a] border-slate-800 w-full"/>
+              <label className="block text-muted-foreground text-[14px] font-bold uppercase tracking-widest mb-2">Búsqueda</label>
+              <Input placeholder="Nombre, correo o DNI " value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="sgc-input bg-input border-border w-full"/>
             </div>  
             <div className="flex flex-col sm:flex-row gap-6 w-full lg:w-auto lg:ml-auto"> 
               <div className="w-full sm:min-w-180px">
-                <label className="block text-slate-400 text-[14px] font-bold uppercase tracking-widest mb-2 mt-6">Acceso</label>
+                <label className="block text-muted-foreground text-[14px] font-bold uppercase tracking-widest mb-2 mt-6">Acceso</label>
                 <Select value={nivelFilter} onValueChange={(v) => { setNivelFilter(v); setPage(1); }}>
-                  <SelectTrigger className="sgc-input bg-[#0a0f1a] border-slate-800 w-40">
+                  <SelectTrigger className="sgc-input bg-input border-border w-40">
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                    <SelectItem value="todos" className="focus:bg-blue-600">Todos</SelectItem>
-                    <SelectItem value="Administrador" className="focus:bg-blue-600">Administrador</SelectItem>
-                    <SelectItem value="Supervisor" className="focus:bg-blue-600">Supervisor</SelectItem>
-                    <SelectItem value="Guardia de seguridad" className="focus:bg-blue-600">Guardia de seguridad</SelectItem>
-                    <SelectItem value="Personal médico" className="focus:bg-blue-600">Personal médico</SelectItem>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    <SelectItem value="todos" className="focus:bg-primary">Todos</SelectItem>
+                    <SelectItem value="Administrador" className="focus:bg-primary">Administrador</SelectItem>
+                    <SelectItem value="Supervisor" className="focus:bg-primary">Supervisor</SelectItem>
+                    <SelectItem value="Guardia de seguridad" className="focus:bg-primary">Guardia de seguridad</SelectItem>
+                    <SelectItem value="Personal médico" className="focus:bg-primary">Personal médico</SelectItem>
                   </SelectContent>
                 </Select>
               </div>  
               <div className="w-full sm:min-w-180px">
-                <label className="block text-slate-400 text-[14px] font-bold uppercase tracking-widest mb-2 mt-6">Estado (cuenta)</label>
+                <label className="block text-muted-foreground text-[14px] font-bold uppercase tracking-widest mb-2 mt-6">Estado (cuenta)</label>
                 <Select value={estadoFilter} onValueChange={(v) => { setEstadoFilter(v); setPage(1); }}>
-                  <SelectTrigger className="sgc-input bg-[#0a0f1a] border-slate-800 w-40"><SelectValue placeholder="Todos" /></SelectTrigger>
-                  <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                    <SelectItem value="todos" className="focus:bg-blue-600">Todos</SelectItem>
-                    <SelectItem value="activo" className="focus:bg-blue-600 text-green-400">Activo</SelectItem>
-                    <SelectItem value="inactivo" className="focus:bg-blue-600 text-red-400">Inactivo</SelectItem>
+                  <SelectTrigger className="sgc-input bg-input border-border w-40"><SelectValue placeholder="Todos" /></SelectTrigger>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    <SelectItem value="todos" className="focus:bg-primary">Todos</SelectItem>
+                    <SelectItem value="activo" className="focus:bg-primary text-accent">Activo</SelectItem>
+                    <SelectItem value="inactivo" className="focus:bg-primary text-destructive">Inactivo</SelectItem>
                   </SelectContent>
                 </Select>
               </div>  
               <div className="w-full sm:min-w-180px">
-                <label className="block text-slate-400 text-[14px] font-bold uppercase tracking-widest mb-2 mt-6">Conexión</label>
+                <label className="block text-muted-foreground text-[14px] font-bold uppercase tracking-widest mb-2 mt-6">Conexión</label>
                 <Select value={sesionFilter} onValueChange={(v) => { setSesionFilter(v); setPage(1); }}>
-                  <SelectTrigger className="sgc-input bg-[#0a0f1a] border-slate-800 w-40"><SelectValue placeholder="Todos" /></SelectTrigger>
-                  <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                    <SelectItem value="todos" className="focus:bg-blue-600">Todos</SelectItem>
-                    <SelectItem value="online" className="focus:bg-blue-600 text-emerald-400">En línea</SelectItem>
-                    <SelectItem value="offline" className="focus:bg-blue-600 text-slate-400">Offline</SelectItem>
+                  <SelectTrigger className="sgc-input bg-input border-border w-40"><SelectValue placeholder="Todos" /></SelectTrigger>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    <SelectItem value="todos" className="focus:bg-primary">Todos</SelectItem>
+                    <SelectItem value="online" className="focus:bg-primary text-accent">En línea</SelectItem>
+                    <SelectItem value="offline" className="focus:bg-primary text-muted-foreground">Offline</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -276,15 +276,15 @@ export default function UsuariosPanel() {
         </Card>
 
         {/* Tabla */}
-        <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80 overflow-hidden">
-          <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50 gap-4">
+        <Card className="sgc-card border-0 bg-card/60 shadow-xl border-border/80 overflow-hidden">
+          <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-border/50 gap-4">
             <CardTitle className="text-xl text-white font-bold tracking-wide">Usuarios registrados</CardTitle>
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-start md:justify-end">
               <Button 
                 onClick={handleManualRefresh}
                 disabled={isRefreshing}
                 variant="outline" 
-                className="text-[16px] bg-[#0a0f1a] border-blue-700 text-slate-200 hover:text-white hover:bg-blue-600 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                className="text-[16px] bg-input border-primary text-foreground hover:text-primary-foreground hover:bg-primary flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
                 <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} /> 
                 {isRefreshing ? 'Actualizando...' : 'Actualizar registros'}
               </Button>
@@ -310,21 +310,21 @@ export default function UsuariosPanel() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-[#040408] border-b border-slate-800/50">
+                  <thead className="bg-card border-b border-border/50">
                     <tr>
-                      <th className="text-left py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-35!">Usuario</th>
-                      <th className="text center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-25">DNI</th>
-                      <th className="text-left py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px]">Correo</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px]">Cargo</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px]">Nivel</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[13.7px] min-w-30">Estado de cuenta</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-40">Fecha creación</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-40">Última actualización<noscript></noscript></th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px] min-w-40">Última conexión</th>
-                      <th className="text-center py-4 px-6 text-slate-400 font-bold uppercase tracking-wider text-[14px]">Acciones</th>
+                      <th className="text-left py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[14px] min-w-35!">Usuario</th>
+                      <th className="text center py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[14px] min-w-25">DNI</th>
+                      <th className="text-left py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[14px]">Correo</th>
+                      <th className="text-center py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[14px]">Cargo</th>
+                      <th className="text-center py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[14px]">Nivel</th>
+                      <th className="text-center py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[13.7px] min-w-30">Estado de cuenta</th>
+                      <th className="text-center py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[14px] min-w-40">Fecha creación</th>
+                      <th className="text-center py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[14px] min-w-40">Última actualización<noscript></noscript></th>
+                      <th className="text-center py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[14px] min-w-40">Última conexión</th>
+                      <th className="text-center py-4 px-6 text-muted-foreground font-bold uppercase tracking-wider text-[14px]">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/50">
+                  <tbody className="divide-y divide-border/50">
                       {usuarios
                       .filter(usr => {
                           if (!sesionFilter || sesionFilter === 'todos') return true;

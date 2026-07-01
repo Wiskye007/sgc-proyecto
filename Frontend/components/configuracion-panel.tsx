@@ -124,8 +124,8 @@ const fetchDatos = async () => {
     return (
       <div className="sgc-bg min-h-screen w-full flex items-center justify-center">
         <div className="text-center space-y-3">
-            <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto"/>
-            <p className="text-slate-400 font-medium">Cargando preferencias...</p>
+            <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"/>
+            <p className="text-muted-foreground font-medium">Cargando preferencias...</p>
         </div>
       </div>
     );
@@ -154,79 +154,79 @@ const fetchDatos = async () => {
   if (!configuracion) return null;
 
   return (
-    <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-slate-200">
+    <div className="sgc-bg min-h-screen w-full py-8 px-4 md:px-8 font-sans text-foreground">
       <div className="container mx-auto max-w-4xl relative z-10 space-y-6">
         
         {/* --- HEADER --- */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0a0f1a]/80 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-card/80 p-6 rounded-2xl border border-border/80 backdrop-blur-xl shadow-2xl">
             <div className="flex items-center gap-4">
-                <Button aria-label="Volver" className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" onClick={() => router.back()}>
-                    <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
+                <Button aria-label="Volver" className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-primary/10 border border-primary/20 hover:bg-primary hover:border-primary transition-colors group" onClick={() => router.back()}>
+                    <ArrowLeft className="h-5 w-5 text-primary group-hover:text-background transition-colors" />
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-wide">Configuración</h1>
-                    <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Personaliza tu experiencia en el sistema</p>
+                    <h1 className="text-3xl font-black text-foreground tracking-wide">Configuración</h1>
+                    <p className="text-primary text-xs font-bold uppercase tracking-widest mt-1">Personaliza tu experiencia en el sistema</p>
                 </div>
             </div>
         </div>
 
         <Tabs defaultValue="visualizacion" className="w-full">
-          <TabsList className="mb-6 flex w-full bg-[#0a0f1a]/60 border border-slate-800/50 p-1.5 rounded-xl h-auto flex-wrap">
-            <TabsTrigger value="visualizacion" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Visualización</TabsTrigger>
-            <TabsTrigger value="seguridad" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Seguridad</TabsTrigger>
-            <TabsTrigger value="notificaciones" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Notificaciones</TabsTrigger>
-            {configuracion.esAdmin && <TabsTrigger value="sistema" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Sistema</TabsTrigger>}
+          <TabsList className="mb-6 flex w-full bg-card/60 border border-border/50 p-1.5 rounded-xl h-auto flex-wrap">
+            <TabsTrigger value="visualizacion" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground font-semibold tracking-wide">Visualización</TabsTrigger>
+            <TabsTrigger value="seguridad" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground font-semibold tracking-wide">Seguridad</TabsTrigger>
+            <TabsTrigger value="notificaciones" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground font-semibold tracking-wide">Notificaciones</TabsTrigger>
+            {configuracion.esAdmin && <TabsTrigger value="sistema" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground font-semibold tracking-wide">Sistema</TabsTrigger>}
           </TabsList>
 
           {/* TAB: VISUALIZACIÓN Y ACCESIBILIDAD */}
           <TabsContent value="visualizacion" className="space-y-4">
-            <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80">
-              <CardHeader className="border-b border-slate-800/60 pb-4">
-                <CardTitle className="text-white text-lg flex items-center gap-2">
-                  <LayoutGrid className="w-5 h-5 text-blue-400" /> Accesibilidad y tablas
+            <Card className="sgc-card border-0 bg-card/60 shadow-xl border-border/80">
+              <CardHeader className="border-b border-border/60 pb-4">
+                <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                  <LayoutGrid className="w-5 h-5 text-primary" /> Accesibilidad y tablas
                 </CardTitle>
-                <CardDescription className="text-slate-400 text-[15px]">Ajusta cómo se muestran los datos en pantalla</CardDescription>
+                <CardDescription className="text-muted-foreground text-[15px]">Ajusta cómo se muestran los datos en pantalla</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6 pt-0">
 
                 {/* Accesibilidad y Tablas */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                     <div>
-                        <label className=" text-slate-300 text-[14px] font-medium mb-4 flex items-center gap-2"><LayoutGrid className="w-4 h-4 text-blue-300"/> Densidad de las tablas</label>
+                        <label className="text-secondary text-[14px] font-medium mb-4 flex items-center gap-2"><LayoutGrid className="w-4 h-4 text-primary"/> Densidad de las tablas</label>
                         <Select value={cambios.densidadTablas || configuracion.densidadTablas} onValueChange={(v) => handleConfigChange('densidadTablas', v)}>
-                            <SelectTrigger className="sgc-input h-10! w-full bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
-                            <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
+                            <SelectTrigger className="sgc-input h-10! w-full bg-input border-border focus:border-primary"><SelectValue/></SelectTrigger>
+                            <SelectContent className="bg-popover border-border text-popover-foreground">
                                 <SelectItem value="comodo" className="focus:bg-blue-600">Cómodo (Con más espacio)</SelectItem>
                                 <SelectItem value="normal" className="focus:bg-blue-600">Normal</SelectItem>
-                                <SelectItem value="compacto" className="focus:bg-blue-600">Compacto (Ver más registros)</SelectItem>
+                                <SelectItem value="compacto" className="focus:bg-primary">Compacto (Ver más registros)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                     <div>
-                        <label className="text-slate-300 text-[14px] font-medium mb-4 flex items-center gap-2"><Type className="w-4 h-4 text-grey-400"/> Tamaño de Fuente</label>
+                        <label className="text-secondary text-[14px] font-medium mb-4 flex items-center gap-2"><Type className="w-4 h-4 text-muted-foreground"/> Tamaño de Fuente</label>
                         <Select value={cambios.tamanoFuente || configuracion.tamanoFuente} onValueChange={(v) => handleConfigChange('tamanoFuente', v)}>
-                            <SelectTrigger className="sgc-input h-10! w-full bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
-                            <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                                <SelectItem value="pequeno" className="focus:bg-blue-600 text-sm">Pequeño</SelectItem>
-                                <SelectItem value="mediano" className="focus:bg-blue-600 text-base">Mediano (Recomendado)</SelectItem>
-                                <SelectItem value="grande" className="focus:bg-blue-600 text-lg">Grande</SelectItem>
+                            <SelectTrigger className="sgc-input h-10! w-full bg-input border-border focus:border-primary"><SelectValue/></SelectTrigger>
+                            <SelectContent className="bg-popover border-border text-popover-foreground">
+                                <SelectItem value="pequeno" className="focus:bg-primary text-sm">Pequeño</SelectItem>
+                                <SelectItem value="mediano" className="focus:bg-primary text-base">Mediano (Recomendado)</SelectItem>
+                                <SelectItem value="grande" className="focus:bg-primary text-lg">Grande</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                   <div className="pt-0">
-                      <label className="text-slate-300 text-[14px] font-medium mb-4 flex items-center gap-2">
-                          <MonitorPlay className="w-4 h-4 text-orange-400"/> Pantalla de inicio predeterminada
+                      <label className="text-secondary text-[14px] font-medium mb-4 flex items-center gap-2">
+                          <MonitorPlay className="w-4 h-4 text-accent"/> Pantalla de inicio predeterminada
                       </label>
                       <Select value={cambios.pantallaInicio || configuracion.pantallaInicio} onValueChange={(v) => handleConfigChange('pantallaInicio', v)}>
-                          <SelectTrigger className="sgc-input h-10! w-full bg-[#0a0f1a] border-slate-800 focus:border-blue-500">
+                          <SelectTrigger className="sgc-input h-10! w-full bg-input border-border focus:border-primary">
                               <SelectValue/>
                           </SelectTrigger>
-                          <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                              <SelectItem value="dashboard" className="focus:bg-blue-600">Panel Principal</SelectItem>
-                              <SelectItem value="convictos" className="focus:bg-blue-600">Panel de Convictos</SelectItem>
-                              <SelectItem value="seguridad" className="focus:bg-blue-600">Panel de Seguridad</SelectItem>
-                              <SelectItem value="medico" className="focus:bg-blue-600">Panel Médico</SelectItem>
-                              <SelectItem value="reportes" className="focus:bg-blue-600">Panel de Reportes</SelectItem>
+                          <SelectContent className="bg-popover border-border text-popover-foreground">
+                              <SelectItem value="dashboard" className="focus:bg-primary">Panel Principal</SelectItem>
+                              <SelectItem value="convictos" className="focus:bg-primary">Panel de Convictos</SelectItem>
+                              <SelectItem value="seguridad" className="focus:bg-primary">Panel de Seguridad</SelectItem>
+                              <SelectItem value="medico" className="focus:bg-primary">Panel Médico</SelectItem>
+                              <SelectItem value="reportes" className="focus:bg-primary">Panel de Reportes</SelectItem>
                           </SelectContent>
                       </Select>
                   </div>
@@ -237,51 +237,51 @@ const fetchDatos = async () => {
 
           {/* TAB: SEGURIDAD DE SESIÓN (CRÍTICO) */}
           <TabsContent value="seguridad" className="space-y-6">
-            <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80">
-              <CardHeader className="border-b border-slate-800/60 pb-4">
-                <CardTitle className="text-white text-lg flex items-center gap-2">
-                  <Lock className="w-5 h-5 text-red-400" /> Seguridad de la sesión
+            <Card className="sgc-card border-0 bg-card/60 shadow-xl border-border/80">
+              <CardHeader className="border-b border-border/60 pb-4">
+                <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-destructive" /> Seguridad de la sesión
                 </CardTitle>
-                <CardDescription className="text-slate-400">Proteja el acceso en terminales compartidas</CardDescription>
+                <CardDescription className="text-muted-foreground">Proteja el acceso en terminales compartidas</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 
                 <div>
-                    <label className=" text-slate-300 text-[15px] font-medium mb-2 flex items-center gap-2"><Timer className="w-4 h-4 text-purple-400 "/> Cierre automático por inactividad</label>
-                    <p className="text-[14px] text-slate-500 mb-4">La sesión expirará si el sistema detecta que no hay movimiento del ratón o teclado en el tiempo especificado.</p>
+                    <label className="text-secondary text-[15px] font-medium mb-2 flex items-center gap-2"><Timer className="w-4 h-4 text-accent"/> Cierre automático por inactividad</label>
+                    <p className="text-[14px] text-muted-foreground mb-4">La sesión expirará si el sistema detecta que no hay movimiento del ratón o teclado en el tiempo especificado.</p>
                     <Select value={cambios.cierreInactividad || configuracion.cierreInactividad} onValueChange={(v) => handleConfigChange('cierreInactividad', v)}>
-                        <SelectTrigger className="sgc-input h-11! w-70 bg-[#0a0f1a] border-slate-800 focus:border-blue-500"><SelectValue/></SelectTrigger>
-                        <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
-                            <SelectItem value="5" className="focus:bg-blue-600">Cerrar en 5 minutos</SelectItem>
-                            <SelectItem value="15" className="focus:bg-blue-600">Cerrar en 15 minutos (Recomendado)</SelectItem>
-                            <SelectItem value="30" className="focus:bg-blue-600">Cerrar en 30 minutos</SelectItem>
-                            <SelectItem value="nunca" className="focus:bg-blue-600 text-red-400">Nunca (Peligroso)</SelectItem>
+                        <SelectTrigger className="sgc-input h-11! w-70 bg-input border-border focus:border-primary"><SelectValue/></SelectTrigger>
+                        <SelectContent className="bg-popover border-border text-popover-foreground">
+                            <SelectItem value="5" className="focus:bg-primary">Cerrar en 5 minutos</SelectItem>
+                            <SelectItem value="15" className="focus:bg-primary">Cerrar en 15 minutos (Recomendado)</SelectItem>
+                            <SelectItem value="30" className="focus:bg-primary">Cerrar en 30 minutos</SelectItem>
+                            <SelectItem value="nunca" className="focus:bg-primary text-destructive">Nunca (Peligroso)</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
-                <div className="pt-6 border-t border-slate-800/50">
-                    <label className=" text-slate-300 text-[15px] font-medium mb-4 flex items-center gap-2"><Activity className="w-4 h-4 text-green-400"/> Historial de conexiones recientes</label>
-                    <div className="rounded-xl border border-slate-800/80 overflow-hidden">
+                <div className="pt-6 border-t border-border/50">
+                    <label className="text-secondary text-[15px] font-medium mb-4 flex items-center gap-2"><Activity className="w-4 h-4 text-accent"/> Historial de conexiones recientes</label>
+                    <div className="rounded-xl border border-border/80 overflow-hidden">
                         <Table>
-                            <TableHeader className="bg-[#0a0f1a]">
-                                <TableRow className="border-slate-800/50 hover:bg-transparent">
-                                    <TableHead className="text-slate-400">Fecha y hora</TableHead>
-                                    <TableHead className="text-slate-400">Dirección IP</TableHead>
-                                    <TableHead className="text-slate-400">Dispositivo/Navegador</TableHead>
+                            <TableHeader className="bg-card">
+                                <TableRow className="border-border/50 hover:bg-transparent">
+                                    <TableHead className="text-muted-foreground">Fecha y hora</TableHead>
+                                    <TableHead className="text-muted-foreground">Dirección IP</TableHead>
+                                    <TableHead className="text-muted-foreground">Dispositivo/Navegador</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {historial.length === 0 ? (
-                                    <TableRow className="border-slate-800/50 hover:bg-transparent">
-                                        <TableCell colSpan={3} className="text-center text-slate-500 py-6">No hay registros de conexión.</TableCell>
+                                    <TableRow className="border-border/50 hover:bg-transparent">
+                                        <TableCell colSpan={3} className="text-center text-muted-foreground py-6">No hay registros de conexión.</TableCell>
                                     </TableRow>
                                 ) : (
                                     historial.map((log, index) => (
-                                        <TableRow key={index} className="border-slate-800/50 hover:bg-blue-500/5">
-                                            <TableCell className="font-mono text-xs text-slate-300">{log.fecha}</TableCell>
-                                            <TableCell className="font-mono text-xs text-blue-400">{log.ip}</TableCell>
-                                            <TableCell className="text-xs text-slate-400">{log.dispositivo}</TableCell>
+                                        <TableRow key={index} className="border-border/50 hover:bg-primary/5">
+                                            <TableCell className="font-mono text-xs text-secondary">{log.fecha}</TableCell>
+                                            <TableCell className="font-mono text-xs text-primary">{log.ip}</TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">{log.dispositivo}</TableCell>
                                         </TableRow>
                                     ))
                                 )}
@@ -296,18 +296,18 @@ const fetchDatos = async () => {
 
         {/* TAB: NOTIFICACIONES */}
         <TabsContent value="notificaciones" className="space-y-6">
-          <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80">
+          <Card className="sgc-card border-0 bg-card/60 shadow-xl border-border/80">
             <CardHeader>
-              <CardTitle className="sgc-text-primary text-lg flex items-center gap-2">
-                <Bell className="w-5 h-5  text-yellow-400" />Preferencias de notificaciones
+              <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                <Bell className="w-5 h-5 text-accent" />Preferencias de notificaciones
               </CardTitle>
-              <CardDescription className="text-slate-400 text-[14px]">Controla cómo deseas recibir notificaciones</CardDescription>
+              <CardDescription className="text-muted-foreground text-[14px]">Controla cómo deseas recibir notificaciones</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between p-4 border sgc-border rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div>
-                  <p className="sgc-text-primary font-medium">Notificaciones por correo</p>
-                  <p className="sgc-text-secondary text-sm text-slate-400" >Recibe actualizaciones importantes por email</p>
+                  <p className="text-foreground font-medium">Notificaciones por correo</p>
+                  <p className="text-muted-foreground text-sm">Recibe actualizaciones importantes por email</p>
                 </div>
                 <Switch
                   checked={cambios.notificacionesEmail !== undefined ? cambios.notificacionesEmail : configuracion.notificacionesEmail}
@@ -315,10 +315,10 @@ const fetchDatos = async () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 border sgc-border rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div>
-                  <p className="sgc-text-primary font-medium">Notificaciones del sistema</p>
-                  <p className="sgc-text-secondary text-sm  text-slate-400">Recibe notificaciones emergentes en el sistema</p>
+                  <p className="text-foreground font-medium">Notificaciones del sistema</p>
+                  <p className="text-muted-foreground text-sm">Recibe notificaciones emergentes en el sistema</p>
                 </div>
                 <Switch
                   checked={cambios.notificacionesSistema !== undefined ? cambios.notificacionesSistema : configuracion.notificacionesSistema}
@@ -328,18 +328,18 @@ const fetchDatos = async () => {
             </CardContent>
           </Card>
 
-          <Card className="sgc-card border-0 bg-[#060a12]/60 shadow-xl border-slate-800/80">
+          <Card className="sgc-card border-0 bg-card/60 shadow-xl border-border/80">
             <CardHeader>
-              <CardTitle className="sgc-text-primary text-lg flex items-center gap-2">
-                <Lock className="w-5 h-5  text-red-400" />Seguridad de la cuenta
+              <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                <Lock className="w-5 h-5 text-destructive" />Seguridad de la cuenta
               </CardTitle>
-              <CardDescription className="text-slate-400 text-[14px]">Opciones de seguridad avanzada</CardDescription>
+              <CardDescription className="text-muted-foreground text-[14px]">Opciones de seguridad avanzada</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between p-4 border sgc-border rounded-lg opacity-60 cursor-not-allowed">
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg opacity-60 cursor-not-allowed">
                 <div>
-                  <p className="sgc-text-primary font-medium">Autenticación de dos factores</p>
-                  <p className="sgc-text-secondary text-sm  text-slate-400">Próximamente disponible</p>
+                  <p className="text-foreground font-medium">Autenticación de dos factores</p>
+                  <p className="text-muted-foreground text-sm">Próximamente disponible</p>
                 </div>
                 <Switch disabled checked={false} />
               </div>

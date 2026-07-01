@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+        <html lang="es" className={`${geistSans.variable} ${geistMono.variable} dark`} suppressHydrationWarning>
             <head>
                 {/* Script sincrónico para aplicar el tamaño de letra */}
                 <script
