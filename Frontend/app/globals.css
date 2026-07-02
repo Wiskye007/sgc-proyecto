@@ -309,9 +309,9 @@ html:not(.dark) [data-radix-toast-announce-exclude] ~ * {
 }
 
 /* Toasts siempre con texto blanco */
-[data-radix-toast-content],
-[data-radix-toast-content] * {
-    color: #fff !important;
+li[data-radix-collection-item],
+li[data-radix-collection-item] * {
+    color: white !important;
 }
 /* 2. Textos generales */
 html:not(.dark) .text-white,
