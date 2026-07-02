@@ -160,6 +160,7 @@
     border-color: oklch(0.25 0.02 240) !important;
     box-shadow: none !important;
     }
+
 /* =========================================================
     2. ESTILOS SGC ADAPTABLES
 ========================================================= */
@@ -307,6 +308,11 @@ html:not(.dark) [data-radix-toast-announce-exclude] ~ * {
     color: #ffffff !important;
 }
 
+/* Toasts siempre con texto blanco */
+[data-radix-toast-content],
+[data-radix-toast-content] * {
+    color: #fff !important;
+}
 /* 2. Textos generales */
 html:not(.dark) .text-white,
 html:not(.dark) .text-slate-200,

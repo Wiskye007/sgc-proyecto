@@ -219,8 +219,8 @@ export default function PerfilPanel() {
         
         <Tabs defaultValue="info" className="w-full">
           <TabsList className="mb-6 flex w-full bg-[#0a0f1a]/60 border border-slate-800/50 p-1.5 rounded-xl h-auto">
-            <TabsTrigger value="info" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Información Personal</TabsTrigger>
-            <TabsTrigger value="seguridad" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Seguridad</TabsTrigger>
+            <TabsTrigger value="info" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white! data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Información Personal</TabsTrigger>
+            <TabsTrigger value="seguridad" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white! data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Seguridad</TabsTrigger>
           </TabsList>
 
           {/* TAB: INFORMACIÓN PERSONAL */}

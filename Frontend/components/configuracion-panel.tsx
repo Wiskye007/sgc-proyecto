@@ -221,10 +221,10 @@ const fetchDatos = async () => {
 
         <Tabs defaultValue="visualizacion" className="w-full">
           <TabsList className="mb-6 flex w-full bg-[#0a0f1a]/60 border border-slate-800/50 p-1.5 rounded-xl h-auto flex-wrap">
-            <TabsTrigger value="visualizacion" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Visualización</TabsTrigger>
-            <TabsTrigger value="seguridad" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Seguridad</TabsTrigger>
-            <TabsTrigger value="notificaciones" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Notificaciones</TabsTrigger>
-            {configuracion.esAdmin && <TabsTrigger value="sistema" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Sistema</TabsTrigger>}
+            <TabsTrigger value="visualizacion" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white! text-slate-400 font-semibold tracking-wide">Visualización</TabsTrigger>
+            <TabsTrigger value="seguridad" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white! text-slate-400 font-semibold tracking-wide">Seguridad</TabsTrigger>
+            <TabsTrigger value="notificaciones" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white! text-slate-400 font-semibold tracking-wide">Notificaciones</TabsTrigger>
+            {configuracion.esAdmin && <TabsTrigger value="sistema" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white! text-slate-400 font-semibold tracking-wide">Sistema</TabsTrigger>}
           </TabsList>
 
           {/* TAB: VISUALIZACIÓN Y ACCESIBILIDAD */}

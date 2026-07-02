@@ -3,8 +3,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
-import SessionManager from "@/components/SessionManager"; // Tu nuevo componente global
-
+import SessionManager from "@/components/SessionManager";
 const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],
@@ -23,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+        <html lang="es" className={`dark ${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
             <head>
                 {/* Script sincrónico para aplicar el tamaño de letra */}
                 <script
