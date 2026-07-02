@@ -452,20 +452,19 @@ export default function MedicoPanel() {
                     </Card>
                 </div>
 
-                {/* --- PESTAÑAS CON TIP DE UX (onValueChange) --- */}
+                {/* ---  NAVEGACIÓN DE TABS --- */}
                 <Tabs defaultValue="revisiones" className="w-full mt-2" onValueChange={() => { setSearchTerm(""); setPrioridadFilter("todos"); setEstadoDerivacionFilter("todos"); }}>    
-                        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6 bg-[#060a12]/80 border border-slate-800/80 rounded-xl p-1 gap-1">
-                            <TabsTrigger value="revisiones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Revisiones</TabsTrigger>
-                            <TabsTrigger value="tratamientos" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Tratamientos</TabsTrigger>
-                            <TabsTrigger value="derivaciones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Derivaciones</TabsTrigger>
-                            <TabsTrigger value="historial" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide text-slate-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Historial</TabsTrigger>
+                        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6rounded-xl p-1 gap-1 sgc-bg mb-6!">
+                            <TabsTrigger value="revisiones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Revisiones</TabsTrigger>
+                            <TabsTrigger value="tratamientos" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Tratamientos</TabsTrigger>
+                            <TabsTrigger value="derivaciones" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Derivaciones</TabsTrigger>
+                            <TabsTrigger value="historial" className="rounded-lg py-2.5 text-sm font-semibold tracking-wide data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">Historial</TabsTrigger>
                         </TabsList>
 
-                        {/* ======================= REVISIONES ======================= */}
                         <TabsContent value="revisiones" className="space-y-6">
                             <Card className="sgc-card border-0 mb-4">
                                 <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
-                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de Revisiones</CardTitle>
+                                    <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de revisiones</CardTitle>
                                     <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${filteredRevisiones.length > 50 ? "border-red-500 text-red-400 bg-red-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
                                         Registros totales: {filteredRevisiones.length}
                                     </Badge>
@@ -478,7 +477,7 @@ export default function MedicoPanel() {
                                         </div>
                                         <div className="md:w-auto flex flex-col lg:flex-row gap-4 items-end w-full">
                                             <Select value={prioridadFilter} onValueChange={setPrioridadFilter}>
-                                                <SelectTrigger className="sgc-input h-10! w-full md:w-[200px]"><SelectValue placeholder="Prioridad"/></SelectTrigger>
+                                                <SelectTrigger className="sgc-input h-10! w-full md:w-50"><SelectValue placeholder="Prioridad"/></SelectTrigger>
                                                 <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                                                     <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todas las prioridades</SelectItem>
                                                     <SelectItem value="urgente" className="focus:bg-blue-600 focus:text-white">Urgente</SelectItem>
@@ -587,31 +586,36 @@ export default function MedicoPanel() {
                                             </DialogContent>
                                         </Dialog>
 
-                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(filteredRevisiones, "revisiones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                        <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={() => exportToCSV(filteredRevisiones, "revisiones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                        <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
                                     </div>
                                 </CardContent>
                             </Card>
-
-                            <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
+                        {/* ======================= REVISIONES ======================= */}
+                            <div className="sgc-card border-0 overflow-hidden">
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400">ID</TableHead>
-                                            <TableHead className="text-slate-300">Fecha</TableHead>
-                                            <TableHead className="text-slate-300">Hora</TableHead>
-                                            <TableHead className="text-slate-300">Prioridad</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[270px]">Diagnóstico</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Tratamiento</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Médico</TableHead>
+                                            <TableHead className="font-bold text-blue-400 text-center min-w-15">ID</TableHead>
+                                            <TableHead className="text-slate-300 w-40">Fecha</TableHead>
+                                            <TableHead className="text-slate-300 w-40">Hora</TableHead>
+                                            <TableHead className="text-slate-300 w-80">Prioridad</TableHead>
+                                            <TableHead className="text-slate-300 min-w-60">Paciente</TableHead>
+                                            <TableHead className="text-slate-300 min-w-65">Diagnóstico</TableHead>
+                                            <TableHead className="text-slate-300 min-w-50">Tratamiento</TableHead>
+                                            <TableHead className="text-slate-300 min-w-50">Médico</TableHead>
                                             <TableHead className="text-center text-slate-300">Acciones</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {filteredRevisiones.map((rev) => (
-                                            <TableRow key={rev.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                                <TableCell className="font-bold text-blue-400">R-{rev.id}</TableCell>
+                                        {filteredRevisiones.length === 0 ? (
+                                        <TableRow className="border-0 hover:bg-transparent">
+                                        <TableCell colSpan={9} className="text-center py-12 text-slate-500">No hay revisiones registradas.</TableCell>
+                                        </TableRow>
+                                        ) : (
+                                        filteredRevisiones.map((rev) => (
+                                            <TableRow key={rev.id} className="border-slate-800/50 hover:bg-blue-500/10 transition-colors">
+                                                <TableCell className="font-bold text-blue-400 text-center">R-{rev.id}</TableCell>
                                                 <TableCell className="text-slate-300">{rev.fecha}</TableCell>
                                                 <TableCell className="text-slate-300">{rev.hora}</TableCell>
                                                 <TableCell><Badge variant="outline" className={getPrioridadColor(rev.prioridad)}>{(rev.prioridad || "").toString().toUpperCase()}</Badge></TableCell>   
@@ -624,13 +628,14 @@ export default function MedicoPanel() {
                                                         onClick={() => handleStartEdit("revision", rev.id, rev)}>
                                                         <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors"/>
                                                     </Button>
-                                                    <Button size="icon" className="h-8 w-8 bg-red-500/10 border border-red-500/20 hover:bg-red-600 hover:border-red-500 transition-colors group"
+                                                    <Button size="icon" className="h-8 w-8 bg-red-500/10 hover:bg-red-500! border border-red-500/30 text-red-400 hover:text-white! transition-colors group"
                                                         onClick={() => setDeleteConfirm({ type: "revision", id: rev.id })}>
                                                         <Trash2 className="h-3.5 w-3.5 text-red-400 group-hover:text-white transition-colors"/>
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>
-                                        ))}
+                                            ))
+                                        )}
                                     </TableBody>
                                 </Table>
                             </div>
@@ -728,30 +733,30 @@ export default function MedicoPanel() {
                                             </DialogContent>
                                         </Dialog>
 
-                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(filteredTratamientos, "tratamientos")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                        <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={() => exportToCSV(filteredTratamientos, "tratamientos")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                        <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
+                            <div className="sgc-card border-0 overflow-hidden">
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400 min-w-[60px]">ID</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[250px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[180px]">Medicamento</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[170px]">Dosis</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[180px]">Frecuencia</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[150px]">Duración</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[120px]">Inicio</TableHead>
+                                            <TableHead className="font-bold text-blue-400 min-w-15 text-center">ID</TableHead>
+                                            <TableHead className="text-slate-300 min-w-62.5">Paciente</TableHead>
+                                            <TableHead className="text-slate-300 min-w-45">Medicamento</TableHead>
+                                            <TableHead className="text-slate-300 min-w-42.5">Dosis</TableHead>
+                                            <TableHead className="text-slate-300 min-w-45">Frecuencia</TableHead>
+                                            <TableHead className="text-slate-300 min-w-37.5">Duración</TableHead>
+                                            <TableHead className="text-slate-300 min-w-30">Inicio</TableHead>
                                             <TableHead className="text-center text-slate-300">Acciones</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredTratamientos.map(tr => (
-                                            <TableRow key={tr.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                                <TableCell className="font-bold text-blue-400">T-{tr.id}</TableCell>    
+                                            <TableRow key={tr.id} className="border-slate-800/50 hover:bg-blue-500/10 transition-colors">
+                                                <TableCell className="font-bold text-blue-400 text-center">T-{tr.id}</TableCell>    
                                                 <TableCell className="font-medium text-white">{tr.nombre ?? convictoIdToName(tr.convictoId)}</TableCell>    
                                                 <TableCell className="text-slate-300">{tr.medicamento}</TableCell>
                                                 <TableCell className="text-slate-300">{tr.dosis}</TableCell>
@@ -763,7 +768,7 @@ export default function MedicoPanel() {
                                                         onClick={() => handleStartEdit("tratamiento", tr.id, tr)}>
                                                         <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors"/>
                                                     </Button>
-                                                    <Button size="icon" className="h-8 w-8 bg-red-500/10 border border-red-500/20 hover:bg-red-600 hover:border-red-500 transition-colors group"
+                                                    <Button size="icon" className="h-8 w-8 bg-red-500/10 hover:bg-red-500! border border-red-500/30 text-red-400 hover:text-white! transition-colors group"
                                                         onClick={() => setDeleteConfirm({ type: "tratamiento", id: tr.id })}>
                                                         <Trash2 className="h-3.5 w-3.5 text-red-400 group-hover:text-white transition-colors"/>
                                                     </Button>
@@ -792,7 +797,7 @@ export default function MedicoPanel() {
                                         </div>
                                         <div className="md:w-auto flex flex-col lg:flex-row gap-4 items-end w-full">
                                             <Select value={estadoDerivacionFilter} onValueChange={setEstadoDerivacionFilter}>
-                                                <SelectTrigger className="sgc-input h-10! w-full md:w-[200px]"><SelectValue placeholder="Estado"/></SelectTrigger>
+                                                <SelectTrigger className="sgc-input h-10! w-full md:w-50px"><SelectValue placeholder="Estado"/></SelectTrigger>
                                                 <SelectContent className="bg-[#0f172a] border-slate-800 text-slate-200">
                                                     <SelectItem value="todos" className="focus:bg-blue-600 focus:text-white">Todos los estados</SelectItem>
                                                     <SelectItem value="pendiente" className="focus:bg-blue-600 focus:text-white">Pendiente</SelectItem>
@@ -900,29 +905,29 @@ export default function MedicoPanel() {
                                             </DialogContent>
                                         </Dialog>
 
-                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(filteredDerivaciones, "derivaciones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                        <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={() => exportToCSV(filteredDerivaciones, "derivaciones")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                        <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
+                            <div className="sgc-card border-0 overflow-hidden">
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400">ID</TableHead>
+                                            <TableHead className="font-bold text-blue-400 text-center">ID</TableHead>
                                             <TableHead className="text-slate-300">Estado</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Paciente</TableHead>
+                                            <TableHead className="text-slate-300 min-w-50">Paciente</TableHead>
                                             <TableHead className="text-slate-300">Especialidad</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[200px]">Motivo</TableHead>
+                                            <TableHead className="text-slate-300 min-w-50">Motivo</TableHead>
                                             <TableHead className="text-slate-300">Institución</TableHead>
                                             <TableHead className="text-center text-slate-300">Acciones</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredDerivaciones.map(d => (
-                                            <TableRow key={d.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                                <TableCell className="font-bold text-blue-400">D-{d.id}</TableCell>
+                                            <TableRow key={d.id} className="border-slate-800/50 hover:bg-blue-500/10 transition-colors">
+                                                <TableCell className="font-bold text-blue-400 text-center">D-{d.id}</TableCell>
                                                 <TableCell><Badge variant="outline" className={getEstadoColor(d.estado)}>{(d.estado || "").toUpperCase()}</Badge></TableCell>
                                                 <TableCell className="font-medium text-white">{d.nombre ?? convictoIdToName(d.convictoId)}</TableCell>
                                                 <TableCell className="text-slate-300">{d.especialidad}</TableCell>
@@ -933,7 +938,7 @@ export default function MedicoPanel() {
                                                         onClick={() => handleStartEdit("derivacion", d.id, d)}>
                                                         <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors"/>
                                                     </Button>
-                                                    <Button size="icon" className="h-8 w-8 bg-red-500/10 border border-red-500/20 hover:bg-red-600 hover:border-red-500 transition-colors group"
+                                                    <Button size="icon" className="h-8 w-8 bg-red-500/10 hover:bg-red-500! border border-red-500/30 text-red-400 hover:text-white! transition-colors group"
                                                         onClick={() => setDeleteConfirm({ type: "derivacion", id: d.id })}>
                                                         <Trash2 className="h-3.5 w-3.5 text-red-400 group-hover:text-white transition-colors"/>
                                                     </Button>
@@ -962,36 +967,36 @@ export default function MedicoPanel() {
                                         </div>
                                     </div>
                                     <div className="flex flex-wrap gap-3 mt-6">
-                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(filteredHistorial, "historial")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
-                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
+                                        <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={() => exportToCSV(filteredHistorial, "historial")}><Download className="h-4 w-4 mr-2"/> Exportar CSV</Button>
+                                        <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={handleImprimir}><Printer className="h-4 w-4 mr-2"/> Imprimir</Button>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-[#060a12]/50 shadow-inner">
+                            <div className="sgc-card border-0 overflow-hidden">
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-blue-500/10 border-b border-slate-800 hover:bg-transparent">
-                                            <TableHead className="font-bold text-blue-400 min-w-[60px]">ID</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[110px]">Fecha</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[250px]">Paciente</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[120px]">DNI</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[120px]">Tipo</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[230px]">Diagnóstico</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[250px]">Observaciones</TableHead>
-                                            <TableHead className="text-slate-300 min-w-[180px]">Médico</TableHead>
+                                            <TableHead className="font-bold text-blue-400 min-w-15 text-center">ID</TableHead>
+                                            <TableHead className="text-slate-300 min-w-27.5">Fecha</TableHead>
+                                            <TableHead className="text-slate-300 min-w-62.5">Paciente</TableHead>
+                                            <TableHead className="text-slate-300 min-w-30">DNI</TableHead>
+                                            <TableHead className="text-slate-300 min-w-30">Tipo</TableHead>
+                                            <TableHead className="text-slate-300 min-w-57.5">Diagnóstico</TableHead>
+                                            <TableHead className="text-slate-300 min-w-50">Observaciones</TableHead>
+                                            <TableHead className="text-slate-300 min-w-45">Médico</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredHistorial.map(h => (
-                                            <TableRow key={h.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                                <TableCell className="font-bold text-blue-400">H-{h.id}</TableCell>
+                                            <TableRow key={h.id} className="border-slate-800/50 hover:bg-blue-500/10 transition-colors">
+                                                <TableCell className="font-bold text-blue-400 text-center">H-{h.id}</TableCell>
                                                 <TableCell className="text-slate-300">{h.fecha}</TableCell>
                                                 <TableCell className="font-medium text-white">{h.nombre ?? convictoIdToName(h.convictoId)}</TableCell>
                                                 <TableCell className="text-slate-400 font-mono">{convictoIdToDni(h.convictoId)}</TableCell>
                                                 <TableCell><Badge variant="outline" className="bg-slate-800 text-slate-300 border-slate-700">{h.tipo}</Badge></TableCell>
                                                 <TableCell className="text-slate-300">{h.diagnostico}</TableCell>
-                                                <TableCell className="text-slate-400 max-w-[250px] truncate">{h.observaciones}</TableCell>
+                                                <TableCell className="text-slate-400 max-w-62.50px] truncate">{h.observaciones}</TableCell>
                                                 <TableCell className="text-slate-300 font-medium">{h.medico}</TableCell>
                                             </TableRow>
                                         ))}

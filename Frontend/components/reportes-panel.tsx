@@ -362,8 +362,8 @@ export default function ReportesPanel() {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 
                                 {/* Gráfico 1 - Población por Pabellón */}
-                                <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
-                                    <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                <div className="rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                    <h3 className="text-[14px] font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
                                         <Users className="h-4 w-4 text-blue-400"/> Ocupación por Pabellón
                                     </h3>
                                     {datoPoblacionPabellones.length > 0 ? (
@@ -386,8 +386,8 @@ export default function ReportesPanel() {
                                 </div>
 
                                 {/* Gráfico 2 - Tendencia de Población */}
-                                <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
-                                    <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                <div className=" rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                    <h3 className="text-[14px] font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
                                         <Activity className="h-4 w-4 text-purple-400"/> Indicador de Capacidad
                                     </h3>
                                     {datoPoblacionPabellones.length > 0 ? (
@@ -398,10 +398,10 @@ export default function ReportesPanel() {
                                                 return (
                                                     <div key={idx}>
                                                         <div className="flex justify-between text-sm text-slate-400 mb-1">
-                                                            <span className="text-sm font-medium text-slate-300">{pab.nombre}</span>
-                                                            <span className="font-bold text-white">{porcentaje}%</span>
+                                                            <span className="text-sm font-medium text-slate-300 text-[16px]">{pab.nombre}</span>
+                                                            <span className="font-bold text-[18px]">{porcentaje}%</span>
                                                         </div>
-                                                        <div className="w-full bg-slate-800/50 rounded-full h-3 overflow-hidden">
+                                                        <div className="w-full bg-slate-800/30 rounded-full h-3 overflow-hidden">
                                                             <div className={`h-full rounded-full transition-all ${colorBar}`} style={{width: `${porcentaje}%`}}/>
                                                         </div>
                                                     </div>
@@ -416,8 +416,8 @@ export default function ReportesPanel() {
                                 </div>
 
                                 {/* Gráfico 3 - Incidentes */}
-                                <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
-                                    <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                <div className="rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                    <h3 className="text-[14px] font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
                                         <AlertCircle className="h-4 w-4 text-red-400"/> Distribución de Incidentes
                                     </h3>
                                     {datoIncidentes.length > 0 ? (
@@ -434,7 +434,7 @@ export default function ReportesPanel() {
                                                     outerRadius={90} 
                                                     fill="#8884d8" 
                                                     stroke="#060a12" 
-                                                    strokeWidth={2}
+                                                    strokeWidth={1}
                                                 >
                                                     {datoIncidentes.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill}/> ))}
                                                 </Pie>
@@ -452,8 +452,8 @@ export default function ReportesPanel() {
                                 </div>
 
                                 {/* Gráfico 4 - Prioridades de Revisiones Médicas */}
-                                <div className="bg-[#060a12]/50 rounded-xl p-5 border border-slate-800/80 shadow-inner">
-                                    <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
+                                <div className="rounded-xl p-5 border border-slate-800/80 shadow-inner">
+                                    <h3 className=" text-[14px] font-bold tracking-widest text-slate-400 uppercase mb-6 flex items-center gap-2">
                                         <Pill className="h-4 w-4 text-purple-400"/> Prioridades de Revisiones Médicas
                                     </h3>
                                     {datoPrioridades.length > 0 ? (
@@ -469,7 +469,7 @@ export default function ReportesPanel() {
                                                         dataKey="valor" 
                                                         nameKey="prioridad"
                                                         stroke="#060a12" 
-                                                        strokeWidth={2}
+                                                        strokeWidth={1}
                                                         label={({ percent }: { percent?: number }) => {
                                                             return `${((percent || 0) * 100).toFixed(1)}%`;}}
                                                         labelLine={false}>{datoPrioridades.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.fill}/> ))}
@@ -503,7 +503,7 @@ export default function ReportesPanel() {
                         <CardTitle className="text-xl flex items-center gap-2 text-white">
                             <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
                                 <Plus className="h-5 w-5 text-blue-400"/>
-                            </div>Generar Nuevo Reporte
+                            </div>Generar nuevo reporte
                         </CardTitle>
                         <CardDescription className="text-slate-400 text-[15px]">Selecciona el módulo de datos que deseas procesar</CardDescription>
                     </CardHeader>
@@ -527,8 +527,8 @@ export default function ReportesPanel() {
                                         </div>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="w-full h-9 rounded-lg flex items-center justify-center gap-2 bg-slate-800/50 text-slate-400 font-semibold border border-slate-700/50 group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent transition-all duration-300 text-sm">
-                                            <Plus className="h-4 w-4"/> Configurar Reporte
+                                        <div className="w-full h-9 rounded-lg flex items-center justify-center gap-2 bg-slate-800/10 text-slate-400 font-semibold border border-slate-700/50 group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent transition-all duration-300 text-sm">
+                                            <Plus className="h-4 w-4"/> Configurar reporte
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -541,10 +541,10 @@ export default function ReportesPanel() {
                 <Card className="sgc-card border-0 shadow-2xl">
                     <CardHeader className="border-b border-slate-800/60 pb-4">
                         <CardTitle className="text-xl flex items-center gap-2 text-white">
-                            <div className="bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
+                            <div className="bg-slate-800/10 p-1.5 rounded-lg border border-slate-700">
                                 <Save className="h-5 w-5 text-slate-300"/>
                             </div>
-                            Registro de Reportes Emitidos
+                            Registro de reportes emitidos
                         </CardTitle>
                         <CardDescription className="text-slate-400 text-[15px]">Documentos generados y almacenados en la base de datos</CardDescription>
                     </CardHeader>
@@ -552,7 +552,7 @@ export default function ReportesPanel() {
                         {loading ? (
                             <div className="text-center py-12 text-slate-400 animate-pulse">Consultando base de datos...</div>
                         ) : savedReports.length === 0 ? (
-                            <div className="text-center py-12 bg-[#060a12]/40 rounded-xl border border-dashed border-slate-800 text-slate-500">
+                            <div className="text-center py-12 bg-slate-800/10 rounded-xl border border-dashed border-slate-800 text-slate-500">
                                 No se encontraron documentos. Genere un nuevo reporte para visualizarlo aquí.
                             </div>
                         ) : (

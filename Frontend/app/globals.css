@@ -3,17 +3,54 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
-    /* Tema oscuro */
+/* =========================================================
+    1. VARIABLES BASE DE SHADCN Y SGC
+========================================================= */
+@layer base {
+    :root {
+    /* MODO CLARO */
+    --background: oklch(0.985 0 0); 
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(98.511% 0.00011 271.152);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(65.131% 0.07655 268.673); 
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(46.666% 0.2369 269.852);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.96 0 0);
+    --muted-foreground: oklch(0.45 0 0); 
+    --accent: oklch(0.96 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(49.773% 0.17603 25.84);
+    --destructive-foreground: oklch(0.985 0 0);
+    --border: oklch(0.90 0 0); 
+    --input: oklch(0.90 0 0);
+    --ring: oklch(0.488 0.243 264.376);
+    --radius: 0.5rem;
+
+    /* VARIABLES DINÁMICAS SGC */
+    --sgc-bg: #f8fafc;
+    --sgc-card: #ffffff;
+    --sgc-border: #e2e8f0;
+    --sgc-text: #0f172a;
+    --sgc-muted: #475569;
+    --sgc-input: #ffffff;
+
+    }
+
+    .dark {
+    /* MODO OSCURO*/
     --background: oklch(0.12 0.01 240);
     --foreground: oklch(0.95 0.01 240);
     --card: oklch(0.16 0.01 240);
     --card-foreground: oklch(0.95 0.01 240);
     --popover: oklch(0.14 0.01 240);
     --popover-foreground: oklch(0.95 0.01 240);
-    --primary: oklch(0.55 0.18 240);
+    --primary: oklch(46.932% 0.19247 270.849);
     --primary-foreground: oklch(0.98 0.01 240);
-    --secondary: oklch(0.22 0.02 240);
+    --secondary: oklch(36.127% 0.05574 241.06);
     --secondary-foreground: oklch(0.95 0.01 240);
     --muted: oklch(0.2 0.02 240);
     --muted-foreground: oklch(0.6 0.01 240);
@@ -28,8 +65,7 @@
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
     --chart-4: oklch(0.828 0.189 84.429);
-    --chart-5: oklch(0.769 0.188 70.08);
-    --radius: 0.5rem;
+    --chart-5: oklch(0.769 0.188 70.08);    
     --sidebar: oklch(0.14 0.01 240);
     --sidebar-foreground: oklch(0.95 0.01 240);
     --sidebar-primary: oklch(0.55 0.18 240);
@@ -38,41 +74,15 @@
     --sidebar-accent-foreground: oklch(0.95 0.01 240);
     --sidebar-border: oklch(0.25 0.02 240);
     --sidebar-ring: oklch(0.55 0.18 240);
-}
 
-.dark {
-    --background: oklch(0.985 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(0.985 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(0.985 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.396 0.141 25.723);
-    --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border: oklch(0.269 0 0);
-    --input: oklch(0.269 0 0);
-    --ring: oklch(0.439 0 0);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
+    /* VARIABLES DINÁMICAS SGC (Oscuro) */
+    --sgc-bg: #020817; 
+    --sgc-card: rgba(16, 20, 30, 0.88);
+    --sgc-border: rgba(59, 130, 246, 0.55);
+    --sgc-text: #ffffff;
+    --sgc-muted: oklch(0.55 0.10 240);
+    --sgc-input: rgba(6, 12, 20, 0.95);
+    }
 }
 
 @theme inline {
@@ -115,191 +125,281 @@
 }
 
 @layer base {
-    * {
-        @apply border-border outline-ring/50;
-    }
-
+  * { @apply border-border outline-ring/50; }
     body {
         @apply bg-background text-foreground;
         font-family: 'Inter', system-ui, sans-serif;
     }
+    }
+.dark [role="tablist"] {
+    background: rgb(4, 1, 23) !important;
+    border-color: oklch(23.581% 0.02743 19.266);
+    box-shadow: none;
+    }
+
+.dark [role="tab"] {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: oklch(0.65 0.02 240);
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-/* ============================================
-SGC LOGIN — Estilos del rediseño
-   ============================================ */
+.dark [role="tab"]:hover:not([data-state="active"]) {
+    color: oklch(100% 0.00011 271.152);
+}
 
-/* Fondo con gradiente radial + red de partículas SVG */
+.dark [role="tab"][data-state="active"] {
+    background: linear-gradient(180deg, #3ea7ff, #194ad2) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(59,130,246,.5);
+}
+.dark .sgc-card{
+    border-color: oklch(0.25 0.02 240) !important;
+    box-shadow: none !important;
+    }
+/* =========================================================
+    2. ESTILOS SGC ADAPTABLES
+========================================================= */
+
 @utility sgc-bg {
     position: relative;
-    background:
-    radial-gradient(circle at top,
-        rgba(59,130,246,.15),
-        transparent 40%),
-
-    radial-gradient(circle at bottom,
-        rgba(59,130,246,.10),
-        transparent 45%),
-
-    linear-gradient(
-        180deg,
-        #020817 0%,
-        #030712 40%,
-        #020617 100%
-    );
-
+    background-color: var(--sgc-bg);
+    background-image: 
+        radial-gradient(circle at top, rgba(59,130,246,.05), transparent 40%),
+        radial-gradient(circle at bottom, rgba(59,130,246,.03), transparent 45%);
     overflow: hidden;
 }
+.dark .sgc-bg {
+    background-image: 
+        radial-gradient(circle at top, rgba(59,130,246,.15), transparent 40%),
+        radial-gradient(circle at bottom, rgba(59,130,246,.10), transparent 45%),
+        linear-gradient(180deg, #020817 0%, #030712 40%, #020617 100%);
+}
+.sgc-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><g fill='none' stroke='%233b82f6' stroke-opacity='0.15' stroke-width='1'><line x1='80' y1='120' x2='220' y2='200'/><line x1='220' y1='200' x2='380' y2='140'/><line x1='380' y1='140' x2='540' y2='240'/><line x1='540' y1='240' x2='700' y2='180'/><line x1='120' y1='340' x2='280' y2='420'/><line x1='280' y1='420' x2='460' y2='380'/><line x1='460' y1='380' x2='620' y2='460'/><line x1='80' y1='120' x2='120' y2='340'/><line x1='380' y1='140' x2='460' y2='380'/><line x1='540' y1='240' x2='620' y2='460'/></g><g fill='%233b82f6' fill-opacity='0.4'><circle cx='80' cy='120' r='3'/><circle cx='220' cy='200' r='3'/><circle cx='380' cy='140' r='3'/><circle cx='540' cy='240' r='3'/><circle cx='700' cy='180' r='3'/><circle cx='120' cy='340' r='3'/><circle cx='280' cy='420' r='3'/><circle cx='460' cy='380' r='3'/><circle cx='620' cy='460' r='3'/></g></svg>");
+    background-size: cover;
+    opacity: 0.06; 
+    pointer-events: none;
+}
+.dark .sgc-bg::before { opacity: 0.4; }
 
-/* Card del login con sombra azul multicapa */
 @utility sgc-card {
     position: relative;
-    background: rgba(16,20,30,.88);
-    border: 1px solid rgba(59,130,246,.55);
+    background: var(--sgc-card);
+    border: 1px solid var(--sgc-border);
     backdrop-filter: blur(18px);
-    box-shadow:
-    0 0 10px rgba(59,130,246,.4),
-    0 0 40px rgba(59,130,246,.25),
-    0 0 80px rgba(59,130,246,.15);
-
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     overflow: hidden;
-}
-.sgc-card::before {
+    }
+
+    .dark .sgc-card {
+    box-shadow: 0 0 10px rgba(59,130,246,.4), 0 0 40px rgba(59,130,246,.25), 0 0 80px rgba(59,130,246,.15);
+    }
+    .dark .sgc-card::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background:
-    linear-gradient(
-        180deg,
-        rgba(59,130,246,.12),
-        transparent 40%
-    );
-
+    background: linear-gradient(180deg, rgba(59,130,246,.12), transparent 40%);
     pointer-events: none;
 }
 
-/* Inputs oscuros con foco azul */
 @utility sgc-input {
-    background: rgba(6,12,20,.95);
-    border: 1px solid rgba(59,130,246,.45);
-    color: white;
+    background: var(--sgc-input);
+    border: 1px solid var(--sgc-border);
+    color: var(--sgc-text);
     transition: all .2s ease;
-}
-.sgc-input:focus,
-.sgc-input:focus-visible {
+    }
+    .sgc-input:focus, .sgc-input:focus-visible {
     border-color: #3b82f6;
-    box-shadow:
-    0 0 8px rgba(59,130,246,.8),
-    0 0 20px rgba(59,130,246,.35);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+    .dark .sgc-input {
+    border-color: rgba(59,130,246,.45);
+    }
+    .dark .sgc-input:focus, .dark .sgc-input:focus-visible {
+    box-shadow: 0 0 8px rgba(59,130,246,.8), 0 0 20px rgba(59,130,246,.35);
     background: rgba(10,16,28,.98);
-}
-.sgc-input::placeholder {
-    color: oklch(0.50 0.02 240);
-}   
+    }
+    .sgc-input::placeholder { color: var(--sgc-muted); }
+    .dark .sgc-input::placeholder { color: oklch(0.50 0.02 240); }
 
-/* Label azul claro */
-@utility sgc-label {
+    @utility sgc-label {
+    color: var(--sgc-text);
+    font-weight: 600;
+    font-size: 0.875rem;
+    }
+    .dark .sgc-label {
     color: oklch(0.75 0.08 240);
     font-weight: 500;
-    font-size: 0.875rem;
-}
-
-/* Botón primario con gradiente y glow */
+    }
+    
 @utility sgc-btn-primary {
-    background:
-    linear-gradient(
-        180deg,
-        #3ea7ff,
-        #1976d2
-    );
+    background: linear-gradient(180deg, #3b82f6, #2563eb);
     color: white;
-    border: 1px solid rgba(255,255,255,.12);
-    box-shadow:
-    0 0 15px rgba(59,130,246,.5);
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
     font-weight: 600;
-}
-.sgc-btn-primary:hover {
-    box-shadow:
-    0 0 25px rgba(59,130,246,.75);
+    }
+    .dark .sgc-btn-primary {
+    background: linear-gradient(180deg, #3ea7ff, #1976d2);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 0 15px rgba(59,130,246,.5);
+    }
+    .sgc-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(180deg, #2563eb, #1d4ed8);
     transform: translateY(-1px);
-}
-.sgc-btn-primary:hover:not(:disabled) {
+    }
+    .dark .sgc-btn-primary:hover {
+    box-shadow: 0 0 25px rgba(59,130,246,.75);
+    transform: translateY(-1px);
+    }
+    .dark .sgc-btn-primary:hover:not(:disabled) {
     background: linear-gradient(135deg, oklch(0.63 0.21 245), oklch(0.55 0.23 235));
-    box-shadow:
-    0 6px 20px -3px oklch(0.55 0.20 240 / 0.7),
-    inset 0 1px 0 oklch(1 0 0 / 0.2);
+    box-shadow: 0 6px 20px -3px oklch(0.55 0.20 240 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.2);
     transform: translateY(-1px);
-}
-.sgc-btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
+    }
+.sgc-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* Botón secundario (Cancelar) */
 @utility sgc-btn-secondary {
-    background-color: oklch(0.25 0.02 240);
-    color: oklch(0.90 0.01 240);
-    border: 1px solid oklch(0.35 0.03 240);
+    background-color: var(--card);
+    color: var(--sgc-text);
+    border: 1px solid var(--sgc-border);
     font-weight: 500;
     transition: all 0.2s ease;
-}
-.sgc-btn-secondary:hover:not(:disabled) {
+    }
+    .dark .sgc-btn-secondary {
+    background-color: oklch(0.25 0.02 240);
+    color: oklch(0.90 0.01 240);
+    border-color: oklch(0.35 0.03 240);
+    }
+    .sgc-btn-secondary:hover:not(:disabled) {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    }
+    .dark .sgc-btn-secondary:hover:not(:disabled) {
     background-color: oklch(0.30 0.03 240);
     border-color: oklch(0.45 0.05 240);
+    }
+
+@utility sgc-link { color: #2563eb; font-weight: 600; transition: color 0.2s ease; }
+.dark .sgc-link { color: oklch(0.70 0.18 240); font-weight: 500; }
+.sgc-link:hover { text-decoration: underline; }
+.dark .sgc-link:hover { color: oklch(0.80 0.20 240); }
+@utility sgc-input-icon { color: var(--sgc-muted); }
+
+
+/* =========================================================
+    3. AUTO-ADAPTACIÓN
+========================================================= */
+
+/* 1. Alertas de éxito */
+html:not(.dark) .bg-green-600,
+html:not(.dark) .bg-green-600 *,
+html:not(.dark) [role="status"].bg-green-600,
+html:not(.dark) [data-radix-toast-announce-exclude] ~ * {
+    color: #ffffff !important;
 }
 
-/* Link azul */
-@utility sgc-link {
-    color: oklch(0.70 0.18 240);
-    font-weight: 500;
-    transition: color 0.2s ease;
+/* 2. Textos generales */
+html:not(.dark) .text-white,
+html:not(.dark) .text-slate-200,
+html:not(.dark) .text-slate-300 {
+    color: #0f172a !important; 
 }
-.sgc-link:hover {
-    color: oklch(0.80 0.20 240);
-    text-decoration: underline;
-}
-
-/* Ícono dentro del input (posicionamiento) */
-@utility sgc-input-icon {
-    color: oklch(0.55 0.10 240);
+html:not(.dark) .text-slate-400,
+html:not(.dark) .text-slate-500,
+html:not(.dark) .text-blue-200\/70,
+html:not(.dark) .text-blue-200\/80,
+html:not(.dark) .text-blue-300\/50 {
+    color: #475569 !important; 
 }
 
-.sgc-bg::before {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    background-image:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><g fill='none' stroke='%233b82f6' stroke-opacity='0.15' stroke-width='1'><line x1='80' y1='120' x2='220' y2='200'/><line x1='220' y1='200' x2='380' y2='140'/><line x1='380' y1='140' x2='540' y2='240'/><line x1='540' y1='240' x2='700' y2='180'/><line x1='120' y1='340' x2='280' y2='420'/><line x1='280' y1='420' x2='460' y2='380'/><line x1='460' y1='380' x2='620' y2='460'/><line x1='80' y1='120' x2='120' y2='340'/><line x1='380' y1='140' x2='460' y2='380'/><line x1='540' y1='240' x2='620' y2='460'/></g><g fill='%233b82f6' fill-opacity='0.4'><circle cx='80' cy='120' r='3'/><circle cx='220' cy='200' r='3'/><circle cx='380' cy='140' r='3'/><circle cx='540' cy='240' r='3'/><circle cx='700' cy='180' r='3'/><circle cx='120' cy='340' r='3'/><circle cx='280' cy='420' r='3'/><circle cx='460' cy='380' r='3'/><circle cx='620' cy='460' r='3'/></g></svg>");
-
-    background-size: cover;
-
-    opacity: .4;
-
-    pointer-events: none;
+html:not(.dark) .bg-slate-800,
+html:not(.dark) .bg-slate-700,
+html:not(.dark) .bg-slate-900,
+html:not(.dark) .bg-zinc-800,
+html:not(.dark) .bg-zinc-900,
+html:not(.dark) .bg-gray-800,
+html:not(.dark) .bg-\[\#1e293b\] {
+    background-color: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
 }
 
-/*============================================
-Barra de desplazamiento custom
-============================================ */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+html:not(.dark) thead,
+html:not(.dark) thead th {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border-bottom: 2px solid #cbd5e1 !important;
 }
 
-::-webkit-scrollbar-track {
-    background: oklch(0.10 0.015 240);
-    border-radius: 8px;
+/*Contadores y Badges (Verde, Rojo, Amarillo) */
+html:not(.dark) .text-green-400 { color: #16a34a !important; font-weight: 700 !important; }
+html:not(.dark) .bg-green-500\/10 { background-color: #dcfce7 !important; border-color: #86efac !important; }
+
+html:not(.dark) .text-red-400 { color: #dc2626 !important; font-weight: 700 !important; }
+html:not(.dark) .bg-red-500\/10, html:not(.dark) .bg-red-900\/50 { background-color: #fee2e2 !important; border-color: #fca5a5 !important; }
+
+html:not(.dark) .text-yellow-400 { color: #ca8a04 !important; font-weight: 700 !important; }
+html:not(.dark) .bg-yellow-500\/10 { background-color: #fef9c3 !important; border-color: #fde047 !important; }
+
+/* Fondos de Tarjetas estándar */
+html:not(.dark) .bg-\[\#0a0f1a\],
+html:not(.dark) .bg-\[\#060a12\],
+html:not(.dark) .bg-\[\#0f172a\],
+html:not(.dark) .bg-\[\#0a0f1a\]\/50,
+html:not(.dark) .bg-\[\#0a0f1a\]\/60,
+html:not(.dark) .bg-\[\#0a0f1a\]\/80,
+html:not(.dark) .bg-\[\#060a12\]\/60 {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
 }
 
-::-webkit-scrollbar-thumb {
-    background: oklch(0.25 0.05 240);
-    border-radius: 8px;
-    border: 2px solid oklch(0.10 0.015 240);
+/* Botones de "Acciones" en la tabla de Usuarios (Editar, Activar, Reset, Eliminar) */
+html:not(.dark) .bg-\[\#1b2d52\] { background-color: #eff6ff !important; border-color: #bfdbfe !important; color: #2563eb !important; }
+html:not(.dark) .bg-\[\#1b2d52\]:hover { background-color: #dbeafe !important; }
+
+html:not(.dark) .bg-\[\#0a0f1a\] { background-color: #f8fafc !important; border-color: #e2e8f0 !important; color: #475569 !important; }
+
+html:not(.dark) .bg-\[\#5d5026\] { background-color: #fefce8 !important; border-color: #fef08a !important; color: #ca8a04 !important; }
+html:not(.dark) .bg-\[\#5d5026\]:hover { background-color: #fef08a !important; }
+
+html:not(.dark) .bg-\[\#431111\] { background-color: #fef2f2 !important; border-color: #fecaca !important; color: #dc2626 !important; }
+html:not(.dark) .bg-\[\#431111\]:hover { background-color: #fecaca !important; }
+
+/* Bordes en general */
+html:not(.dark) .border-slate-800,
+html:not(.dark) .border-slate-800\/50,
+html:not(.dark) .border-slate-800\/60,
+html:not(.dark) .border-slate-800\/80,
+html:not(.dark) .border-slate-700,
+html:not(.dark) .border-blue-500\/20,
+html:not(.dark) .border-blue-500\/40 {
+    border-color: #e2e8f0 !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.55 0.18 240);
-}   
+html:not(.dark) .hover\:bg-blue-500\/5:hover,
+html:not(.dark) .hover\:bg-blue-500\/7:hover {
+    background-color: #f1f5f9 !important; 
+}
+
+/* =========================================================
+4. BARRA DE DESPLAZAMIENTO (SCROLLBAR)
+========================================================= */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+
+/* Modo Claro */
+::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; border: 2px solid #f1f5f9; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Modo Oscuro */
+.dark ::-webkit-scrollbar-track { background: oklch(0.10 0.015 240); }
+.dark ::-webkit-scrollbar-thumb { background: oklch(0.25 0.05 240); border: 2px solid oklch(0.10 0.015 240); }
+.dark ::-webkit-scrollbar-thumb:hover { background: oklch(0.55 0.18 240); }

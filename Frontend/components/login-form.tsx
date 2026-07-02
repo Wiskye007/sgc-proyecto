@@ -57,9 +57,14 @@ export default function LoginForm() {
                     title: "Inicio de sesión exitoso", 
                     description: `Bienvenido, ${data.usuario.nombre}` 
                 })
-                router.push("/dashboard")
-            } else {
-                // AQUÍ CAPTURAMOS EL ERROR ESPECÍFICO DEL BACKEND
+                // LÓGICA DE REDIRECCIÓN PERSONALIZADA:
+                const pantalla = data.pantallaInicio || "dashboard";
+                const rutaDestino = pantalla === "dashboard" 
+                    ? "/dashboard" 
+                    : `/dashboard/${pantalla}`; 
+                router.push(rutaDestino);
+                } else {
+                // CAPTURAMOS EL ERROR ESPECÍFICO DEL BACKEND
                 toast({
                     title: response.status === 403 ? "Acceso denegado" : "Error de inicio de sesión",
                     description: data.error || "Usuario o contraseña incorrectos",

@@ -211,7 +211,7 @@ export default function UsuariosPanel() {
         {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0a0f1a]/80 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-xl shadow-2xl">
             <div className="flex items-center gap-4">
-                <Button aria-label="Volver" className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" onClick={() => router.back()}>
+                <Button aria-label="Volver" className="h-12 w-12 rounded-xl p-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20 hover:bg-blue-600 hover:border-blue-500 transition-colors group" onClick={() => router.push('/dashboard')}>
                     <ArrowLeft className="h-5 w-5 text-blue-400 group-hover:text-white transition-colors" />
                 </Button>
                 <div className="flex items-center gap-4">
@@ -385,13 +385,13 @@ export default function UsuariosPanel() {
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex gap-2 justify-center">
-                            <Button size="icon" variant="outline" onClick={() => handleEditUsuario(usr)} className="h-8 w-8 bg-[#1b2d52] border-slate-700 hover:bg-blue-600 hover:border-blue-500 text-slate-300 hover:text-white" title="Editar"><Edit3 className="w-4 h-4" /></Button>
+                            <Button size="icon" variant="outline" onClick={() => handleEditUsuario(usr)} className="h-8 w-8 bg-blue-500/10! border-slate-700 hover:bg-blue-600! hover:border-blue-500! text-slate-200 hover:text-white!" title="Editar"><Edit3 className="w-4 h-4" /></Button>
                             
-                            <Button size="icon" variant="outline" onClick={() => handleToggleEstado(usr)} disabled={isCurrentUser} className={`h-8 w-8 bg-[#0a0f1a] border-slate-700 ${isCurrentUser ? 'opacity-30 cursor-not-allowed' : usr.estado === 'activo' ? 'hover:bg-red-600 hover:border-red-500 text-slate-300 hover:text-white' : 'hover:bg-green-600 hover:border-green-500 text-slate-300 hover:text-white'}`} title={isCurrentUser ? "No puedes desactivar tu propia cuenta" : usr.estado === 'activo' ? 'Desactivar' : 'Activar'}><Power className="w-4 h-4" /></Button>
+                            <Button size="icon" variant="outline" onClick={() => handleToggleEstado(usr)} disabled={isCurrentUser} className={`h-8 w-8 bg-[#0a0f1a] border-slate-700 ${isCurrentUser ? 'opacity-30 cursor-not-allowed' : usr.estado === 'activo' ? 'hover:bg-red-600! hover:border-red-500! text-slate-300 hover:text-white!' : 'hover:bg-green-600! hover:border-green-500! text-slate-300 hover:text-white!'}`} title={isCurrentUser ? "No puedes desactivar tu propia cuenta" : usr.estado === 'activo' ? 'Desactivar' : 'Activar'}><Power className="w-4 h-4" /></Button>
                             
-                            <Button size="icon" variant="outline" onClick={() => handleResetPassword(usr)} className="h-8 w-8 bg-[#5d5026] border-slate-700 hover:bg-yellow-600 hover:border-yellow-500 text-slate-300 hover:text-white" title="Resetear contraseña"><RotateCcw className="w-4 h-4" /></Button>
+                            <Button size="icon" variant="outline" onClick={() => handleResetPassword(usr)} className="h-8 w-8 bg-yellow-500/20! border-slate-700 hover:bg-yellow-500! hover:border-yellow-500! text-slate-400 hover:text-white" title="Resetear contraseña"><RotateCcw className="w-4 h-4" /></Button>
 
-                            <Button size="icon" variant="outline" onClick={() => handleDeleteUsuario(usr)} disabled={isCurrentUser} className={`h-8 w-8 bg-[#431111] border-slate-700 ${isCurrentUser ? 'opacity-30 cursor-not-allowed' : 'hover:bg-red-600 hover:border-red-500 text-slate-300 hover:text-white'}`} title={isCurrentUser ? "No puedes eliminar tu propia cuenta" : "Eliminar usuario permanentemente"}>
+                            <Button size="icon" variant="outline" onClick={() => handleDeleteUsuario(usr)} disabled={isCurrentUser} className={`h-8 w-8 bg-red-500/10! border-slate-700 ${isCurrentUser ? 'opacity-30 cursor-not-allowed' : 'hover:bg-red-600! hover:border-red-500! text-slate-400 hover:text-white!'}`} title={isCurrentUser ? "No puedes eliminar tu propia cuenta" : "Eliminar usuario permanentemente"}>
                                 <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -479,7 +479,7 @@ export default function UsuariosPanel() {
         {/* Modal de confirmación (Eliminar, Resetear, Estado) */}
         {confirmacionAction.type && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-60 flex items-center justify-center p-0">
-            <Card className={`sgc-card w-full max-w-md bg-[#0a0f1a] shadow-2xl ${confirmacionAction.type === 'delete' ? 'border-red-900/50' : 'border-slate-700'}`}>
+            <Card className={`sgc-card w-full max-w-md shadow-2xl ${confirmacionAction.type === 'delete' ? 'border-red-900/50' : 'border-slate-700'}`}>
               <CardHeader className="border-b border-slate-800">
                 <CardTitle className={`text-xl flex items-center gap-2 ${confirmacionAction.type === 'delete' ? 'text-red-400' : 'text-yellow-400'}`}>
                   <AlertTriangle className="w-6 h-6" /> Confirmar acción

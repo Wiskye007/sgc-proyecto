@@ -385,7 +385,7 @@ export default function SeguridadPanel() {
                         )
                     }) : (
                         <div className="col-span-full flex items-center justify-center py-8">
-                            <p className="text-slate-400 text-sm">No hay datos de pabellones disponibles</p>
+                            <p className="text-slate-400 text-xl">No hay datos de pabellones disponibles</p>
                         </div>
                     )}
                 </div>
@@ -397,9 +397,9 @@ export default function SeguridadPanel() {
                         <CardHeader className="border-b border-slate-800/60 pb-4 flex flex-row items-start justify-between gap-4">
                             <div>
                                 <CardTitle className="text-xl text-white flex items-center gap-2">
-                                    <AlertTriangle className="h-6 w-6 text-red-400"/> Alertas e Incidentes
+                                    <AlertTriangle className="h-6 w-6 text-red-400"/> Alertas e incidentes
                                 </CardTitle>
-                                <CardDescription className="text-slate-400 text-[15px] mt-1">
+                                <CardDescription className="text-slate-400 text-[15px] mt-1 ml-8">
                                     {filtroIncidentes === '24h' ? "Registro de las últimas 24 horas" :
                                     filtroIncidentes === 'mes' ? "Registro del último mes" :
                                     filtroIncidentes === 'anio' ? "Registro del último año" :
@@ -409,10 +409,10 @@ export default function SeguridadPanel() {
                             
                             {/* Select del filtro */}
                             <Select value={filtroIncidentes} onValueChange={setFiltroIncidentes}>
-                                <SelectTrigger className="w-45 h-9 sgc-input text-sm border-slate-700 bg-slate-900/50">
+                                <SelectTrigger className="w-45 h-9 sgc-input text-sm border-slate-700 bg-slate-900/20">
                                     <SelectValue placeholder="Filtrar" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#111827] border border-slate-800 text-slate-200 text-xs">
+                                <SelectContent className="border border-slate-800 text-slate-200 text-xs">
                                     <SelectItem value="24h" className="focus:bg-blue-600 focus:text-white">Últimas 24h</SelectItem>
                                     <SelectItem value="mes" className="focus:bg-blue-600 focus:text-white">Último mes</SelectItem>
                                     <SelectItem value="anio" className="focus:bg-blue-600 focus:text-white">Último año</SelectItem>
@@ -428,7 +428,7 @@ export default function SeguridadPanel() {
                                         <div className="inline-block">
                                             <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"/>
                                         </div>
-                                        <p className="text-slate-400 text-sm">Actualizando registros...</p>
+                                        <p className="text-slate-400 text-[15px]">Actualizando registros...</p>
                                     </div>
                                 </div>
                             ) : incidentes.length > 0 ? (
@@ -436,15 +436,15 @@ export default function SeguridadPanel() {
                                     {incidentes.map((incidente) => (
                                         <div
                                             key={incidente.id}
-                                            className="flex items-start gap-4 p-4 rounded-xl bg-[#060a12]/60 border border-slate-800/80 shadow-inner hover:border-slate-700 transition-colors"
+                                            className="flex items-start gap-4 p-4 rounded-xl bg-[#060a12]/8 border border-slate-800/80 shadow-inner hover:border-slate-700 transition-colors"
                                         >
-                                            <div className="mt-1 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
+                                            <div className="mt-1 bg-slate-900/8 p-2 rounded-lg border border-slate-800">
                                                 {getPrioridadIcon(incidente.prioridad, incidente.tipo)}
                                             </div>
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between mb-1.5">
                                                     <span className="font-bold text-sm text-slate-200 uppercase tracking-wide">{incidente.tipo}</span>
-                                                    <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700">
+                                                    <span className="text-[11px] font-medium text-black-400 uppercase tracking-wider bg-slate-800/10 px-2 py-0.5 rounded border border-slate-700">
                                                         {incidente.fecha}
                                                     </span>
                                                 </div>
@@ -475,7 +475,7 @@ export default function SeguridadPanel() {
                             {/* Dialog: Movimiento */}
                             <Dialog open={movimientoDialog} onOpenChange={setMovimientoDialog}>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full justify-start h-14 bg-[#060a12]/80 border border-slate-800 hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
+                                    <Button className="w-full justify-start h-14 bg-[#060a12]/10 border border-slate-800 hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
                                         <MoveRight className="mr-3 h-5 w-5 text-blue-400 group-hover:text-white transition-colors" /> Registrar movimiento de recluso
                                     </Button>
                                 </DialogTrigger>
@@ -518,7 +518,7 @@ export default function SeguridadPanel() {
                             {/* Dialog: Incidente */}
                             <Dialog open={incidenteDialog} onOpenChange={setIncidenteDialog}>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full justify-start h-14 bg-[#060a12]/80 border border-slate-800 hover:bg-red-600 hover:border-red-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
+                                    <Button className="w-full justify-start h-14 bg-[#060a12]/10 border border-slate-800 hover:bg-red-600 hover:border-red-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
                                         <AlertOctagon className="mr-3 h-5 w-5 text-red-400 group-hover:text-white transition-colors" /> Reportar incidente
                                     </Button>
                                 </DialogTrigger>
@@ -578,7 +578,7 @@ export default function SeguridadPanel() {
                             {/* Dialog: Accesos */}
                             <Dialog open={accesoDialog} onOpenChange={setAccesoDialog}>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full justify-start h-14 bg-[#060a12]/80 border border-slate-800 hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
+                                    <Button className="w-full justify-start h-14 bg-[#060a12]/10 border border-slate-800 hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
                                         <KeyRound className="mr-3 h-5 w-5 text-blue-400 group-hover:text-white transition-colors" /> Control de accesos
                                     </Button>
                                 </DialogTrigger>
@@ -632,7 +632,7 @@ export default function SeguridadPanel() {
                             {/* Dialog: Visitas */}
                             <Dialog open={visitaDialog} onOpenChange={setVisitaDialog}>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full justify-start h-14 bg-[#060a12]/80 border border-slate-800 hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
+                                    <Button className="w-full justify-start h-14 bg-[#060a12]/10 border border-slate-800 hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-300 group shadow-inner text-base">
                                         <Users className="mr-3 h-5 w-5 text-blue-400 group-hover:text-white transition-colors" /> Registro de visitas
                                     </Button>
                                 </DialogTrigger>

@@ -151,6 +151,55 @@ const fetchDatos = async () => {
     toast({ title: "Descargado", description: `${filename}.csv` });
   };
 
+  // Lógica de herramientas del sistema
+  const ejecutarHerramienta = async (herramienta: 'estado' | 'exportar' | 'reporte') => {
+    try {
+      if (herramienta === 'estado') {
+        const res = await authFetch(`${API_URL}/usuarios/sistema/estado`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        toast({ 
+          title: "Estado del Servidor", 
+          description: `SO: ${data.sistema_operativo} | BD: ${data.base_datos} (${data.latencia_bd_ms}ms) | Hora local: ${data.hora_servidor}` 
+        });
+      } 
+      else if (herramienta === 'exportar') {
+        toast({ title: "Procesando", description: "Empaquetando base de datos..." });
+        const res = await authFetch(`${API_URL}/usuarios/sistema/exportar`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        
+        // Crear y descargar archivo JSON
+        const blob = new Blob([JSON.stringify(data.backup_data, null, 2)], { type: "application/json" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `backup_sgc_${data.timestamp}.json`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        toast({ title: "Éxito", description: "Base de datos exportada y descargada." });
+      } 
+      else if (herramienta === 'reporte') {
+        const res = await authFetch(`${API_URL}/usuarios/sistema/reporte`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        
+        // Crear un resumen en texto plano descargable
+        const contenido = `REPORTE DE SISTEMA SGC\nFecha: ${data.reporte.fecha_generacion}\n--------------------------\nTotal Usuarios: ${data.reporte.total_usuarios_registrados}\nUsuarios Activos: ${data.reporte.usuarios_activos}\nConexiones Históricas: ${data.reporte.total_conexiones_historicas}\n`;
+        const blob = new Blob([contenido], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `reporte_sgc_${data.reporte.fecha_generacion.replace(/[: ]/g, '_')}.txt`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        toast({ title: "Reporte generado", description: "El reporte se ha descargado a tu equipo." });
+      }
+    } catch (err: any) {
+      toast({ title: "Error del sistema", description: err.message || "Fallo en la herramienta", variant: "destructive" });
+    }
+  };
+
   if (!configuracion) return null;
 
   return (
@@ -172,10 +221,10 @@ const fetchDatos = async () => {
 
         <Tabs defaultValue="visualizacion" className="w-full">
           <TabsList className="mb-6 flex w-full bg-[#0a0f1a]/60 border border-slate-800/50 p-1.5 rounded-xl h-auto flex-wrap">
-            <TabsTrigger value="visualizacion" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Visualización</TabsTrigger>
-            <TabsTrigger value="seguridad" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Seguridad</TabsTrigger>
-            <TabsTrigger value="notificaciones" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Notificaciones</TabsTrigger>
-            {configuracion.esAdmin && <TabsTrigger value="sistema" className="flex-1 min-w-[120px] py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Sistema</TabsTrigger>}
+            <TabsTrigger value="visualizacion" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Visualización</TabsTrigger>
+            <TabsTrigger value="seguridad" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Seguridad</TabsTrigger>
+            <TabsTrigger value="notificaciones" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Notificaciones</TabsTrigger>
+            {configuracion.esAdmin && <TabsTrigger value="sistema" className="flex-1 min-w-30 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 font-semibold tracking-wide">Sistema</TabsTrigger>}
           </TabsList>
 
           {/* TAB: VISUALIZACIÓN Y ACCESIBILIDAD */}
@@ -217,7 +266,7 @@ const fetchDatos = async () => {
                       <label className="text-slate-300 text-[14px] font-medium mb-4 flex items-center gap-2">
                           <MonitorPlay className="w-4 h-4 text-orange-400"/> Pantalla de inicio predeterminada
                       </label>
-                      <Select value={cambios.pantallaInicio || configuracion.pantallaInicio} onValueChange={(v) => handleConfigChange('pantallaInicio', v)}>
+                        <Select value={cambios.pantallaInicio || configuracion.pantallaInicio} onValueChange={(v) => handleConfigChange('pantallaInicio', v)}>
                           <SelectTrigger className="sgc-input h-10! w-full bg-[#0a0f1a] border-slate-800 focus:border-blue-500">
                               <SelectValue/>
                           </SelectTrigger>
@@ -227,6 +276,12 @@ const fetchDatos = async () => {
                               <SelectItem value="seguridad" className="focus:bg-blue-600">Panel de Seguridad</SelectItem>
                               <SelectItem value="medico" className="focus:bg-blue-600">Panel Médico</SelectItem>
                               <SelectItem value="reportes" className="focus:bg-blue-600">Panel de Reportes</SelectItem>
+                              {/* Para admins */}
+                              {configuracion.esAdmin && (
+                                  <SelectItem value="usuarios" className="focus:bg-blue-600 text-yellow-400 font-medium">
+                                      Gestión de Usuarios (Admin)
+                                  </SelectItem>
+                              )}
                           </SelectContent>
                       </Select>
                   </div>
@@ -371,15 +426,14 @@ const fetchDatos = async () => {
                   <h4 className="sgc-text-primary font-semibold text-sm">Herramientas de sistema</h4>
                   
                   <div className="flex flex-col gap-2">
-                      {/* Habilitamos los botones solo si el usuario es Admin */}
-                      <Button onClick={() => toast({title: "Espere", description: "Verificando integridad..."})} className="sgc-btn-secondary w-full justify-start">
+                      <Button onClick={() => ejecutarHerramienta('estado')} className="sgc-btn-secondary w-full justify-start">
                           <Server className="w-4 h-4 mr-2" /> Verificar estado del servidor
                       </Button>
-                      <Button onClick={() => exportToCSV(historial, "base_de_datos_respaldo")} className="sgc-btn-secondary w-full justify-start">
+                      <Button onClick={() => ejecutarHerramienta('exportar')} className="sgc-btn-secondary w-full justify-start">
                           <Download className="w-4 h-4 mr-2" /> Exportar base de datos
                       </Button>
-                      <Button onClick={() => toast({title: "Acción exitosa", description: "Reporte generado en logs."})} className="sgc-btn-secondary w-full justify-start">
-                          <Server className="w-4 h-4 mr-2" /> Generar reporte de sistema
+                      <Button onClick={() => ejecutarHerramienta('reporte')} className="sgc-btn-secondary w-full justify-start">
+                          <Activity className="w-4 h-4 mr-2" /> Generar reporte de sistema
                       </Button>
                   </div>
                 </div>

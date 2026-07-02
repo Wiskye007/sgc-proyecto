@@ -593,17 +593,17 @@ const ConvictosPanel: React.FC = () => {
 
                 <Tabs defaultValue="datos" className="w-full">
                     {/* --- NAVEGACIÓN DE TABS --- */}
-                    <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6 bg-[#060a12]/80 border border-slate-800/80 rounded-xl p-1 gap-1">
-                        <TabsTrigger value="datos" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Datos Generales</TabsTrigger>
-                        <TabsTrigger value="movimientos" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Traslados</TabsTrigger>
-                        <TabsTrigger value="conducta" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Conducta</TabsTrigger>
-                        <TabsTrigger value="visitas" className="flex-1 py-2.5 text-center rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 hover:text-slate-200 transition-all font-semibold tracking-wide">Visitas</TabsTrigger>
+                    <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-6rounded-xl p-1 gap-1 sgc-bg mb-6!">
+                        <TabsTrigger value="datos" className="flex-1 py-2.5 text-center rounded-lg transition-all font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white tracking-wide">Datos Generales</TabsTrigger>
+                        <TabsTrigger value="movimientos" className="flex-1 py-2.5 text-center rounded-lg transition-all font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white  tracking-wide">Traslados</TabsTrigger>
+                        <TabsTrigger value="conducta" className="flex-1 py-2.5 text-center rounded-lg transition-all font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white  tracking-wide">Conducta</TabsTrigger>
+                        <TabsTrigger value="visitas" className="flex-1 py-2.5 text-center rounded-lg transition-all font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white tracking-wide">Visitas</TabsTrigger>
                     </TabsList>
 
                     {/* ========== CONVICTOS-DATOS GENERALES ========== */}
                     <TabsContent value="datos" className="space-y-4">
                         <Card className="sgc-card border-0 mb-4">
-                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-800/50">
+                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4">
                                 <CardTitle className="text-xl text-white font-bold tracking-wide">Directorio de internos</CardTitle>
                                 <Badge variant="secondary" className={`text-[16px] px-3 py-1 mt-2 md:mt-0 ${convictosData.length > 800 ? "border-red-500 text-red-400 bg-red-500/10" : convictosData.length > 400 ? "border-yellow-500 text-yellow-400 bg-yellow-500/10" : "border-green-500 text-green-400 bg-green-500/10"}`}>
                                     Registros totales: {convictosData.length}
@@ -640,14 +640,14 @@ const ConvictosPanel: React.FC = () => {
                                 </div>
                                     <div className="flex flex-wrap gap-3 mt-6">
                                         <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoConvicto(true)}><Plus className="h-4 w-4"/> Nuevo convicto</Button>
-                                        <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(convictosData, "convictos")}><Download className="h-4 w-4"/> Exportar CSV</Button>
+                                        <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={() => exportToCSV(convictosData, "convictos")}><Download className="h-4 w-4"/> Exportar CSV</Button>
                                         <div className="basis-full sm:basis-auto">
-                                            <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                                            <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
                                         </div>
                                     </div>
                             </CardContent>
                         </Card>
-
+                         {/* ========== DATOS GENERALES ========== */}
                         <Card className="sgc-card border-0 overflow-hidden">
                             <CardContent className="p-0">
                                 <div className="overflow-x-auto">
@@ -695,7 +695,7 @@ const ConvictosPanel: React.FC = () => {
                                                                 aria-label="Editar">
                                                                 <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors" />
                                                             </Button>
-                                                            <Button size="icon" className="bg-red-500/10 hover:bg-red-500 border border-red-500/30 text-red-400 hover:text-white h-8 w-8 transition-colors" onClick={() => setDeleteConfirm({type: "convicto", id: c.id})} aria-label="Eliminar">
+                                                            <Button size="icon" className="bg-red-500/10 hover:bg-red-500! border border-red-500/30 text-red-400 hover:text-white! h-8 w-8 transition-colors" onClick={() => setDeleteConfirm({type: "convicto", id: c.id})} aria-label="Eliminar">
                                                                 <Trash2 className="h-3.5 w-3.5"/>
                                                             </Button>
                                                         </TableCell>
@@ -721,9 +721,9 @@ const ConvictosPanel: React.FC = () => {
                             </CardHeader>
                             <div className="flex flex-wrap gap-3 ml-6 mb-0">
                                 <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevoMovimiento(true)}><Plus className="h-4 w-4"/>Registrar traslado</Button>
-                                <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(movimientosData, "movimientos")}><Download className="h-4 w-4"/>Exportar CSV</Button>
+                                <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={() => exportToCSV(movimientosData, "movimientos")}><Download className="h-4 w-4"/>Exportar CSV</Button>
                                 <div className="basis-full sm:basis-auto">
-                                    <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                                    <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
                                 </div>
                             </div>
                         </Card>
@@ -768,7 +768,7 @@ const ConvictosPanel: React.FC = () => {
                                                                 aria-label="Editar">
                                                                 <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors" />
                                                             </Button>
-                                                            <Button size="icon" className="bg-red-500/10 hover:bg-red-500 border border-red-500/30 text-red-400 hover:text-white h-8 w-8 transition-colors" onClick={() => setDeleteConfirm({type: "movimiento", id: m.id})}><Trash2 className="h-3.5 w-3.5"/></Button>
+                                                            <Button size="icon" className="bg-red-500/10 hover:bg-red-500! border border-red-500/30 text-red-400 hover:text-white! h-8 w-8 transition-colors" onClick={() => setDeleteConfirm({type: "movimiento", id: m.id})}><Trash2 className="h-3.5 w-3.5"/></Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))
@@ -804,11 +804,11 @@ const ConvictosPanel: React.FC = () => {
                                     </Select>
                                 </div>
                             </CardHeader>
-                            <div className="flex flex-wrap gap-3 ml-6 mb-4">
+                            <div className="flex flex-wrap gap-3 ml-6 mb-0">
                                 <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaConducta(true)}><Plus className="h-4 w-4"/>Registrar conducta</Button>
-                                <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(conductaData, "conducta")}><Download className="h-4 w-4"/>Exportar CSV</Button>
+                                <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={() => exportToCSV(conductaData, "conducta")}><Download className="h-4 w-4"/>Exportar CSV</Button>
                                 <div className="basis-full sm:basis-auto">
-                                    <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                                    <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
                                 </div>
                             </div>
                         </Card>
@@ -852,7 +852,7 @@ const ConvictosPanel: React.FC = () => {
                                                             aria-label="Editar">
                                                             <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors" />
                                                             </Button>
-                                                            <Button size="icon" className="bg-red-500/10 hover:bg-red-500 border border-red-500/30 text-red-400 hover:text-white h-8 w-8 transition-colors" onClick={() => setDeleteConfirm({type: "conducta", id: c.id})}><Trash2 className="h-3.5 w-3.5"/></Button>
+                                                            <Button size="icon" className="bg-red-500/10 hover:bg-red-500! border border-red-500/30 text-red-400 hover:text-white! h-8 w-8 transition-colors" onClick={() => setDeleteConfirm({type: "conducta", id: c.id})}><Trash2 className="h-3.5 w-3.5"/></Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))
@@ -888,11 +888,11 @@ const ConvictosPanel: React.FC = () => {
                                     </Select>
                                 </div>
                             </CardHeader>
-                            <div className="flex flex-wrap gap-3 mb-4 ml-6">
+                            <div className="flex flex-wrap gap-3 mb-0 ml-6">
                                 <Button className="sgc-btn-primary h-10 px-4" onClick={() => setOpenNuevaVisita(true)}><Plus className="h-4 w-4"/>Registrar visita</Button>
-                                <Button className="sgc-btn-secondary h-10 px-4" onClick={() => exportToCSV(visitasData, "visitas")}><Download className="h-4 w-4"/>Exportar CSV</Button>
+                                <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={() => exportToCSV(visitasData, "visitas")}><Download className="h-4 w-4"/>Exportar CSV</Button>
                                 <div className="basis-full sm:basis-auto">
-                                    <Button className="sgc-btn-secondary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
+                                    <Button className="sgc-btn-secondary hover:sgc-btn-primary h-10 px-4" onClick={handlePrint}><Printer className="h-4 w-4" />Imprimir</Button>
                                 </div>
                             </div>
                         </Card>
@@ -940,7 +940,7 @@ const ConvictosPanel: React.FC = () => {
                                                                 aria-label="Editar">
                                                                 <Edit2 className="h-3.5 w-3.5 text-blue-400 group-hover:text-white transition-colors" />
                                                             </Button>
-                                                            <Button size="icon" className="bg-red-500/10 hover:bg-red-500 border border-red-500/30 text-red-400 hover:text-white h-8 w-8 transition-colors" onClick={() => setDeleteConfirm({type: "visita", id: v.id})}><Trash2 className="h-3.5 w-3.5"/></Button>
+                                                            <Button size="icon" className="bg-red-500/10 hover:bg-red-500! border border-red-500/30 text-red-400 hover:text-white! h-8 w-8 transition-colors" onClick={() => setDeleteConfirm({type: "visita", id: v.id})}><Trash2 className="h-3.5 w-3.5"/></Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))
@@ -954,9 +954,8 @@ const ConvictosPanel: React.FC = () => {
                 </Tabs>
 
                 {/* =========================================================
-                    VENTANAS EMERGENTES (MODALS) CON DISEÑO SGC
-                ========================================================= */}
-
+                    VENTANAS EMERGENTES (MODALS)
+                ========================================================= */}   
                 {/* DIALOG: NUEVO CONVICTO */}
                 <Dialog open={openNuevoConvicto} onOpenChange={(open) => {
                     setOpenNuevoConvicto(open);

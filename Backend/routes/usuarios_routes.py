@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from auth_utils import requiere_auth
 from functools import wraps
 from datetime import datetime, timedelta
+import platform
+import time
 
 
 bp = Blueprint('usuarios', __name__, url_prefix='/api/usuarios')
@@ -288,7 +290,87 @@ def historial_conexiones():
         return jsonify({'success': True, 'historial': historial}), 200
     except Exception as e:
         logger.exception(f"Error al obtener historial: {e}")
-        return jsonify({'error': 'Error al obtener historial'}), 500        
+        return jsonify({'error': 'Error al obtener historial'}), 500
+
+    # -------------------------------------------------------
+# ENDPOINT: ESTADO DEL SERVIDOR (HERRAMIENTA)
+# -------------------------------------------------------
+@bp.route('/sistema/estado', methods=['GET'])
+@requiere_auth
+@requiere_admin
+def estado_servidor():
+    inicio = time.time()
+    db_status = "Desconectada"
+    try:
+        db.execute_query("SELECT 1")
+        db_status = "Conectada y Estable"
+    except Exception:
+        pass
+    
+    latencia = round((time.time() - inicio) * 1000, 2)
+    ahora_lima = (datetime.utcnow() - timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
+    
+    return jsonify({
+        'success': True,
+        'sistema_operativo': f"{platform.system()} {platform.release()}",
+        'python_version': platform.python_version(),
+        'base_datos': db_status,
+        'latencia_bd_ms': latencia,
+        'hora_servidor': ahora_lima
+    }), 200
+
+# -------------------------------------------------------
+# ENDPOINT: EXPORTAR BASE DE DATOS (HERRAMIENTA)
+# -------------------------------------------------------
+@bp.route('/sistema/exportar', methods=['GET'])
+@requiere_auth
+@requiere_admin
+def exportar_bd():
+    try:
+        # Extraemos las tablas principales de forma segura a JSON
+        tablas = ['usuarios', 'configuracion_usuarios', 'historial_conexiones']
+        export_data = {}
+        for t in tablas:
+            try:
+                export_data[t] = db.execute_query(f"SELECT * FROM {t}")
+            except Exception:
+                export_data[t] = []
+                
+        return jsonify({
+            'success': True, 
+            'backup_data': export_data, 
+            'timestamp': (datetime.utcnow() - timedelta(hours=5)).strftime('%Y%m%d_%H%M%S')
+        }), 200
+    except Exception as e:
+        return jsonify({'error': f'Error al generar backup: {str(e)}'}), 500
+
+# -------------------------------------------------------
+# ENDPOINT: REPORTE DE SISTEMA (HERRAMIENTA)
+# -------------------------------------------------------
+@bp.route('/sistema/reporte', methods=['GET'])
+@requiere_auth
+@requiere_admin
+def reporte_sistema():
+    try:
+        total_usrs = db.execute_query("SELECT COUNT(*) as t FROM usuarios")
+        activos = db.execute_query("SELECT COUNT(*) as t FROM usuarios WHERE estado = 'activo'")
+        conexiones = db.execute_query("SELECT COUNT(*) as t FROM historial_conexiones")
+        
+        # Asumiendo que count devuelve {"t": numero} o {"T": numero}
+        def get_count(res):
+            if not res: return 0
+            return res[0].get('t') or res[0].get('T') or res[0].get('count') or 0
+
+        reporte = {
+            'fecha_generacion': (datetime.utcnow() - timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S'),
+            'total_usuarios_registrados': get_count(total_usrs),
+            'usuarios_activos': get_count(activos),
+            'total_conexiones_historicas': get_count(conexiones)
+        }
+        
+        return jsonify({'success': True, 'reporte': reporte}), 200
+    except Exception as e:
+        return jsonify({'error': 'Error generando reporte'}), 500        
     
 # -------------------------------------------------------
 # ENDPOINT: LISTAR USUARIOS (SOLO ADMIN)
